@@ -1,0 +1,182 @@
+{
+  "set": "20-net",
+  "desc": "网络",
+  "rules": [
+    {
+      "intent_id": "net.port.listen",
+      "desc": "查看端口占用/监听",
+      "keywords": [
+        "端口占用",
+        "端口被谁占用",
+        "谁占用了端口",
+        "端口监听",
+        "查端口",
+        "port",
+        "监听端口",
+        "端口",
+        "监听",
+        "ss -lntp",
+        "谁占用"
+      ],
+      "weight": 12,
+      "params": [
+        {
+          "name": "port",
+          "required": false,
+          "extract": "port"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "ss -lntp | grep {port}",
+        "lsof -i:{port}",
+        "netstat -lntp | grep {port}"
+      ],
+      "tips": [
+        "优先 ss；无端口号时去掉 grep 查看全部监听；netstat 可能未安装"
+      ]
+    },
+    {
+      "intent_id": "net.ping",
+      "desc": "测试网络连通性",
+      "keywords": [
+        "ping",
+        "通不通",
+        "网络连通",
+        "能不能通",
+        "连通性",
+        "探测主机",
+        "ping一下"
+      ],
+      "weight": 9,
+      "params": [
+        {
+          "name": "host",
+          "required": true,
+          "extract": "host"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "ping -c 4 {host}",
+        "ping -c 4 -W 2 {host}"
+      ],
+      "tips": [
+        "将 {host} 换成 IP 或域名"
+      ]
+    },
+    {
+      "intent_id": "net.ip.addr",
+      "desc": "查看本机IP地址",
+      "keywords": [
+        "ip地址",
+        "本机ip",
+        "网卡地址",
+        "查看ip",
+        "ip addr",
+        "我的ip",
+        "ifconfig"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "cmd_template": [
+        "ip -br addr",
+        "ip addr",
+        "hostname -I"
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "net.nic.info",
+      "desc": "查看网卡信息",
+      "keywords": [
+        "网卡",
+        "网卡信息",
+        "网卡状态",
+        "网口",
+        "网卡列表",
+        "ip link",
+        "网卡名"
+      ],
+      "weight": 8,
+      "risk_level": "low",
+      "cmd_template": [
+        "ip link",
+        "ip -s link",
+        "ethtool {iface}"
+      ],
+      "tips": [
+        "ethtool 需指定网卡名，如 eth0、ens33"
+      ]
+    },
+    {
+      "intent_id": "net.route",
+      "desc": "查看路由表",
+      "keywords": [
+        "路由",
+        "路由表",
+        "默认网关",
+        "route",
+        "看路由",
+        "ip route",
+        "网关"
+      ],
+      "weight": 8,
+      "risk_level": "low",
+      "cmd_template": [
+        "ip route",
+        "ip route show default"
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "net.dns",
+      "desc": "查看DNS配置与解析",
+      "keywords": [
+        "dns",
+        "域名解析",
+        "nameserver",
+        "解析域名",
+        "dns配置",
+        "resolv.conf",
+        "/etc/resolv.conf"
+      ],
+      "weight": 8,
+      "params": [
+        {
+          "name": "host",
+          "required": false,
+          "extract": "host"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "cat /etc/resolv.conf",
+        "getent hosts {host}",
+        "dig {host} +short"
+      ],
+      "tips": [
+        "dig 可能未安装；可用 getent 或 nslookup"
+      ]
+    },
+    {
+      "intent_id": "net.ss.all",
+      "desc": "查看全部网络连接",
+      "keywords": [
+        "网络连接",
+        "连接列表",
+        "ss连接",
+        "tcp连接",
+        "有哪些连接",
+        "网络连接列表"
+      ],
+      "weight": 8,
+      "risk_level": "low",
+      "cmd_template": [
+        "ss -antp",
+        "ss -antup"
+      ],
+      "tips": []
+    }
+  ]
+}

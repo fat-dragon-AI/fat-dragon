@@ -1,0 +1,163 @@
+{
+  "set": "40-svc-pkg",
+  "desc": "服务与软件包",
+  "rules": [
+    {
+      "intent_id": "svc.status",
+      "desc": "查看服务状态",
+      "keywords": [
+        "服务状态",
+        "服务跑了没",
+        "systemctl状态",
+        "看服务",
+        "服务是否启动",
+        "status"
+      ],
+      "weight": 10,
+      "params": [
+        {
+          "name": "service",
+          "required": true,
+          "extract": "service"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "systemctl status {service}",
+        "systemctl is-active {service}"
+      ],
+      "tips": [
+        "将 {service} 换成服务名，如 nginx、sshd"
+      ]
+    },
+    {
+      "intent_id": "svc.restart",
+      "desc": "重启服务",
+      "keywords": [
+        "重启服务",
+        "服务重启",
+        "restart服务",
+        "重新启动服务",
+        "restart"
+      ],
+      "weight": 10,
+      "params": [
+        {
+          "name": "service",
+          "required": true,
+          "extract": "service"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "{service_restart} {service}",
+        "systemctl restart {service}"
+      ],
+      "tips": [
+        "可能影响业务；生产环境谨慎操作"
+      ]
+    },
+    {
+      "intent_id": "svc.start",
+      "desc": "启动服务",
+      "keywords": [
+        "启动服务",
+        "开启服务",
+        "start服务",
+        "把服务拉起来"
+      ],
+      "weight": 9,
+      "params": [
+        {
+          "name": "service",
+          "required": true,
+          "extract": "service"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "systemctl start {service}",
+        "systemctl enable --now {service}"
+      ],
+      "tips": [
+        "enable --now 会设开机自启并立即启动"
+      ]
+    },
+    {
+      "intent_id": "svc.stop",
+      "desc": "停止服务",
+      "keywords": [
+        "停止服务",
+        "关掉服务",
+        "stop服务",
+        "关闭服务"
+      ],
+      "weight": 9,
+      "params": [
+        {
+          "name": "service",
+          "required": true,
+          "extract": "service"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "systemctl stop {service}"
+      ],
+      "tips": [
+        "确认业务允许停服"
+      ]
+    },
+    {
+      "intent_id": "svc.list",
+      "desc": "列出运行中的服务",
+      "keywords": [
+        "有哪些服务",
+        "服务列表",
+        "运行的服务",
+        "列出服务",
+        "services",
+        "systemd"
+      ],
+      "weight": 8,
+      "risk_level": "low",
+      "cmd_template": [
+        "systemctl list-units --type=service --state=running",
+        "systemctl list-unit-files --type=service | head -n 50"
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "pkg.install",
+      "desc": "安装软件包（发行版适配）",
+      "keywords": [
+        "安装软件",
+        "装包",
+        "安装包",
+        "yum安装",
+        "apt安装",
+        "安装软件包",
+        "装个",
+        "包管理器",
+        "apt install",
+        "yum install",
+        "dnf install"
+      ],
+      "weight": 9,
+      "params": [
+        {
+          "name": "pkg",
+          "required": true,
+          "extract": "pkg"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "{pkg_install} {pkg}"
+      ],
+      "tips": [
+        "占位符由系统适配表替换；需相应权限"
+      ]
+    }
+  ]
+}

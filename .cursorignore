@@ -1,0 +1,2 @@
+# Agent / Indexing: do not use archived project docs under .ignore/
+.ignore/

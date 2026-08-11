@@ -1,0 +1,427 @@
+{
+  "set": "80-ops",
+  "desc": "用户权限防火墙定时与 PATH",
+  "rules": [
+    {
+      "intent_id": "user.whoami",
+      "desc": "查看当前用户与身份",
+      "keywords": [
+        "当前用户",
+        "我是谁",
+        "whoami",
+        "用户身份",
+        "id"
+      ],
+      "weight": 7,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "whoami → id → groups",
+          "stop_on_error": false,
+          "steps": [
+            "whoami",
+            "id",
+            "groups"
+          ]
+        }
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "perm.chmod",
+      "desc": "修改文件权限（示例）",
+      "keywords": [
+        "改权限",
+        "chmod",
+        "文件权限",
+        "目录权限",
+        "修改权限",
+        "改一下权限",
+        "授权",
+        "读写执行",
+        "改成755",
+        "改成644",
+        "改成777"
+      ],
+      "weight": 7,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        },
+        {
+          "name": "mode",
+          "required": false,
+          "extract": "mode"
+        }
+      ],
+      "risk_level": "high",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "先 ls 确认再 chmod",
+          "stop_on_error": true,
+          "steps": [
+            "ls -lah {path}",
+            "chmod {mode} {path}"
+          ]
+        }
+      ],
+      "tips": [
+        "先 ls 确认；{mode} 如 644、755；勿对系统目录盲目 777"
+      ]
+    },
+    {
+      "intent_id": "perm.chown",
+      "desc": "修改文件/目录属主（示例）",
+      "keywords": [
+        "chown",
+        "改属主",
+        "改所有者",
+        "修改属主",
+        "修改所有者",
+        "改归属",
+        "文件属主",
+        "目录属主",
+        "所有者",
+        "属主",
+        "归属",
+        "归还给",
+        "归还给当前用户",
+        "改成我的",
+        "改成当前用户",
+        "递归改属主",
+        "改用户组",
+        "改拥有者",
+        "文件所有者",
+        "目录所有者",
+        "owner"
+      ],
+      "keyword_weights": {
+        "归还给当前用户": 12,
+        "改成当前用户": 10,
+        "归还给": 8,
+        "改属主": 8,
+        "修改属主": 8,
+        "修改所有者": 8,
+        "递归改属主": 8
+      },
+      "weight": 8,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        },
+        {
+          "name": "owner",
+          "required": false,
+          "extract": "owner"
+        }
+      ],
+      "risk_level": "high",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "先 ls 再 chown {owner}",
+          "stop_on_error": true,
+          "steps": [
+            "ls -lah {path}",
+            "chown {owner} {path}"
+          ]
+        },
+        {
+          "kind": "sequence",
+          "label": "先 ls 再递归 chown -R {owner}",
+          "stop_on_error": true,
+          "steps": [
+            "ls -lah {path}",
+            "chown -R {owner} {path}"
+          ]
+        },
+        {
+          "kind": "sequence",
+          "label": "先 ls 再改成当前用户 $USER:$USER",
+          "stop_on_error": true,
+          "steps": [
+            "ls -lah {path}",
+            "chown \"$USER:$USER\" {path}"
+          ]
+        },
+        {
+          "kind": "sequence",
+          "label": "先 ls 再递归改成当前用户",
+          "stop_on_error": true,
+          "steps": [
+            "ls -lah {path}",
+            "chown -R \"$USER:$USER\" {path}"
+          ]
+        }
+      ],
+      "tips": [
+        "先 ls 确认属主；{owner} 形如 user 或 user:group；目录常用 -R；勿对系统目录盲目 chown"
+      ]
+    },
+    {
+      "intent_id": "firewall.status",
+      "desc": "查看防火墙状态",
+      "keywords": [
+        "防火墙",
+        "防火墙状态",
+        "firewall",
+        "firewalld",
+        "ufw状态",
+        "ufw",
+        "防火墙开了没",
+        "防火墙开了"
+      ],
+      "weight": 8,
+      "keyword_weights": {
+        "防火墙开了没": 8,
+        "防火墙开了": 6,
+        "防火墙状态": 5
+      },
+      "risk_level": "low",
+      "cmd_template": [
+        "systemctl status firewalld",
+        "firewall-cmd --state",
+        "ufw status"
+      ],
+      "tips": [
+        "按发行版选用 firewalld 或 ufw 命令"
+      ]
+    },
+    {
+      "intent_id": "cron.list",
+      "desc": "查看定时任务",
+      "keywords": [
+        "定时任务",
+        "crontab",
+        "计划任务",
+        "看cron",
+        "cron"
+      ],
+      "weight": 8,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "crontab → /etc/cron.* → timers",
+          "stop_on_error": false,
+          "steps": [
+            "crontab -l",
+            "ls -lah /etc/cron.* 2>/dev/null",
+            "systemctl list-timers --all | head -n 30"
+          ]
+        }
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "firewall.open.port",
+      "desc": "开放防火墙端口（示例）",
+      "keywords": [
+        "开放端口",
+        "放行端口",
+        "防火墙开端口",
+        "firewall开端口",
+        "开端口",
+        "放行"
+      ],
+      "weight": 8,
+      "params": [
+        {
+          "name": "port",
+          "required": true,
+          "extract": "port"
+        }
+      ],
+      "risk_level": "high",
+      "cmd_template": [
+        "firewall-cmd --permanent --add-port={port}/tcp && firewall-cmd --reload",
+        "ufw allow {port}/tcp"
+      ],
+      "tips": [
+        "按发行版二选一；确认安全策略后再执行"
+      ]
+    },
+    {
+      "intent_id": "env.path.view",
+      "desc": "查看当前 PATH",
+      "keywords": [
+        "看PATH",
+        "查看PATH",
+        "PATH是什么",
+        "echo PATH",
+        "环境变量PATH",
+        "path路径",
+        "哪些目录在path",
+        "打印PATH",
+        "path",
+        "环境变量"
+      ],
+      "weight": 11,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "打印 PATH → 分行 → which java",
+          "stop_on_error": false,
+          "steps": [
+            "echo \"$PATH\"",
+            "echo \"$PATH\" | tr ':' '\\n'",
+            "which -a java 2>/dev/null; type java 2>/dev/null"
+          ]
+        }
+      ],
+      "tips": [
+        "第三步可把 java 换成要排查的命令名"
+      ]
+    },
+    {
+      "intent_id": "env.path.export",
+      "desc": "当前会话临时写入 PATH",
+      "keywords": [
+        "临时加PATH",
+        "export PATH",
+        "会话写PATH",
+        "临时写入path",
+        "当前shell加path",
+        "临时path",
+        "PATH加目录",
+        "会话path"
+      ],
+      "weight": 12,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "export PATH → 打印前几项 → hash -r",
+          "stop_on_error": true,
+          "steps": [
+            "export PATH={path}:$PATH",
+            "echo \"$PATH\" | tr ':' '\\n' | head -n 5",
+            "hash -r"
+          ]
+        }
+      ],
+      "tips": [
+        "将 {path} 换成如 /opt/jdk/current/bin；仅当前终端有效",
+        "Agent 子进程里 export 不会回写到你原来的交互 shell"
+      ]
+    },
+    {
+      "intent_id": "env.path.write",
+      "desc": "持久化写入 PATH（bashrc / profile.d）",
+      "keywords": [
+        "写入PATH",
+        "写PATH",
+        "永久PATH",
+        "PATH持久化",
+        "加到bashrc",
+        "写入path",
+        "配置PATH",
+        "永久加path",
+        "path写入环境变量",
+        "添加到PATH",
+        "环境变量写入path",
+        "加入path",
+        "加入PATH",
+        "加path",
+        "加到path",
+        "加到PATH",
+        "path加入",
+        "PATH加入"
+      ],
+      "weight": 13,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "high",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "写入 ~/.bashrc 并 tail 确认",
+          "stop_on_error": true,
+          "steps": [
+            "echo 'export PATH={path}:$PATH' >> ~/.bashrc",
+            "tail -n 3 ~/.bashrc"
+          ]
+        },
+        {
+          "kind": "sequence",
+          "label": "写入 ~/.profile 并 tail 确认",
+          "stop_on_error": true,
+          "steps": [
+            "echo 'export PATH={path}:$PATH' >> ~/.profile",
+            "tail -n 3 ~/.profile"
+          ]
+        },
+        {
+          "kind": "sequence",
+          "label": "写入 /etc/profile.d（需 sudo）",
+          "stop_on_error": true,
+          "steps": [
+            "echo 'export PATH={path}:$PATH' | sudo tee /etc/profile.d/custom-path.sh >/dev/null",
+            "sudo cat /etc/profile.d/custom-path.sh"
+          ]
+        }
+      ],
+      "tips": [
+        "用户级优先 ~/.bashrc；全局用 profile.d（需 sudo）",
+        "写入后执行 source ~/.bashrc 或重新登录生效；避免重复追加"
+      ]
+    },
+    {
+      "intent_id": "env.path.source",
+      "desc": "使 PATH 配置立即生效",
+      "keywords": [
+        "source bashrc",
+        "刷新PATH",
+        "PATH生效",
+        "重新加载环境变量",
+        "source环境",
+        "让path生效",
+        "source path"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "source ~/.bashrc 并打印 PATH",
+          "stop_on_error": false,
+          "steps": [
+            "source ~/.bashrc",
+            "echo \"$PATH\""
+          ]
+        },
+        {
+          "kind": "sequence",
+          "label": "source ~/.profile 并打印 PATH",
+          "stop_on_error": false,
+          "steps": [
+            "source ~/.profile",
+            "echo \"$PATH\""
+          ]
+        }
+      ],
+      "tips": [
+        "在当前 shell 执行；Agent 内 source 只影响该执行进程"
+      ]
+    }
+  ]
+}

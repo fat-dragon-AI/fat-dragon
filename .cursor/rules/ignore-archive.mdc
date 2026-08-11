@@ -1,0 +1,11 @@
+---
+description: Never read or search the .ignore archive directory
+alwaysApply: true
+---
+
+# `.ignore` 归档目录
+
+- **禁止**读取、搜索、引用、总结 `.ignore/` 下任何文件（含 `.ignore/docs/` 历史变更记录）。
+- 现行文档只在 `.docs/`（索引见 `.docs/INDEX.md`）；逻辑梳理现行稿在 `.review-ll/` 中与近期变更对应的文件。
+- 用户若明确要求查阅归档，再临时打开指定路径；默认当作不存在。
+- 不要用终端/`cat`/`find` 绕过本约束去扫 `.ignore/`。

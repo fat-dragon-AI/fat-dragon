@@ -1,0 +1,483 @@
+{
+  "set": "10-sys",
+  "desc": "系统监控与硬件",
+  "rules": [
+    {
+      "intent_id": "sys.mem.free",
+      "desc": "查看内存使用情况",
+      "keywords": [
+        "内存",
+        "还剩多少内存",
+        "内存占用",
+        "free",
+        "看看内存",
+        "内存使用",
+        "mem",
+        "free -h",
+        "看内存"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "cmd_template": [
+        "free -h",
+        "cat /proc/meminfo | head -n 20"
+      ],
+      "tips": [
+        "free -h 更直观；关注 available 而非仅 free"
+      ]
+    },
+    {
+      "intent_id": "sys.cpu.usage",
+      "desc": "查看CPU使用与负载",
+      "keywords": [
+        "cpu",
+        "CPU占用",
+        "cpu使用率",
+        "处理器",
+        "看cpu",
+        "cpu高",
+        "top"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "cmd_template": [
+        "top -bn1 | head -n 20",
+        "uptime",
+        "mpstat -P ALL 1 1"
+      ],
+      "tips": [
+        "mpstat 需 sysstat 包；无该命令时用 top/uptime"
+      ]
+    },
+    {
+      "intent_id": "sys.load.avg",
+      "desc": "查看系统负载",
+      "keywords": [
+        "负载",
+        "系统负载",
+        "load",
+        "load average",
+        "看负载",
+        "uptime",
+        "平均负载"
+      ],
+      "weight": 9,
+      "risk_level": "low",
+      "cmd_template": [
+        "uptime",
+        "cat /proc/loadavg",
+        "w"
+      ],
+      "tips": [
+        "1/5/15 分钟负载；对比 CPU 核数判断是否过载"
+      ]
+    },
+    {
+      "intent_id": "sys.disk.usage",
+      "desc": "查看磁盘空间占用",
+      "keywords": [
+        "磁盘",
+        "硬盘空间",
+        "磁盘占用",
+        "df",
+        "空间不够",
+        "看看磁盘",
+        "磁盘使用",
+        "磁盘空间",
+        "df -h",
+        "磁盘快满",
+        "快满了怎么看",
+        "磁盘快满了"
+      ],
+      "weight": 10,
+      "keyword_weights": {
+        "磁盘快满": 6,
+        "磁盘快满了": 6,
+        "磁盘空间": 4
+      },
+      "risk_level": "low",
+      "cmd_template": [
+        "df -h",
+        "df -i",
+        "lsblk"
+      ],
+      "tips": [
+        "inode 满时 df -h 仍显示有空间，需看 df -i"
+      ]
+    },
+    {
+      "intent_id": "sys.disk.du",
+      "desc": "查看目录占用空间",
+      "keywords": [
+        "目录多大",
+        "哪个目录占空间",
+        "du命令",
+        "du -sh",
+        "目录占用",
+        "文件夹大小",
+        "用du",
+        "目录大小"
+      ],
+      "weight": 9,
+      "risk_level": "low",
+      "params": [
+        {
+          "name": "path",
+          "required": false,
+          "extract": "path"
+        }
+      ],
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "总量 → 一级子目录",
+          "stop_on_error": false,
+          "steps": [
+            "du -sh {path}",
+            "du -h --max-depth=1 {path} | sort -hr | head -n 20"
+          ]
+        }
+      ],
+      "tips": [
+        "未指定路径时将 {path} 换成 . 或目标目录；大目录可能较慢"
+      ]
+    },
+    {
+      "intent_id": "sys.uptime",
+      "desc": "查看开机时长与运行时间",
+      "keywords": [
+        "开机多久",
+        "运行时间",
+        "uptime",
+        "开机时长",
+        "启动了多久"
+      ],
+      "weight": 8,
+      "risk_level": "low",
+      "cmd_template": [
+        "uptime -p",
+        "who -b"
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "sys.info",
+      "desc": "查看系统基本信息",
+      "keywords": [
+        "系统信息",
+        "什么系统",
+        "系统版本",
+        "内核版本",
+        "uname",
+        "发行版"
+      ],
+      "weight": 9,
+      "risk_level": "low",
+      "cmd_template": [
+        "uname -a",
+        "cat /etc/os-release",
+        "hostnamectl"
+      ],
+      "tips": [
+        "hostnamectl 在部分精简系统可能不存在"
+      ]
+    },
+    {
+      "intent_id": "sys.cpu.model",
+      "desc": "查看 CPU 型号与规格",
+      "keywords": [
+        "cpu型号",
+        "CPU型号",
+        "处理器型号",
+        "什么cpu",
+        "cpu是什么",
+        "lscpu",
+        "cpu信息",
+        "看cpu型号",
+        "几核cpu",
+        "cpu规格"
+      ],
+      "weight": 12,
+      "risk_level": "low",
+      "cmd_template": [
+        "lscpu",
+        "grep -m1 'model name' /proc/cpuinfo",
+        "nproc",
+        "lscpu | grep -E 'Model name|Architecture|CPU\\(s\\)|Thread|Core|MHz|Vendor'"
+      ],
+      "tips": [
+        "优先 lscpu；虚拟机可能看到 vCPU 而非物理型号全称"
+      ]
+    },
+    {
+      "intent_id": "sys.mem.model",
+      "desc": "查看内存型号/条数与容量信息",
+      "keywords": [
+        "内存型号",
+        "内存条",
+        "内存规格",
+        "什么内存",
+        "内存信息",
+        "dimm",
+        "看内存型号",
+        "内存厂家",
+        "内存频率",
+        "dmidecode"
+      ],
+      "weight": 12,
+      "risk_level": "low",
+      "cmd_template": [
+        "sudo dmidecode -t memory",
+        "sudo dmidecode -t 17 | grep -E 'Size:|Type:|Speed:|Manufacturer:|Part Number:|Locator:'",
+        "free -h",
+        "cat /proc/meminfo | head -n 5"
+      ],
+      "tips": [
+        "dmidecode 通常需 root；无权限时只能看到容量（free/meminfo），看不到颗粒型号"
+      ]
+    },
+    {
+      "intent_id": "sys.hw.overview",
+      "desc": "查看整机硬件概况",
+      "keywords": [
+        "硬件信息",
+        "硬件配置",
+        "机器配置",
+        "整机信息",
+        "lshw",
+        "硬件概况",
+        "看硬件",
+        "服务器配置"
+      ],
+      "weight": 11,
+      "risk_level": "low",
+      "cmd_template": [
+        "sudo lshw -short",
+        "sudo dmidecode -t system",
+        "sudo dmidecode -t baseboard",
+        "hostnamectl"
+      ],
+      "tips": [
+        "lshw/dmidecode 多需 sudo；精简环境可能未安装 lshw"
+      ]
+    },
+    {
+      "intent_id": "sys.config.summary",
+      "desc": "查看系统配置摘要（CPU/内存/磁盘/系统）",
+      "keywords": [
+        "系统配置",
+        "配置摘要",
+        "机器概况",
+        "服务器概况",
+        "资源配置",
+        "看配置",
+        "配置怎么样",
+        "系统概况"
+      ],
+      "weight": 11,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "配置摘要：OS → CPU → MEM → DISK → HOST",
+          "stop_on_error": false,
+          "steps": [
+            "echo '=== OS ===' && cat /etc/os-release && uname -r",
+            "echo '=== CPU ===' && lscpu | grep -E 'Model name|Architecture|CPU\\(s\\)|Thread|Core'",
+            "echo '=== MEM ===' && free -h",
+            "echo '=== DISK ===' && df -hT",
+            "echo '=== HOST ===' && hostnamectl 2>/dev/null || true"
+          ]
+        }
+      ],
+      "tips": [
+        "选该 sequence 后进入 step> 按序确认；也可用 all 一次跑完剩余步骤",
+        "详细硬件型号见 CPU型号/内存型号/硬件信息"
+      ]
+    },
+    {
+      "intent_id": "sys.bios.info",
+      "desc": "查看 BIOS/主板信息",
+      "keywords": [
+        "bios",
+        "bios版本",
+        "主板",
+        "主板型号",
+        "baseboard",
+        "固件版本",
+        "看主板",
+        "dmidecode -t bios"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "cmd_template": [
+        "sudo dmidecode -t bios",
+        "sudo dmidecode -t baseboard",
+        "sudo dmidecode -t chassis"
+      ],
+      "tips": [
+        "一般需要 root；云主机可能信息有限"
+      ]
+    },
+    {
+      "intent_id": "sys.block.devices",
+      "desc": "查看磁盘/块设备型号与拓扑",
+      "keywords": [
+        "磁盘型号",
+        "硬盘型号",
+        "块设备",
+        "lsblk",
+        "磁盘信息",
+        "有几块盘",
+        "硬盘信息",
+        "磁盘列表"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "cmd_template": [
+        "lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINT,MODEL,SERIAL",
+        "lsblk -f",
+        "sudo fdisk -l"
+      ],
+      "tips": [
+        "MODEL 列可看盘型号；fdisk -l 需权限"
+      ]
+    },
+    {
+      "intent_id": "sys.process.list",
+      "desc": "查看进程列表",
+      "keywords": [
+        "进程",
+        "进程列表",
+        "有哪些进程",
+        "ps",
+        "看进程",
+        "看ps"
+      ],
+      "weight": 8,
+      "risk_level": "low",
+      "cmd_template": [
+        "ps aux --sort=-%cpu | head -n 30",
+        "ps -ef | head -n 30"
+      ],
+      "tips": [
+        "按 CPU 排序便于排查占用高的进程"
+      ]
+    },
+    {
+      "intent_id": "sys.process.find",
+      "desc": "按名称查找进程",
+      "keywords": [
+        "查进程",
+        "进程在不在",
+        "有没有进程",
+        "pgrep",
+        "查找进程",
+        "找进程",
+        "grep进程"
+      ],
+      "weight": 9,
+      "params": [
+        {
+          "name": "proc_name",
+          "required": true,
+          "extract": "proc"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "ps aux | grep {proc_name} | grep -v grep",
+        "pgrep -a {proc_name}"
+      ],
+      "tips": [
+        "将 {proc_name} 换成进程名关键词，如 nginx、java"
+      ]
+    },
+    {
+      "intent_id": "sys.process.kill",
+      "desc": "结束指定进程",
+      "keywords": [
+        "杀进程",
+        "结束进程",
+        "kill",
+        "杀掉",
+        "终止进程",
+        "kill -9",
+        "杀掉进程",
+        "结束指定进程"
+      ],
+      "weight": 8,
+      "keyword_weights": {
+        "杀掉": 4,
+        "杀掉进程": 6,
+        "杀进程": 5
+      },
+      "params": [
+        {
+          "name": "pid",
+          "required": true,
+          "extract": "pid"
+        }
+      ],
+      "risk_level": "high",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "先 SIGTERM，再视需要 SIGKILL",
+          "stop_on_error": false,
+          "steps": [
+            "kill {pid}",
+            "kill -9 {pid}"
+          ]
+        }
+      ],
+      "tips": [
+        "step> 中先执行 kill；进程已退出可 s 跳过 kill -9",
+        "确认 PID 无误，避免误杀"
+      ]
+    },
+    {
+      "intent_id": "sys.date.time",
+      "desc": "查看与核对系统时间",
+      "keywords": [
+        "系统时间",
+        "看时间",
+        "日期时间",
+        "对时",
+        "timedatectl",
+        "date",
+        "时钟"
+      ],
+      "weight": 7,
+      "risk_level": "low",
+      "cmd_template": [
+        "date",
+        "timedatectl status"
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "sys.io.stat",
+      "desc": "查看磁盘 IO 情况",
+      "keywords": [
+        "磁盘io",
+        "io高",
+        "iostat",
+        "磁盘读写",
+        "看io",
+        "io占用",
+        "iotop",
+        "io"
+      ],
+      "weight": 9,
+      "risk_level": "low",
+      "cmd_template": [
+        "iostat -xz 1 3",
+        "iotop -obn 3"
+      ],
+      "tips": [
+        "需 sysstat/iotop；无权限时 iotop 可能受限"
+      ]
+    }
+  ]
+}

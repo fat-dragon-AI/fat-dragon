@@ -1,0 +1,124 @@
+{
+  "set": "50-nginx",
+  "desc": "Nginx",
+  "rules": [
+    {
+      "intent_id": "nginx.config.test",
+      "desc": "校验 Nginx 配置",
+      "keywords": [
+        "nginx配置校验",
+        "nginx检查配置",
+        "nginx -t",
+        "nginx配置对不对",
+        "检查nginx配置",
+        "nginx校验"
+      ],
+      "weight": 11,
+      "risk_level": "low",
+      "cmd_template": [
+        "nginx -t",
+        "/usr/sbin/nginx -t"
+      ],
+      "tips": [
+        "修改配置后务必先 -t 再 reload"
+      ]
+    },
+    {
+      "intent_id": "nginx.config.view",
+      "desc": "查看 Nginx 配置文件",
+      "keywords": [
+        "nginx配置",
+        "看nginx配置",
+        "nginx.conf",
+        "nginx配置文件",
+        "看nginx",
+        "nginx"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "nginx -T → ls → cat conf",
+          "stop_on_error": false,
+          "steps": [
+            "nginx -T 2>/dev/null | head -n 200",
+            "ls -lah /etc/nginx/",
+            "cat /etc/nginx/nginx.conf"
+          ]
+        }
+      ],
+      "tips": [
+        "路径因发行版可能不同"
+      ]
+    },
+    {
+      "intent_id": "nginx.reload",
+      "desc": "平滑重载 Nginx",
+      "keywords": [
+        "重载nginx",
+        "nginx reload",
+        "nginx平滑重启",
+        "刷新nginx配置"
+      ],
+      "weight": 10,
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "nginx -t → systemctl reload",
+          "steps": [
+            "nginx -t",
+            "systemctl reload nginx"
+          ]
+        },
+        {
+          "kind": "single",
+          "label": "nginx -s reload",
+          "cmd": "nginx -s reload"
+        }
+      ],
+      "tips": [
+        "先校验再 reload，避免加载错误配置"
+      ]
+    },
+    {
+      "intent_id": "nginx.restart",
+      "desc": "重启 Nginx",
+      "keywords": [
+        "重启nginx",
+        "nginx重启",
+        "restart nginx",
+        "nginx restart"
+      ],
+      "weight": 9,
+      "risk_level": "medium",
+      "cmd_template": [
+        "systemctl restart nginx"
+      ],
+      "tips": [
+        "会短暂中断连接；优先考虑 reload"
+      ]
+    },
+    {
+      "intent_id": "nginx.log",
+      "desc": "查看 Nginx 日志",
+      "keywords": [
+        "nginx日志",
+        "nginx access",
+        "nginx error",
+        "看nginx日志"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "cmd_template": [
+        "tail -n 200 /var/log/nginx/access.log",
+        "tail -n 200 /var/log/nginx/error.log",
+        "tail -f /var/log/nginx/error.log"
+      ],
+      "tips": [
+        "日志路径可按站点配置变化"
+      ]
+    }
+  ]
+}

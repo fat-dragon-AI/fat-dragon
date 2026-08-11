@@ -1,0 +1,203 @@
+{
+  "set": "70-docker",
+  "desc": "Docker",
+  "rules": [
+    {
+      "intent_id": "docker.ps",
+      "desc": "查看容器列表",
+      "keywords": [
+        "docker容器",
+        "容器列表",
+        "docker ps",
+        "有哪些容器",
+        "看容器",
+        "docker",
+        "容器"
+      ],
+      "weight": 12,
+      "tips": [
+        "仅输入 docker 时会列出本组常用意图，再选编号看具体命令"
+      ]
+    },
+    {
+      "intent_id": "docker.logs",
+      "desc": "查看容器日志",
+      "keywords": [
+        "docker日志",
+        "容器日志",
+        "docker logs",
+        "看容器日志",
+        "docker"
+      ],
+      "weight": 11,
+      "params": [
+        {
+          "name": "container",
+          "required": true,
+          "extract": "container"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "docker logs --tail 200 {container}",
+        "docker logs -f --tail 100 {container}"
+      ],
+      "tips": [
+        "将 {container} 换成容器名或 ID"
+      ]
+    },
+    {
+      "intent_id": "docker.exec",
+      "desc": "进入容器",
+      "keywords": [
+        "进入容器",
+        "docker exec",
+        "进容器",
+        "容器里执行",
+        "docker bash",
+        "docker"
+      ],
+      "weight": 10,
+      "params": [
+        {
+          "name": "container",
+          "required": true,
+          "extract": "container"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "docker exec -it {container} bash",
+        "docker exec -it {container} sh"
+      ],
+      "tips": [
+        "无 bash 时用 sh"
+      ]
+    },
+    {
+      "intent_id": "docker.start",
+      "desc": "启动容器",
+      "keywords": [
+        "启动容器",
+        "docker start",
+        "容器启动",
+        "docker"
+      ],
+      "weight": 9,
+      "params": [
+        {
+          "name": "container",
+          "required": true,
+          "extract": "container"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "docker start {container}"
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "docker.stop",
+      "desc": "停止容器",
+      "keywords": [
+        "停止容器",
+        "docker stop",
+        "关掉容器",
+        "容器停止",
+        "docker"
+      ],
+      "weight": 9,
+      "params": [
+        {
+          "name": "container",
+          "required": true,
+          "extract": "container"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "docker stop {container}"
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "docker.rm",
+      "desc": "删除容器",
+      "keywords": [
+        "删除容器",
+        "docker rm",
+        "去掉容器",
+        "移除容器",
+        "docker"
+      ],
+      "weight": 9,
+      "params": [
+        {
+          "name": "container",
+          "required": true,
+          "extract": "container"
+        }
+      ],
+      "risk_level": "high",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "先 stop 再 rm",
+          "stop_on_error": true,
+          "steps": [
+            "docker stop {container}",
+            "docker rm {container}"
+          ]
+        },
+        {
+          "kind": "single",
+          "label": "强制删除 docker rm -f（慎用）",
+          "cmd": "docker rm -f {container}"
+        }
+      ],
+      "tips": [
+        "优先选「先 stop 再 rm」；-f 强制删除需谨慎"
+      ]
+    },
+    {
+      "intent_id": "docker.images",
+      "desc": "查看镜像列表",
+      "keywords": [
+        "docker镜像",
+        "镜像列表",
+        "docker images",
+        "有哪些镜像",
+        "docker"
+      ],
+      "weight": 9,
+      "risk_level": "low",
+      "cmd_template": [
+        "docker images",
+        "docker image ls"
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "docker.compose.ps",
+      "desc": "查看 compose 服务状态",
+      "keywords": [
+        "compose状态",
+        "docker compose",
+        "compose ps",
+        "编排状态",
+        "compose",
+        "docker"
+      ],
+      "weight": 8,
+      "risk_level": "low",
+      "cmd_template": [
+        "docker compose ps",
+        "docker-compose ps"
+      ],
+      "tips": [
+        "需在含 compose 文件的目录执行"
+      ]
+    }
+  ]
+}

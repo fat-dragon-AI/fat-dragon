@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "detect": {
+    "source": "/etc/os-release",
+    "id_field": "ID",
+    "id_like_field": "ID_LIKE"
+  },
+  "profiles": {
+    "debian": {
+      "match": ["debian", "ubuntu", "uos", "deepin", "linuxmint"],
+      "placeholders": {
+        "pkg_install": "apt-get install -y",
+        "pkg_update": "apt-get update",
+        "service_restart": "systemctl restart"
+      }
+    },
+    "rhel": {
+      "match": ["rhel", "centos", "rocky", "alinux", "kylin", "anolis", "opencloudos", "fedora"],
+      "placeholders": {
+        "pkg_install": "yum install -y",
+        "pkg_update": "yum makecache",
+        "service_restart": "systemctl restart"
+      }
+    }
+  },
+  "default_profile": "rhel"
+}

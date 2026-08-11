@@ -1,0 +1,1063 @@
+{
+  "set": "60-java",
+  "desc": "Java / JVM / JDK",
+  "rules": [
+    {
+      "intent_id": "jvm.jps",
+      "desc": "列出 Java 进程",
+      "keywords": [
+        "jps",
+        "java进程",
+        "有哪些java",
+        "jvm进程",
+        "看java进程",
+        "列出java",
+        "java pid",
+        "查找java进程",
+        "找java进程",
+        "查java进程",
+        "java进程有哪些",
+        "运维java进程"
+      ],
+      "weight": 12,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "jps 优先，再用 ps 兜底",
+          "stop_on_error": false,
+          "steps": [
+            "jps -lvm",
+            "jps -l",
+            "ps aux | grep -i '[j]ava'"
+          ]
+        }
+      ],
+      "tips": [
+        "需 JDK/JRE 在 PATH；无 jps 时看第三条 ps；也可用意图「ps找java」"
+      ]
+    },
+    {
+      "intent_id": "jvm.jstat.gc",
+      "desc": "查看 JVM GC 情况",
+      "keywords": [
+        "jstat",
+        "gc情况",
+        "看gc",
+        "垃圾回收",
+        "jvm gc",
+        "gc"
+      ],
+      "weight": 10,
+      "params": [
+        {
+          "name": "pid",
+          "required": true,
+          "extract": "pid"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "jstat -gcutil {pid} 1000 10",
+        "jstat -gc {pid} 1000 5"
+      ],
+      "tips": [
+        "先用 jps 拿到 PID"
+      ]
+    },
+    {
+      "intent_id": "jvm.jstack",
+      "desc": "导出线程栈（排查卡顿死锁）",
+      "keywords": [
+        "jstack",
+        "线程栈",
+        "死锁",
+        "卡顿",
+        "线程dump",
+        "java卡死"
+      ],
+      "weight": 11,
+      "params": [
+        {
+          "name": "pid",
+          "required": true,
+          "extract": "pid"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "jstack -l {pid}",
+        "jstack -l {pid} > /tmp/jstack-{pid}.txt && echo /tmp/jstack-{pid}.txt"
+      ],
+      "tips": [
+        "高负载时多次抓取对比；注意磁盘与权限"
+      ]
+    },
+    {
+      "intent_id": "jvm.jmap.heap",
+      "desc": "查看/导出堆信息",
+      "keywords": [
+        "jmap",
+        "堆内存",
+        "heap dump",
+        "内存溢出",
+        "dump堆",
+        "java内存",
+        "堆dump",
+        "dump一下堆",
+        "导出堆",
+        "heapdump",
+        "dump 堆",
+        "heap"
+      ],
+      "weight": 10,
+      "params": [
+        {
+          "name": "pid",
+          "required": true,
+          "extract": "pid"
+        }
+      ],
+      "risk_level": "high",
+      "cmd_template": [
+        "jmap -heap {pid}",
+        "jmap -dump:format=b,file=/tmp/heap-{pid}.hprof {pid}"
+      ],
+      "tips": [
+        "dump 可能导致短暂停顿与大文件；生产慎用"
+      ]
+    },
+    {
+      "intent_id": "java.version",
+      "desc": "查看 Java / javac 版本",
+      "keywords": [
+        "java版本",
+        "查看java版本",
+        "看java版本",
+        "jdk版本",
+        "jre版本",
+        "java -version",
+        "javac版本",
+        "什么java",
+        "java是哪个版本",
+        "当前java版本",
+        "java",
+        "jdk",
+        "jre",
+        "看java"
+      ],
+      "weight": 13,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "java → javac → properties",
+          "stop_on_error": false,
+          "steps": [
+            "java -version",
+            "javac -version",
+            "java -XshowSettings:properties -version 2>&1 | head -n 40"
+          ]
+        }
+      ],
+      "tips": [
+        "-version 输出在 stderr；确认 PATH 中的 java 是否为目标版本"
+      ]
+    },
+    {
+      "intent_id": "java.home.env",
+      "desc": "查看 JAVA_HOME 与 java 安装路径",
+      "keywords": [
+        "JAVA_HOME",
+        "java路径",
+        "jdk路径",
+        "java装哪了",
+        "which java",
+        "java home",
+        "java环境变量",
+        "看java环境",
+        "javahome"
+      ],
+      "weight": 11,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "JAVA_HOME → which → 真实路径 → 推算安装根",
+          "stop_on_error": false,
+          "steps": [
+            "echo \"JAVA_HOME=$JAVA_HOME\"",
+            "which java",
+            "readlink -f $(which java)",
+            "dirname $(dirname $(readlink -f $(which java)))"
+          ]
+        }
+      ],
+      "tips": [
+        "最后一条常可推算出 JAVA_HOME；若 which java 为空说明未入 PATH"
+      ]
+    },
+    {
+      "intent_id": "java.ps",
+      "desc": "用 ps 查找 Java 进程（无 jps 时）",
+      "keywords": [
+        "ps找java",
+        "grep java",
+        "java进程列表",
+        "没有jps",
+        "查java进程",
+        "ps java",
+        "ps查java",
+        "grep找java",
+        "找jar进程"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "cmd_template": [
+        "ps aux | grep -i '[j]ava'",
+        "ps -ef | grep -i '[j]ava'",
+        "ps aux | grep -i '\\.jar' | grep -v grep"
+      ],
+      "tips": [
+        "优先仍建议 jps -lvm；容器内注意 PID 命名空间"
+      ]
+    },
+    {
+      "intent_id": "jvm.jinfo",
+      "desc": "查看 JVM 参数与系统属性",
+      "keywords": [
+        "jinfo",
+        "jvm参数",
+        "启动参数",
+        "java参数",
+        "vm参数",
+        "系统属性",
+        "看jvm配置"
+      ],
+      "weight": 11,
+      "params": [
+        {
+          "name": "pid",
+          "required": true,
+          "extract": "pid"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "jinfo -flags {pid}",
+        "jinfo -sysprops {pid}",
+        "jinfo {pid}"
+      ],
+      "tips": [
+        "先 jps 取 PID；部分精简 JRE 可能无 jinfo"
+      ]
+    },
+    {
+      "intent_id": "jvm.jcmd",
+      "desc": "jcmd 诊断（线程/VM/GC）",
+      "keywords": [
+        "jcmd",
+        "jcmd线程",
+        "Thread.print",
+        "VM.flags",
+        "jcmd诊断",
+        "java诊断命令"
+      ],
+      "weight": 11,
+      "params": [
+        {
+          "name": "pid",
+          "required": true,
+          "extract": "pid"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "jcmd {pid} help",
+        "jcmd {pid} VM.version",
+        "jcmd {pid} VM.flags",
+        "jcmd {pid} Thread.print",
+        "jcmd {pid} GC.heap_info"
+      ],
+      "tips": [
+        "JDK8+ 常用；Thread.print 可作 jstack 替代"
+      ]
+    },
+    {
+      "intent_id": "jvm.jmap.histo",
+      "desc": "查看堆对象直方图",
+      "keywords": [
+        "jmap histo",
+        "对象直方图",
+        "堆直方图",
+        "histo",
+        "哪些对象占内存",
+        "java对象统计",
+        "直方图"
+      ],
+      "weight": 10,
+      "params": [
+        {
+          "name": "pid",
+          "required": true,
+          "extract": "pid"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "jmap -histo {pid} | head -n 50",
+        "jmap -histo:live {pid} | head -n 50"
+      ],
+      "tips": [
+        ":live 会触发 Full GC；生产谨慎"
+      ]
+    },
+    {
+      "intent_id": "jvm.thread.dump.signal",
+      "desc": "信号方式打线程栈（kill -3）",
+      "keywords": [
+        "kill -3",
+        "信号打线程",
+        "thread dump信号",
+        "java线程dump",
+        "3号信号"
+      ],
+      "weight": 9,
+      "params": [
+        {
+          "name": "pid",
+          "required": true,
+          "extract": "pid"
+        }
+      ],
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "kill -3 → jcmd Thread.print",
+          "stop_on_error": false,
+          "steps": [
+            "kill -3 {pid}",
+            "jcmd {pid} Thread.print"
+          ]
+        }
+      ],
+      "tips": [
+        "kill -3 通常输出到进程标准输出/日志；优先确认日志位置"
+      ]
+    },
+    {
+      "intent_id": "java.jar.run",
+      "desc": "前台运行 jar 包",
+      "keywords": [
+        "运行jar",
+        "启动jar",
+        "java -jar",
+        "跑jar",
+        "执行jar包",
+        "前台跑jar",
+        "前台启动jar"
+      ],
+      "weight": 10,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "java -jar {path}",
+        "java -Xms512m -Xmx1024m -jar {path}"
+      ],
+      "tips": [
+        "将 {path} 换成 jar 绝对路径；后台见「nohup启动jar」；生产见「java systemd」"
+      ]
+    },
+    {
+      "intent_id": "java.jar.nohup",
+      "desc": "nohup 后台启动 jar（写日志与 PID）",
+      "keywords": [
+        "nohup",
+        "nohup jar",
+        "nohup启动jar",
+        "后台启动jar",
+        "后台跑jar",
+        "后台运行jar",
+        "nohup执行jar",
+        "挂起跑jar",
+        "jar后台",
+        "启动jar后台"
+      ],
+      "weight": 12,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "nohup 启动 → 写 PID → 确认进程",
+          "stop_on_error": true,
+          "steps": [
+            "mkdir -p \"$(dirname {path})/logs\" 2>/dev/null; true",
+            "nohup java -jar {path} > \"$(dirname {path})/logs/app.log\" 2>&1 & echo $! | tee \"$(dirname {path})/app.pid\"",
+            "sleep 1; ps -fp \"$(cat \"$(dirname {path})/app.pid\")\" 2>/dev/null || jps -l | grep -F \"$(basename {path})\""
+          ]
+        },
+        {
+          "kind": "single",
+          "label": "简写：nohup 到 /tmp 日志",
+          "cmd": "nohup java -jar {path} > /tmp/$(basename {path}).log 2>&1 & echo $!"
+        }
+      ],
+      "tips": [
+        "日志默认 jar 同级 logs/app.log，PID 写 app.pid；停服见「停止jar」或 stop 脚本",
+        "生产更推荐 systemd 托管"
+      ]
+    },
+    {
+      "intent_id": "java.app.stop",
+      "desc": "停止 Java / jar 进程",
+      "keywords": [
+        "停止jar",
+        "停掉jar",
+        "结束jar",
+        "关掉java程序",
+        "停止java程序",
+        "停java应用",
+        "kill jar",
+        "关闭jar",
+        "停止java应用"
+      ],
+      "weight": 11,
+      "params": [
+        {
+          "name": "path",
+          "required": false,
+          "extract": "path"
+        },
+        {
+          "name": "pid",
+          "required": false,
+          "extract": "pid"
+        }
+      ],
+      "risk_level": "high",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "按 PID 文件优雅停止再强杀",
+          "stop_on_error": false,
+          "steps": [
+            "kill \"$(cat \"$(dirname {path})/app.pid\")\"",
+            "sleep 2",
+            "kill -9 \"$(cat \"$(dirname {path})/app.pid\")\" 2>/dev/null; true"
+          ]
+        },
+        {
+          "kind": "sequence",
+          "label": "按已知 PID：SIGTERM → SIGKILL",
+          "stop_on_error": false,
+          "steps": [
+            "kill {pid}",
+            "sleep 2",
+            "kill -9 {pid} 2>/dev/null; true"
+          ]
+        },
+        {
+          "kind": "single",
+          "label": "按 jar 名查找后提示（请改成真实 PID）",
+          "cmd": "jps -l | grep -F \"$(basename {path})\"; ps aux | grep -F \"$(basename {path})\" | grep -v grep"
+        }
+      ],
+      "tips": [
+        "优先 PID 文件或 jps 确认后再 kill；勿盲目 kill -9"
+      ]
+    },
+    {
+      "intent_id": "java.app.scripts",
+      "desc": "生成 jar 启停脚本 start.sh / stop.sh",
+      "keywords": [
+        "java启停脚本",
+        "jar启动脚本",
+        "jar停止脚本",
+        "start.sh",
+        "stop.sh",
+        "生成启停脚本",
+        "java启动脚本",
+        "java停止脚本",
+        "写启停脚本",
+        "jar脚本"
+      ],
+      "weight": 12,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "从模板写出 start.sh / stop.sh 并 chmod",
+          "stop_on_error": true,
+          "steps": [
+            "DIR=\"$(cd \"$(dirname {path})\" && pwd)\"; JAR_NAME=\"$(basename {path})\"; sed \"s|@JAR_NAME@|${JAR_NAME}|g\" \"{templates_root}/java/start.sh.tpl\" > \"$DIR/start.sh\"",
+            "DIR=\"$(cd \"$(dirname {path})\" && pwd)\"; cp \"{templates_root}/java/stop.sh.tpl\" \"$DIR/stop.sh\"",
+            "chmod +x \"$(dirname {path})/start.sh\" \"$(dirname {path})/stop.sh\" && ls -lah \"$(dirname {path})/start.sh\" \"$(dirname {path})/stop.sh\""
+          ]
+        },
+        {
+          "kind": "single",
+          "label": "执行 start.sh",
+          "cmd": "\"$(cd \"$(dirname {path})\" && pwd)/start.sh\""
+        },
+        {
+          "kind": "single",
+          "label": "执行 stop.sh",
+          "cmd": "\"$(cd \"$(dirname {path})\" && pwd)/stop.sh\""
+        }
+      ],
+      "tips": [
+        "将 {path} 换成 jar 绝对路径；模板在 resources/templates/java/；再跑 start.sh / stop.sh"
+      ]
+    },
+    {
+      "intent_id": "java.systemd.unit",
+      "desc": "把 jar 注册为 systemd 服务",
+      "keywords": [
+        "java systemd",
+        "jar systemd",
+        "java做成服务",
+        "jar做成服务",
+        "注册systemd",
+        "java服务单元",
+        "systemd托管java",
+        "java unit",
+        "把java放入systemd",
+        "java开机自启",
+        "jar开机自启",
+        "systemd java"
+      ],
+      "weight": 13,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        },
+        {
+          "name": "service",
+          "required": false,
+          "extract": "service"
+        }
+      ],
+      "risk_level": "high",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "模板渲染 unit → reload → enable --now → status",
+          "stop_on_error": true,
+          "steps": [
+            "JAR=\"$(readlink -f {path})\"; APP_HOME=\"$(dirname \"$JAR\")\"; SVC=\"{service}\"; [[ \"$SVC\" == \"{service}\" || -z \"$SVC\" ]] && SVC=\"$(basename \"$JAR\" .jar)\"; JAVA_BIN=\"$(command -v java)\"; UNIT=\"/etc/systemd/system/${SVC}.service\"; sed -e \"s|@SERVICE@|${SVC}|g\" -e \"s|@APP_HOME@|${APP_HOME}|g\" -e \"s|@JAVA_BIN@|${JAVA_BIN}|g\" -e \"s|@JAR@|${JAR}|g\" \"{templates_root}/java/app.service.tpl\" | sudo tee \"$UNIT\" >/dev/null; echo \"wrote $UNIT\"",
+            "sudo systemctl daemon-reload",
+            "JAR=\"$(readlink -f {path})\"; SVC=\"{service}\"; [[ \"$SVC\" == \"{service}\" || -z \"$SVC\" ]] && SVC=\"$(basename \"$JAR\" .jar)\"; sudo systemctl enable --now \"$SVC\"",
+            "JAR=\"$(readlink -f {path})\"; SVC=\"{service}\"; [[ \"$SVC\" == \"{service}\" || -z \"$SVC\" ]] && SVC=\"$(basename \"$JAR\" .jar)\"; systemctl status \"$SVC\" --no-pager"
+          ]
+        },
+        {
+          "kind": "single",
+          "label": "预览建议的 unit 名与 ExecStart（不写入）",
+          "cmd": "echo \"unit=/etc/systemd/system/$(basename {path} .jar).service\"; echo \"ExecStart=$(command -v java) -jar $(readlink -f {path})\"; echo \"template={templates_root}/java/app.service.tpl\""
+        }
+      ],
+      "tips": [
+        "默认服务名=jar 名（去 .jar）；口语里可带服务名供提取；需 sudo",
+        "日常：systemctl stop|start|restart <名>；日志：journalctl -u <名> -f"
+      ]
+    },
+    {
+      "intent_id": "java.jar.inspect",
+      "desc": "查看 jar 包内容/清单",
+      "keywords": [
+        "看jar",
+        "jar内容",
+        "解压jar",
+        "jar tf",
+        "manifest",
+        "看清单",
+        "看jar包"
+      ],
+      "weight": 9,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "jar tf {path} | head -n 50",
+        "unzip -l {path} | head -n 50",
+        "unzip -p {path} META-INF/MANIFEST.MF"
+      ],
+      "tips": [
+        "需 jar/unzip 命令；大 jar 注意管道 head"
+      ]
+    },
+    {
+      "intent_id": "java.compile",
+      "desc": "编译 Java 源文件",
+      "keywords": [
+        "javac",
+        "编译java",
+        "编译源码",
+        "javac编译",
+        "编译java文件",
+        "编译 .java",
+        "编译java源文件",
+        "java编译"
+      ],
+      "weight": 12,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "javac {path}",
+        "javac -encoding UTF-8 -d . {path}",
+        "javac -encoding UTF-8 -cp . -d out {path} && echo compiled_to_out/"
+      ],
+      "tips": [
+        "将 {path} 换成 Hello.java 等源文件；多文件可用 javac src/*.java"
+      ]
+    },
+    {
+      "intent_id": "java.compile.run",
+      "desc": "编译并运行 Java 主类",
+      "keywords": [
+        "编译并运行",
+        "javac后运行",
+        "跑java文件",
+        "运行java类",
+        "java运行主类",
+        "编译运行java",
+        "执行java类",
+        "编译运行",
+        "java运行"
+      ],
+      "weight": 11,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "javac {path} && java $(basename {path} .java)",
+        "javac -encoding UTF-8 -d . {path} && java -cp . $(basename {path} .java)"
+      ],
+      "tips": [
+        "适用于无包名单文件；有 package 时改用 java 包名.类名"
+      ]
+    },
+    {
+      "intent_id": "jvm.gc.log",
+      "desc": "查找/查看 GC 日志",
+      "keywords": [
+        "gc日志",
+        "垃圾回收日志",
+        "看gc日志",
+        "gc.log",
+        "找到gc日志",
+        "gc log"
+      ],
+      "weight": 9,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "进程参数 → 常见路径 → jps",
+          "stop_on_error": false,
+          "steps": [
+            "ps aux | grep -i java | grep -i 'Xlog.*gc\\|PrintGC\\|gc\\.log' | grep -v grep",
+            "ls -lah /tmp/*gc* 2>/dev/null; ls -lah ./*gc*.log 2>/dev/null",
+            "jps -lvm | grep -i 'Xlog\\|PrintGC\\|gc\\.log'"
+          ]
+        }
+      ],
+      "tips": [
+        "GC 日志路径取决于启动参数；从进程参数定位后用 less/tail 查看"
+      ]
+    },
+    {
+      "intent_id": "jvm.class.histogram.jcmd",
+      "desc": "jcmd 查看类直方图",
+      "keywords": [
+        "GC.class_histogram",
+        "类直方图",
+        "jcmd直方图",
+        "class histogram",
+        "class_histogram"
+      ],
+      "weight": 9,
+      "params": [
+        {
+          "name": "pid",
+          "required": true,
+          "extract": "pid"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "jcmd {pid} GC.class_histogram | head -n 50"
+      ],
+      "tips": [
+        "可能触发 STW；生产谨慎"
+      ]
+    },
+    {
+      "intent_id": "java.default.vm",
+      "desc": "查看系统已安装的 Java / JDK 列表",
+      "keywords": [
+        "默认java",
+        "有哪些jdk",
+        "jdk列表",
+        "已安装java",
+        "多个jdk",
+        "update-alternatives --display",
+        "java alternatives列表",
+        "java列表",
+        "有哪些java"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "列出已安装 JDK 与当前默认",
+          "stop_on_error": false,
+          "steps": [
+            "update-alternatives --display java 2>/dev/null || alternatives --display java 2>/dev/null",
+            "ls -lah /usr/lib/jvm 2>/dev/null",
+            "ls -lah /opt/jdk 2>/dev/null",
+            "java -version; echo JAVA_HOME=$JAVA_HOME; which java"
+          ]
+        }
+      ],
+      "tips": [
+        "先看已安装版本，再选「切换java版本」做切换"
+      ]
+    },
+    {
+      "intent_id": "java.switch.version",
+      "desc": "快速切换系统默认 Java 版本",
+      "keywords": [
+        "切换java",
+        "切换java版本",
+        "快速切换java",
+        "改java版本",
+        "换jdk",
+        "切换jdk",
+        "update-alternatives --config java",
+        "alternatives --config java",
+        "java版本切换",
+        "换java",
+        "切jdk"
+      ],
+      "weight": 13,
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "Debian/Ubuntu：切 java → 切 javac → 验证版本",
+          "stop_on_error": false,
+          "steps": [
+            "update-alternatives --config java",
+            "update-alternatives --config javac",
+            "java -version"
+          ]
+        },
+        {
+          "kind": "sequence",
+          "label": "RHEL/CentOS：alternatives 切 java → 验证",
+          "stop_on_error": false,
+          "steps": [
+            "alternatives --config java",
+            "java -version"
+          ]
+        }
+      ],
+      "tips": [
+        "update-alternatives --config 为交互菜单：确认 y 后终端会直通，立刻按编号选择（勿先空回车）",
+        "需 sudo 时在 Agent 中改参加 sudo",
+        "仅当前 shell 临时切换见 java.switch.home"
+      ]
+    },
+    {
+      "intent_id": "java.switch.home",
+      "desc": "当前会话临时切换 JAVA_HOME",
+      "keywords": [
+        "临时切换java",
+        "export JAVA_HOME",
+        "设置JAVA_HOME",
+        "当前shell切换jdk",
+        "临时jdk",
+        "会话切换java",
+        "临时java",
+        "切JAVA_HOME"
+      ],
+      "weight": 11,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "export JAVA_HOME → PATH → 验证版本",
+          "stop_on_error": true,
+          "steps": [
+            "export JAVA_HOME={path}",
+            "export PATH=$JAVA_HOME/bin:$PATH",
+            "java -version",
+            "echo JAVA_HOME=$JAVA_HOME"
+          ]
+        }
+      ],
+      "tips": [
+        "将 {path} 换成如 /usr/lib/jvm/java-17-openjdk；仅当前 shell 有效，可写入 ~/.bashrc 持久化"
+      ]
+    },
+    {
+      "intent_id": "mvn.version",
+      "desc": "查看 Maven 版本",
+      "keywords": [
+        "maven版本",
+        "mvn版本",
+        "mvn -v",
+        "看maven",
+        "maven -version"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "cmd_template": [
+        "mvn -v",
+        "mvn --version"
+      ],
+      "tips": [
+        "需已安装 Maven 并在 PATH"
+      ]
+    },
+    {
+      "intent_id": "mvn.compile",
+      "desc": "Maven 编译项目",
+      "keywords": [
+        "mvn编译",
+        "maven编译",
+        "mvn compile",
+        "编译maven项目",
+        "maven compile",
+        "用maven编译",
+        "mvn编译代码"
+      ],
+      "weight": 12,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "clean → compile",
+          "stop_on_error": true,
+          "steps": [
+            "mvn -q clean",
+            "mvn -q compile"
+          ]
+        },
+        {
+          "kind": "single",
+          "label": "仅 compile",
+          "cmd": "mvn compile"
+        },
+        {
+          "kind": "single",
+          "label": "跳过测试的 package（常用出包）",
+          "cmd": "mvn -DskipTests package"
+        }
+      ],
+      "tips": [
+        "在含 pom.xml 的目录执行；出 jar/war 常用 package"
+      ]
+    },
+    {
+      "intent_id": "mvn.package",
+      "desc": "Maven 打包（package/install）",
+      "keywords": [
+        "mvn打包",
+        "maven打包",
+        "mvn package",
+        "maven package",
+        "打jar包",
+        "maven出包",
+        "mvn install",
+        "跳过测试打包",
+        "mvn package skipTests"
+      ],
+      "weight": 12,
+      "risk_level": "medium",
+      "cmd_template": [
+        "mvn -DskipTests package",
+        "mvn clean package -DskipTests",
+        "mvn clean install -DskipTests",
+        "ls -lah target/*.jar 2>/dev/null | head -n 20"
+      ],
+      "tips": [
+        "产物一般在 target/；Spring Boot 常为 *-SNAPSHOT.jar 或可执行 fat jar"
+      ]
+    },
+    {
+      "intent_id": "mvn.test",
+      "desc": "Maven 跑测试",
+      "keywords": [
+        "mvn test",
+        "maven测试",
+        "跑单元测试",
+        "maven test",
+        "mvn跑测试"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "cmd_template": [
+        "mvn test",
+        "mvn -Dtest={file_keyword} test"
+      ],
+      "params": [
+        {
+          "name": "file_keyword",
+          "required": false,
+          "extract": "file_keyword"
+        }
+      ],
+      "tips": [
+        "指定单测类时可改 -Dtest=FooTest"
+      ]
+    },
+    {
+      "intent_id": "mvn.run",
+      "desc": "Maven 运行项目（spring-boot / exec）",
+      "keywords": [
+        "mvn运行",
+        "maven运行",
+        "spring-boot:run",
+        "mvn spring-boot",
+        "maven启动项目",
+        "mvn跑起来",
+        "exec:java"
+      ],
+      "weight": 11,
+      "risk_level": "medium",
+      "cmd_template": [
+        "mvn spring-boot:run",
+        "mvn -DskipTests spring-boot:run",
+        "mvn exec:java -Dexec.mainClass={file_keyword}"
+      ],
+      "params": [
+        {
+          "name": "file_keyword",
+          "required": false,
+          "extract": "file_keyword"
+        }
+      ],
+      "tips": [
+        "Spring Boot 项目优先 spring-boot:run；普通项目用 exec:java 并指定主类"
+      ]
+    },
+    {
+      "intent_id": "mvn.deps",
+      "desc": "Maven 依赖查看",
+      "keywords": [
+        "maven依赖",
+        "mvn依赖",
+        "dependency:tree",
+        "依赖树",
+        "看pom依赖",
+        "mvn dependency"
+      ],
+      "weight": 9,
+      "risk_level": "low",
+      "cmd_template": [
+        "mvn dependency:tree | head -n 80",
+        "mvn dependency:resolve | head -n 40"
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "jdk.install.17",
+      "desc": "离线安装 JDK17（依赖 soft_res）",
+      "keywords": [
+        "安装jdk17",
+        "离线jdk17",
+        "装jdk17",
+        "jdk17安装",
+        "安装jdk",
+        "jdk17",
+        "离线安装jdk",
+        "装jdk"
+      ],
+      "weight": 11,
+      "risk_level": "high",
+      "resource": {
+        "software": "jdk",
+        "version": "jdk17",
+        "path_template": "{soft_res_root}/{software}/{arch}/{version}/"
+      },
+      "candidates": [
+        {
+          "kind": "single",
+          "label": "查看本地 JDK17 资源目录",
+          "cmd": "ls -lah {resource_dir}"
+        },
+        {
+          "kind": "sequence",
+          "label": "解压并建立软链",
+          "stop_on_error": true,
+          "steps": [
+            "mkdir -p /opt/jdk",
+            "tar -zxvf {resource_dir}/*.tar.gz -C /opt/jdk",
+            "ln -sfn /opt/jdk/jdk-17* /opt/jdk/current",
+            "echo 'export JAVA_HOME=/opt/jdk/current' >> ~/.bashrc",
+            "echo 'export PATH=$JAVA_HOME/bin:$PATH' >> ~/.bashrc"
+          ]
+        },
+        {
+          "kind": "script",
+          "label": "资源目录一键安装脚本（若存在）",
+          "path": "{resource_dir}/install.sh",
+          "interpreter": "bash",
+          "export_name": "install-jdk17.sh"
+        }
+      ],
+      "tips": [
+        "需已挂载 soft_res；Agent 下 sequence 走逐步确认，script 可先导出再改"
+      ]
+    }
+  ]
+}

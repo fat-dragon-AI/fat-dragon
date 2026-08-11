@@ -1,0 +1,17 @@
+{
+  "version": "1.1",
+  "desc": "规则主清单：按 include 合并 rules.d 分片（类 nginx conf.d）",
+  "include": [
+    "rules.d/10-sys.json",
+    "rules.d/20-net.json",
+    "rules.d/30-file.json",
+    "rules.d/40-svc-pkg.json",
+    "rules.d/50-nginx.json",
+    "rules.d/60-java.json",
+    "rules.d/70-docker.json",
+    "rules.d/80-ops.json",
+    "rules.d/85-im.json",
+    "rules.d/90-db-k8s.json"
+  ],
+  "rules": []
+}

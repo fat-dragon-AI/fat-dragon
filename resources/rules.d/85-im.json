@@ -1,0 +1,297 @@
+{
+  "set": "85-im",
+  "desc": "fcitx / 搜狗输入法排查与恢复",
+  "rules": [
+    {
+      "intent_id": "im.status",
+      "desc": "查看 fcitx / 搜狗输入法状态（环境变量、进程）",
+      "keywords": [
+        "输入法状态",
+        "看输入法",
+        "fcitx状态",
+        "搜狗状态",
+        "sogou状态",
+        "输入法进程",
+        "fcitx进程",
+        "搜狗进程",
+        "中文输入法状态",
+        "im状态"
+      ],
+      "weight": 12,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "环境变量 → 进程 → fcitx-remote → 包状态",
+          "stop_on_error": false,
+          "steps": [
+            "echo \"GTK_IM_MODULE=$GTK_IM_MODULE QT_IM_MODULE=$QT_IM_MODULE XMODIFIERS=$XMODIFIERS\"",
+            "pgrep -a fcitx || echo 'fcitx: not running'",
+            "pgrep -a sogou || echo 'sogou: not running'",
+            "fcitx-remote 2>/dev/null || echo 'fcitx-remote: unavailable'",
+            "dpkg -l sogoupinyin fcitx 2>/dev/null | awk '/^ii/{print}'"
+          ]
+        }
+      ],
+      "tips": [
+        "环境变量应指向 fcitx；fcitx-remote 返回 0=关 1=未激活 2=激活",
+        "无进程时优先执行「重启输入法」或「输入法不起作用」相关意图"
+      ]
+    },
+    {
+      "intent_id": "im.fcitx.restart",
+      "desc": "重启 fcitx（带动搜狗服务）",
+      "keywords": [
+        "重启输入法",
+        "重启fcitx",
+        "重启搜狗",
+        "restart fcitx",
+        "重启sogou",
+        "启动输入法",
+        "启动fcitx",
+        "开输入法",
+        "fcitx重启"
+      ],
+      "weight": 13,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "重启 fcitx → 查进程 → 切搜狗并激活",
+          "stop_on_error": false,
+          "steps": [
+            "fcitx -r -d",
+            "sleep 1; pgrep -a fcitx; pgrep -a sogou",
+            "fcitx-remote -s sogoupinyin",
+            "fcitx-remote -o",
+            "fcitx-remote"
+          ]
+        }
+      ],
+      "tips": [
+        "已打开的应用若仍无法切中文，关闭后重开再试 Ctrl+Space",
+        "若反复退出，查 ~/.config/fcitx/log/crash.log"
+      ]
+    },
+    {
+      "intent_id": "im.notwork",
+      "desc": "输入法不起作用 / 搜狗不能用：诊断并恢复",
+      "keywords": [
+        "输入法不起作用",
+        "输入法不能用",
+        "输入法没用",
+        "输入法没反应",
+        "输入法失效",
+        "输入法挂了",
+        "中文输入法不能用",
+        "打不了中文",
+        "无法输入中文",
+        "不能输入中文",
+        "搜狗不能用",
+        "搜狗不起作用",
+        "搜狗输入法不能用",
+        "搜狗输入法不起作用",
+        "搜狗挂了",
+        "搜狗失效",
+        "sogou not work",
+        "sogou not wok",
+        "sogou notworking",
+        "sogoupinyin not work",
+        "fcitx不能用",
+        "fcitx不起作用",
+        "fcitx挂了",
+        "fcitx not work"
+      ],
+      "keyword_weights": {
+        "输入法不起作用": 3,
+        "输入法不能用": 3,
+        "搜狗不能用": 3,
+        "搜狗不起作用": 3,
+        "sogou not work": 3,
+        "sogou not wok": 3,
+        "打不了中文": 2.5,
+        "无法输入中文": 2.5
+      },
+      "weight": 14,
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "single",
+          "label": "诊断：环境变量 / 进程 / 包 / 崩溃日志",
+          "cmd": "echo \"GTK_IM_MODULE=$GTK_IM_MODULE QT_IM_MODULE=$QT_IM_MODULE XMODIFIERS=$XMODIFIERS DISPLAY=$DISPLAY WAYLAND_DISPLAY=$WAYLAND_DISPLAY\"; echo '--- process ---'; pgrep -a fcitx || echo 'fcitx: not running'; pgrep -a sogou || echo 'sogou: not running'; echo '--- package ---'; dpkg -l sogoupinyin fcitx 2>/dev/null | awk '/^ii/{print}'; echo '--- crash ---'; tail -n 20 ~/.config/fcitx/log/crash.log 2>/dev/null || echo 'no crash.log'"
+        },
+        {
+          "kind": "sequence",
+          "label": "恢复：清残留 pid → 重启 fcitx → 切到搜狗并激活",
+          "stop_on_error": false,
+          "steps": [
+            "rm -f /tmp/sogoupinyin*watchdog*.pid 2>/dev/null; true",
+            "fcitx -r -d",
+            "sleep 2",
+            "pgrep -a fcitx; pgrep -a sogou",
+            "fcitx-remote -s sogoupinyin",
+            "fcitx-remote -o",
+            "fcitx-remote"
+          ]
+        },
+        {
+          "kind": "single",
+          "label": "仅切换并激活搜狗拼音",
+          "cmd": "fcitx-remote -s sogoupinyin && fcitx-remote -o && fcitx-remote"
+        }
+      ],
+      "tips": [
+        "最常见原因：fcitx 进程未运行（崩溃后未自启）",
+        "环境变量应为 GTK_IM_MODULE=fcitx QT_IM_MODULE=fcitx XMODIFIERS=@im=fcitx",
+        "恢复后对已开应用重开窗口；快捷键默认 Ctrl+Space",
+        "Wayland 下搜狗/fcitx4 兼容性差，优先 X11 会话"
+      ]
+    },
+    {
+      "intent_id": "im.env.check",
+      "desc": "检查输入法相关环境变量",
+      "keywords": [
+        "输入法环境变量",
+        "fcitx环境变量",
+        "GTK_IM_MODULE",
+        "QT_IM_MODULE",
+        "XMODIFIERS",
+        "看im模块",
+        "输入法模块"
+      ],
+      "weight": 11,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "打印三变量 → 搜配置落点",
+          "stop_on_error": false,
+          "steps": [
+            "echo \"GTK_IM_MODULE=$GTK_IM_MODULE\"",
+            "echo \"QT_IM_MODULE=$QT_IM_MODULE\"",
+            "echo \"XMODIFIERS=$XMODIFIERS\"",
+            "grep -E 'GTK_IM_MODULE|QT_IM_MODULE|XMODIFIERS|fcitx' ~/.profile ~/.bashrc ~/.xprofile ~/.pam_environment /etc/environment 2>/dev/null | head -n 40"
+          ]
+        }
+      ],
+      "tips": [
+        "三者均应指向 fcitx；改完后需注销/重登或 source 后新开应用"
+      ]
+    },
+    {
+      "intent_id": "im.env.set",
+      "desc": "当前会话写入 fcitx 输入法环境变量",
+      "keywords": [
+        "设置输入法环境变量",
+        "设置fcitx环境变量",
+        "export fcitx",
+        "修复输入法环境变量",
+        "写GTK_IM_MODULE",
+        "配置输入法模块"
+      ],
+      "weight": 11,
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "export 三变量 → 回显确认",
+          "stop_on_error": true,
+          "steps": [
+            "export GTK_IM_MODULE=fcitx",
+            "export QT_IM_MODULE=fcitx",
+            "export XMODIFIERS=@im=fcitx",
+            "echo \"GTK_IM_MODULE=$GTK_IM_MODULE QT_IM_MODULE=$QT_IM_MODULE XMODIFIERS=$XMODIFIERS\""
+          ]
+        }
+      ],
+      "tips": [
+        "仅当前 shell 有效；持久化可写入 ~/.xprofile 或 /etc/environment 后重新登录",
+        "Agent 子进程里 export 不会回写到原交互 shell"
+      ]
+    },
+    {
+      "intent_id": "im.switch",
+      "desc": "切换/激活搜狗拼音（fcitx-remote）",
+      "keywords": [
+        "切换输入法",
+        "切换搜狗",
+        "激活输入法",
+        "激活搜狗",
+        "切到搜狗",
+        "切中文输入法",
+        "fcitx-remote",
+        "打开中文输入法",
+        "启用搜狗"
+      ],
+      "weight": 12,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "切到搜狗 → 激活 → 查状态",
+          "stop_on_error": false,
+          "steps": [
+            "fcitx-remote -s sogoupinyin",
+            "fcitx-remote -o",
+            "fcitx-remote"
+          ]
+        }
+      ],
+      "tips": [
+        "需 fcitx 已在运行；返回 2 表示已激活"
+      ]
+    },
+    {
+      "intent_id": "im.sogou.config",
+      "desc": "打开搜狗输入法配置工具",
+      "keywords": [
+        "搜狗配置",
+        "搜狗设置",
+        "打开搜狗配置",
+        "sogou配置",
+        "sogoupinyin-configtool",
+        "输入法设置",
+        "输入法配置"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "cmd_template": [
+        "/opt/sogoupinyin/files/bin/sogoupinyin-configtool",
+        "fcitx-config-gtk3"
+      ],
+      "tips": [
+        "第一行搜狗自带配置；第二行 fcitx 通用配置（可确认是否启用 sogoupinyin）"
+      ]
+    },
+    {
+      "intent_id": "im.fcitx.crash",
+      "desc": "查看 fcitx / 搜狗崩溃日志",
+      "keywords": [
+        "输入法崩溃",
+        "fcitx崩溃",
+        "搜狗崩溃",
+        "输入法crash",
+        "fcitx日志",
+        "搜狗日志",
+        "crash.log"
+      ],
+      "weight": 11,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "列日志目录 → tail crash.log → 看修改时间",
+          "stop_on_error": false,
+          "steps": [
+            "ls -lah ~/.config/fcitx/log/ 2>/dev/null",
+            "tail -n 50 ~/.config/fcitx/log/crash.log 2>/dev/null",
+            "date -r ~/.config/fcitx/log/crash.log 2>/dev/null"
+          ]
+        }
+      ],
+      "tips": [
+        "栈里出现 fcitx-sogoupinyin.so 多为搜狗插件异常；可先重启 fcitx 再观察是否复现"
+      ]
+    }
+  ]
+}

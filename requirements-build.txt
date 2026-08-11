@@ -1,0 +1,33 @@
+# 构建离线包依赖（仅构建机需要；版本需匹配避免 hooks 不兼容）
+#
+# 镜像优先级（强制）：
+#   1. 国内：https://pypi.tuna.tsinghua.edu.cn/simple
+#   2. 兜底：https://pypi.org/simple
+#
+# 推荐安装命令（对「实际跑构建」的解释器执行，不要用裸 pip）：
+#
+#   python3 -m pip install -r requirements-build.txt \
+#     -i https://pypi.tuna.tsinghua.edu.cn/simple \
+#     --extra-index-url https://pypi.org/simple
+#
+# 或使用封装脚本（自动选 .venv / miniconda / PATH 中的 python）：
+#
+#   ./scripts/install_build_deps.sh
+#
+# 说明：
+#   - 本机 PATH 的 /usr/bin/python3 可能无 pip；包通常装在 miniconda。
+#   - build_release.sh 与 bin/lch 使用同一套解释器选择逻辑。
+#   - 包索引页（查阅用）：
+#       jieba: https://pypi.org/project/jieba/
+#              https://pypi.tuna.tsinghua.edu.cn/simple/jieba/
+#       pyinstaller: https://pypi.org/project/pyinstaller/
+#                    https://pypi.tuna.tsinghua.edu.cn/simple/pyinstaller/
+#       pyinstaller-hooks-contrib: https://pypi.org/project/pyinstaller-hooks-contrib/
+#                    https://pypi.tuna.tsinghua.edu.cn/simple/pyinstaller-hooks-contrib/
+
+# 运行可选（打进包后提供分词兜底）
+jieba>=0.42.1
+
+# 构建工具
+pyinstaller>=6.14,<7
+pyinstaller-hooks-contrib>=2025.8

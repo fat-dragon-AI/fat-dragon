@@ -1,0 +1,258 @@
+{
+  "set": "30-file",
+  "desc": "文件日志与软链",
+  "rules": [
+    {
+      "intent_id": "file.find.name",
+      "desc": "按名称查找文件",
+      "keywords": [
+        "找文件",
+        "查找文件",
+        "按名称找",
+        "文件在哪",
+        "find文件",
+        "搜索文件",
+        "find",
+        "找一下文件"
+      ],
+      "weight": 10,
+      "params": [
+        {
+          "name": "file_keyword",
+          "required": true,
+          "extract": "file_keyword"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "find / -name '*{file_keyword}*' 2>/dev/null",
+        "find . -name '*{file_keyword}*' 2>/dev/null",
+        "locate {file_keyword}"
+      ],
+      "tips": [
+        "全盘 find 较慢；优先在业务目录下查找；locate 依赖 updatedb"
+      ]
+    },
+    {
+      "intent_id": "file.find.content",
+      "desc": "在文件中搜索内容",
+      "keywords": [
+        "搜内容",
+        "文件里搜",
+        "grep文件",
+        "包含什么内容",
+        "文本搜索",
+        "grep",
+        "搜文件"
+      ],
+      "weight": 9,
+      "params": [
+        {
+          "name": "file_keyword",
+          "required": true,
+          "extract": "file_keyword"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "grep -Rni '{file_keyword}' . --exclude-dir=.git",
+        "rg -n '{file_keyword}' ."
+      ],
+      "tips": [
+        "rg 更快但可能未安装；大目录注意范围"
+      ]
+    },
+    {
+      "intent_id": "file.list",
+      "desc": "列出目录内容",
+      "keywords": [
+        "列目录",
+        "看目录",
+        "ls",
+        "目录有什么",
+        "列出文件",
+        "ll"
+      ],
+      "weight": 7,
+      "params": [
+        {
+          "name": "path",
+          "required": false,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "ls -lah {path}",
+        "ls -lah"
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "file.tail.log",
+      "desc": "查看日志末尾/跟踪日志",
+      "keywords": [
+        "看日志",
+        "日志尾部",
+        "tail日志",
+        "跟踪日志",
+        "实时日志",
+        "刷日志",
+        "tail",
+        "tail -f"
+      ],
+      "weight": 10,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "tail -n 200 {path}",
+        "tail -f {path}",
+        "less +G {path}"
+      ],
+      "tips": [
+        "将 {path} 换成日志路径；tail -f 需 Ctrl+C 结束"
+      ]
+    },
+    {
+      "intent_id": "log.journal",
+      "desc": "查看 systemd 日志",
+      "keywords": [
+        "journalctl",
+        "系统日志",
+        "systemd日志",
+        "看系统日志",
+        "journal"
+      ],
+      "weight": 9,
+      "params": [
+        {
+          "name": "service",
+          "required": false,
+          "extract": "service"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "journalctl -xe -n 100",
+        "journalctl -u {service} -n 100 --no-pager"
+      ],
+      "tips": [
+        "指定服务时替换 {service}"
+      ]
+    },
+    {
+      "intent_id": "file.symlink.create",
+      "desc": "创建软链接（ln -s）",
+      "keywords": [
+        "软链",
+        "软链接",
+        "创建软链",
+        "建立软链",
+        "做软链",
+        "ln -s",
+        "符号链接",
+        "symbolic link",
+        "软连接",
+        "建软链",
+        "命令软链",
+        "做链接"
+      ],
+      "weight": 12,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        },
+        {
+          "name": "link",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "ln -sfn {path} {link}",
+        "ln -sfn {path} /usr/local/bin/$(basename {path})",
+        "mkdir -p \"$HOME/.local/bin\" && ln -sfn {path} \"$HOME/.local/bin/$(basename {path})\"",
+        "ln -sfn {path} /opt/$(basename {path})/current",
+        "ls -l /usr/local/bin/$(basename {path}) \"$HOME/.local/bin/$(basename {path})\" 2>/dev/null"
+      ],
+      "tips": [
+        "{path}=真实文件/目录（必须用绝对路径），{link}=链接路径；已存在用 -sfn 覆盖",
+        "错误示例：sudo ln -sfn lch /usr/local/bin → 会生成指向相对名 lch 的坏链；正确：sudo ln -sfn /绝对路径/bin/lch /usr/local/bin/lch",
+        "可执行命令软链一般放：/usr/local/bin/<命令名>（系统级，需 sudo）或 ~/.local/bin/<命令名>（用户级，多已在 PATH）",
+        "多版本软件常用：/opt/<软件>/current → 真实版本目录，再把 /opt/<软件>/current/bin 加进 PATH",
+        "库/配置较少直接链到 /usr/lib；容器/项目内软链优先放项目目录，避免污染系统路径"
+      ]
+    },
+    {
+      "intent_id": "file.symlink.where",
+      "desc": "软链一般放在哪些位置",
+      "keywords": [
+        "软链放哪",
+        "软链放哪里",
+        "软链放到哪",
+        "软链一般放哪",
+        "软链位置",
+        "链接放哪",
+        "命令链到哪",
+        "usr/local/bin",
+        "软链目录约定",
+        "软链规范位置",
+        "链接位置"
+      ],
+      "weight": 13,
+      "risk_level": "low",
+      "cmd_template": [
+        "echo '可执行命令 → /usr/local/bin（系统）或 ~/bin（用户）'",
+        "echo '多版本软件 → /opt/<name>/current → 真实版本目录'",
+        "ls -ld /usr/local/bin \"$HOME/bin\" /opt 2>/dev/null",
+        "echo \"$PATH\" | tr ':' '\\n' | head -n 20"
+      ],
+      "tips": [
+        "/usr/local/bin：管理员安装的用户级命令，通常已在 PATH",
+        "~/bin 或 ~/.local/bin：免 sudo；需保证目录在 PATH（可配合「写入PATH」）",
+        "/opt/<软件>/：整包安装根；current 软链指向具体版本，便于切换"
+      ]
+    },
+    {
+      "intent_id": "file.symlink.view",
+      "desc": "查看软链接指向",
+      "keywords": [
+        "看软链",
+        "软链指向",
+        "readlink",
+        "链接指哪",
+        "查看软链接",
+        "软链目标",
+        "ls软链",
+        "软链查看"
+      ],
+      "weight": 10,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "ls -l {path}",
+        "readlink {path}",
+        "readlink -f {path}",
+        "stat {path}"
+      ],
+      "tips": [
+        "readlink -f 解析到最终真实路径"
+      ]
+    }
+  ]
+}

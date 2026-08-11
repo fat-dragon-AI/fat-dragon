@@ -1,0 +1,4 @@
+# 可选依赖（模糊分词兜底）。未安装时仅用关键词匹配，功能仍可用。
+# 安装前请确认；优先国内镜像：
+#   pip install jieba -i https://pypi.tuna.tsinghua.edu.cn/simple --extra-index-url https://pypi.org/simple
+jieba>=0.42

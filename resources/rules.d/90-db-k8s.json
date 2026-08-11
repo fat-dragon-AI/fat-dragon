@@ -1,0 +1,114 @@
+{
+  "set": "90-db-k8s",
+  "desc": "MySQL Redis K8s",
+  "rules": [
+    {
+      "intent_id": "mysql.status",
+      "desc": "查看 MySQL/MariaDB 状态",
+      "keywords": [
+        "mysql状态",
+        "mysql是否启动",
+        "mariadb状态",
+        "看mysql",
+        "mysql服务",
+        "mysql",
+        "mariadb"
+      ],
+      "weight": 9,
+      "risk_level": "low",
+      "cmd_template": [
+        "systemctl status mysqld",
+        "systemctl status mysql",
+        "systemctl status mariadb",
+        "mysqladmin ping"
+      ],
+      "tips": [
+        "服务名因发行版可能为 mysqld/mysql/mariadb"
+      ]
+    },
+    {
+      "intent_id": "mysql.processlist",
+      "desc": "查看 MySQL 当前连接/线程",
+      "keywords": [
+        "mysql进程",
+        "mysql连接",
+        "processlist",
+        "慢查询连接",
+        "mysql谁连着"
+      ],
+      "weight": 9,
+      "risk_level": "low",
+      "cmd_template": [
+        "mysql -e 'SHOW FULL PROCESSLIST'",
+        "mysqladmin processlist"
+      ],
+      "tips": [
+        "需本机 mysql 客户端与权限"
+      ]
+    },
+    {
+      "intent_id": "redis.info",
+      "desc": "查看 Redis 状态与信息",
+      "keywords": [
+        "redis状态",
+        "redis信息",
+        "redis info",
+        "看redis",
+        "redis是否启动",
+        "redis"
+      ],
+      "weight": 9,
+      "risk_level": "low",
+      "cmd_template": [
+        "systemctl status redis",
+        "systemctl status redis-server",
+        "redis-cli info",
+        "redis-cli ping"
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "redis.keys.sample",
+      "desc": "抽样查看 Redis key（慎用）",
+      "keywords": [
+        "redis key",
+        "redis键",
+        "redis有哪些键",
+        "scan redis"
+      ],
+      "weight": 7,
+      "risk_level": "medium",
+      "cmd_template": [
+        "redis-cli scan 0 count 20",
+        "redis-cli dbsize"
+      ],
+      "tips": [
+        "生产禁用 KEYS *；优先 SCAN"
+      ]
+    },
+    {
+      "intent_id": "k8s.pods",
+      "desc": "查看 Kubernetes Pod 列表",
+      "keywords": [
+        "k8s pod",
+        "kubernetes",
+        "看pod",
+        "kubectl get pods",
+        "有哪些pod",
+        "k8s",
+        "kubectl",
+        "pod",
+        "pods"
+      ],
+      "weight": 8,
+      "risk_level": "low",
+      "cmd_template": [
+        "kubectl get pods -A",
+        "kubectl get pods -o wide"
+      ],
+      "tips": [
+        "需已配置 kubeconfig"
+      ]
+    }
+  ]
+}
