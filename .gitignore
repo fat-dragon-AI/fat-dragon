@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Build / release
+build/
+dist/
+*.spec.bak
+
+# Runtime
+data/history.json
+data/agent_audit.jsonl
+*.lch-*.sh
+install-jdk*.sh
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Rules split backup
+resources/rules.json.monolith.bak
+
+# Soft res binaries (keep scripts only in git if needed)
+resources/soft_res/**/*.tar.gz
+resources/soft_res/**/*.tgz
+resources/soft_res/**/*.zip
+resources/soft_res/**/*.rpm
+resources/soft_res/**/*.deb
