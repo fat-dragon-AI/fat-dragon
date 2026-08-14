@@ -33,11 +33,23 @@ def detect_profile(adapt: dict[str, Any]) -> tuple[str, dict[str, str], str]:
         ids.extend(x.lower() for x in osr[id_like_field].split())
 
     profiles = adapt.get("profiles") or {}
+    osr_major = 0
+    try:
+        osr_major = int((osr.get("VERSION_ID") or "0").split(".")[0])
+    except ValueError:
+        osr_major = 0
+
     for name, profile in profiles.items():
         match_list = [m.lower() for m in profile.get("match") or []]
         if any(i in match_list for i in ids):
             note = f"{osr.get(id_field, 'unknown')} / {name} profile"
-            return name, dict(profile.get("placeholders") or {}), note
+            placeholders = dict(profile.get("placeholders") or {})
+            dnf_min = profile.get("dnf_min_major")
+            dnf_ph = profile.get("dnf_placeholders") or {}
+            if dnf_min is not None and dnf_ph and osr_major >= int(dnf_min):
+                placeholders.update(dnf_ph)
+                note += " (dnf)"
+            return name, placeholders, note
 
     default_name = adapt.get("default_profile", "rhel")
     default = profiles.get(default_name) or {}

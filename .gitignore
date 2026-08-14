@@ -11,10 +11,15 @@ dist/
 *.spec.bak
 
 # Runtime
-data/history.json
-data/agent_audit.jsonl
+data/
 *.lch-*.sh
 install-jdk*.sh
+
+# PyInstaller 生成物（构建走 CLI 参数，不用根目录 spec）
+/lch.spec
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
 # IDE
 .idea/

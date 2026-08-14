@@ -7,9 +7,9 @@ from pathlib import Path
 from typing import Any
 
 from .adapt import detect_profile
-from .extract import extract_params
+from .extract import extract_params, filter_params, params_look_unsafe
 from .loader import Rule, Runnable, RulesBundle, load_adapt, load_rules_bundle
-from .matcher import MatchResult, match_rules
+from .matcher import MatchResult, match_rules, prepare_rules
 from .paths import detect_home, jieba_dict_path, resolve_file, resolve_rules_main, soft_res_root
 from .preprocess import preprocess
 from .render import (
@@ -33,6 +33,7 @@ class HitView:
     resource_dir: str = ""
     resource_exists: bool = False
     missing: list[str] = field(default_factory=list)
+    negated: bool = False
 
 
 @dataclass
@@ -58,16 +59,44 @@ class Engine:
         self.reload()
 
     def reload(self) -> None:
-        self.rules_path = resolve_rules_main(self.home)
-        if not self.rules_path.is_file():
-            raise FileNotFoundError(f"规则文件不存在: {self.rules_path}")
-        if not self.adapt_path.is_file():
-            raise FileNotFoundError(f"适配文件不存在: {self.adapt_path}")
-        bundle: RulesBundle = load_rules_bundle(self.rules_path)
-        self.rules = bundle.rules
-        self.rule_sources = list(bundle.source_files)
-        self.adapt = load_adapt(self.adapt_path)
-        _, self.placeholders, self.profile_note = detect_profile(self.adapt)
+        prev = (
+            self.rules,
+            self.rule_sources,
+            self.adapt,
+            self.placeholders,
+            self.profile_note,
+            self.rules_path,
+            self.adapt_path,
+        )
+        try:
+            self.rules_path = resolve_rules_main(self.home)
+            self.adapt_path = resolve_file(self.home, "system_adapt.json")
+            if not self.rules_path.is_file():
+                raise FileNotFoundError(f"规则文件不存在: {self.rules_path}")
+            if not self.adapt_path.is_file():
+                raise FileNotFoundError(f"适配文件不存在: {self.adapt_path}")
+            bundle: RulesBundle = load_rules_bundle(self.rules_path)
+            adapt = load_adapt(self.adapt_path)
+            _, placeholders, profile_note = detect_profile(adapt)
+            self.rules = bundle.rules
+            self.rule_sources = list(bundle.source_files)
+            self.adapt = adapt
+            self.placeholders = placeholders
+            self.profile_note = profile_note
+            prepare_rules(self.rules, jieba_dict_path(self.home))
+        except Exception:
+            (
+                self.rules,
+                self.rule_sources,
+                self.adapt,
+                self.placeholders,
+                self.profile_note,
+                self.rules_path,
+                self.adapt_path,
+            ) = prev
+            if not prev[0]:
+                raise
+            raise
 
     def rules_summary(self) -> str:
         n_files = len(self.rule_sources)
@@ -102,14 +131,15 @@ class Engine:
                 ),
             )
 
+        all_params = extract_params(q)
         hits: list[HitView] = []
         for m in matches:
-            hits.append(self._to_hit(q, m))
+            hits.append(self._to_hit(q, m, all_params))
         return QueryResult(query=q, profile_note=self.profile_note, hits=hits)
 
-    def _to_hit(self, text: str, m: MatchResult) -> HitView:
+    def _to_hit(self, text: str, m: MatchResult, all_params: dict | None = None) -> HitView:
         rule = m.rule
-        params = extract_params(text, rule.params)
+        params = filter_params(all_params or extract_params(text), rule.params)
         resource_dir, exists = resolve_resource_dir(rule, self.soft_res, self.arch)
         mapping = build_mapping(
             params,
@@ -127,15 +157,26 @@ class Engine:
             missing.extend(missing_placeholders(blob))
         missing = sorted(set(missing))
 
+        tips = list(rule.tips)
+        risk = rule.risk_level
+        unsafe = params_look_unsafe(params)
+        if unsafe:
+            if risk not in ("high", "critical"):
+                risk = "high"
+            tips = [f"抽出参数含特殊字符，已升级风险: {', '.join(unsafe)}"] + tips
+        if getattr(m, "negated", False):
+            tips = ["输入含否定语气，请确认是否真要执行该操作"] + tips
+
         return HitView(
             intent_id=rule.intent_id,
             desc=rule.desc,
             score=m.score,
             confidence=m.confidence,
-            risk_level=rule.risk_level,
-            tips=list(rule.tips),
+            risk_level=risk,
+            tips=tips,
             runnables=runnables,
             resource_dir=resource_dir,
             resource_exists=exists,
             missing=missing,
+            negated=bool(getattr(m, "negated", False)),
         )

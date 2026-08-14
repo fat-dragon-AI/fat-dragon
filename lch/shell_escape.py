@@ -13,11 +13,23 @@ from .session import get_cwd, try_handle_cd
 # 半角 ! 与全角 ！（输入法下常用）
 SHELL_PREFIXES = ("!", "！")
 
-# 高危启发式：命中则 Agent 下也要求确认
+def _normalize_for_danger(cmd: str) -> str:
+    s = cmd or ""
+    s = s.replace("\\", "")
+    s = s.replace("$IFS", " ")
+    s = re.sub(r"['\"]", " ", s)
+    s = re.sub(r"\$\([^)]*\)", " ", s)
+    s = re.sub(r"`[^`]*`", " ", s)
+    s = re.sub(r"\s+", " ", s)
+    return s
+
+
+# 高危启发式：命中则 Agent 下也要求确认（对去引号/反斜杠后的文本再扫一遍）
 _DANGER_RE = re.compile(
     r"(?:"
-    r"\brm\s+-[^\n]*[Rr][^\n]*[Ff]\b"
-    r"|\brm\s+-[^\n]*[Ff][^\n]*[Rr]\b"
+    r"\brm\b[^\n]*(?:-[^\n]*[Rr][^\n]*[Ff]|-[^\n]*[Ff][^\n]*[Rr]|--recursive|--force)"
+    r"|\bfind\b[^\n]*\s-delete\b"
+    r"|\bwipefs\b"
     r"|\bmkfs(?:\.\w+)?\b"
     r"|\bdd\b[^\n]*\bof=/dev/"
     r"|\b:\(\)\{\s*:\|:\s*&\s*\};:"
@@ -26,10 +38,16 @@ _DANGER_RE = re.compile(
     r"|\b>\s*/(?:etc|boot|usr|var)/"
     r"|\b(?:curl|wget)\b[^\n]*\|\s*(?:ba)?sh\b"
     r"|\bshutdown\b|\breboot\b|\bhalt\b|\bpoweroff\b"
-    r"|\bmkfs\b"
     r")",
     re.IGNORECASE,
 )
+
+
+def is_dangerous_cmd(cmd: str) -> bool:
+    raw = cmd or ""
+    if _DANGER_RE.search(raw):
+        return True
+    return bool(_DANGER_RE.search(_normalize_for_danger(raw)))
 
 
 def strip_shell_prefix(text: str) -> str | None:
@@ -43,10 +61,6 @@ def strip_shell_prefix(text: str) -> str | None:
 
 def is_shell_escape(text: str) -> bool:
     return strip_shell_prefix(text) is not None
-
-
-def is_dangerous_cmd(cmd: str) -> bool:
-    return bool(_DANGER_RE.search(cmd or ""))
 
 
 def estimate_manual_risk(cmd: str) -> str:

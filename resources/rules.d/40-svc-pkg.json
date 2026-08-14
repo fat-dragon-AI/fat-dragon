@@ -38,6 +38,7 @@
         "服务重启",
         "restart服务",
         "重新启动服务",
+        "重启一下",
         "restart"
       ],
       "weight": 10,
@@ -64,7 +65,9 @@
         "启动服务",
         "开启服务",
         "start服务",
-        "把服务拉起来"
+        "把服务拉起来",
+        "启动一下",
+        "启动"
       ],
       "weight": 9,
       "params": [
@@ -90,7 +93,8 @@
         "停止服务",
         "关掉服务",
         "stop服务",
-        "关闭服务"
+        "关闭服务",
+        "停掉"
       ],
       "weight": 9,
       "params": [
@@ -157,6 +161,207 @@
       ],
       "tips": [
         "占位符由系统适配表替换；需相应权限"
+      ]
+    },
+    {
+      "intent_id": "pkg.list",
+      "desc": "列出已安装软件包",
+      "keywords": [
+        "软件列表",
+        "已装软件",
+        "列出已安装",
+        "装了哪些包",
+        "已安装软件",
+        "已安装的包",
+        "有哪些软件包",
+        "装了哪些软件",
+        "rpm -qa",
+        "dpkg -l",
+        "yum list installed"
+      ],
+      "weight": 12,
+      "risk_level": "low",
+      "params": [
+        {
+          "name": "pkg",
+          "required": false,
+          "extract": "pkg"
+        }
+      ],
+      "cmd_template": [
+        "{pkg_list}",
+        "{pkg_list} | grep {pkg}",
+        "rpm -qa | sort | grep {pkg}",
+        "dpkg -l | grep {pkg}"
+      ],
+      "tips": [
+        "Debian/Ubuntu 用 dpkg -l；RHEL/CentOS 用 rpm -qa。有包名时 grep 过滤；输出很长可再加 head"
+      ]
+    },
+    {
+      "intent_id": "pkg.remove",
+      "desc": "卸载软件包",
+      "keywords": [
+        "卸载软件",
+        "卸载包",
+        "卸包",
+        "卸掉软件",
+        "删除软件包",
+        "yum remove",
+        "apt remove",
+        "apt purge",
+        "dnf remove",
+        "卸载"
+      ],
+      "keyword_weights": {
+        "卸载": 10,
+        "卸掉": 8,
+        "卸包": 8
+      },
+      "weight": 13,
+      "risk_level": "high",
+      "params": [
+        {
+          "name": "pkg",
+          "required": true,
+          "extract": "pkg"
+        }
+      ],
+      "cmd_template": [
+        "{pkg_remove} {pkg}",
+        "{pkg_purge} {pkg}"
+      ],
+      "tips": [
+        "将 {pkg} 换成包名；先 {pkg_list} | grep 确认。purge 会删配置（Debian）；需相应权限，可能影响业务"
+      ]
+    },
+    {
+      "intent_id": "pkg.which",
+      "desc": "查看命令 / 可执行文件位置",
+      "keywords": [
+        "命令在哪",
+        "命令位置",
+        "which命令",
+        "软件命令路径",
+        "可执行文件在哪",
+        "whereis",
+        "which",
+        "命令路径"
+      ],
+      "keyword_weights": {
+        "which": 8,
+        "whereis": 8,
+        "命令在哪": 8
+      },
+      "weight": 12,
+      "risk_level": "low",
+      "params": [
+        {
+          "name": "pkg",
+          "required": false,
+          "extract": "pkg"
+        }
+      ],
+      "cmd_template": [
+        "which {pkg}",
+        "which -a {pkg}",
+        "type -a {pkg}",
+        "whereis {pkg}",
+        "command -v {pkg}",
+        "readlink -f \"$(which {pkg})\""
+      ],
+      "tips": [
+        "which / command -v 看 PATH 中的命令；-a 列出全部命中；readlink -f 解开软链得到真实二进制。Java 专用仍走 java.home.env"
+      ]
+    },
+    {
+      "intent_id": "pkg.files",
+      "desc": "查看软件本体 / 包内文件安装位置",
+      "keywords": [
+        "软件本体位置",
+        "软件装在哪",
+        "软件安装路径",
+        "包文件列表",
+        "装到哪个目录",
+        "软件装到哪了",
+        "rpm -ql",
+        "dpkg -L",
+        "装在哪"
+      ],
+      "keyword_weights": {
+        "装在哪": 8,
+        "软件本体位置": 10,
+        "软件装在哪": 8
+      },
+      "weight": 13,
+      "risk_level": "low",
+      "params": [
+        {
+          "name": "pkg",
+          "required": false,
+          "extract": "pkg"
+        }
+      ],
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "命令路径 → 真实路径 → 所属包 → 包内文件",
+          "stop_on_error": false,
+          "steps": [
+            "which {pkg}",
+            "readlink -f \"$(which {pkg})\"",
+            "{pkg_owns} \"$(which {pkg})\"",
+            "{pkg_files} {pkg}"
+          ]
+        },
+        {
+          "kind": "single",
+          "label": "包内文件列表",
+          "cmd": "{pkg_files} {pkg}"
+        },
+        {
+          "kind": "single",
+          "label": "rpm -ql",
+          "cmd": "rpm -ql {pkg}"
+        },
+        {
+          "kind": "single",
+          "label": "dpkg -L",
+          "cmd": "dpkg -L {pkg}"
+        }
+      ],
+      "tips": [
+        "which 是 PATH 上的命令；本体在包管理器登记的文件列表（rpm -ql / dpkg -L）。命令名和包名可能不同，可先 {pkg_owns} \"$(which 命令)\""
+      ]
+    },
+    {
+      "intent_id": "pkg.info",
+      "desc": "查看软件包详情（版本/描述）",
+      "keywords": [
+        "软件包信息",
+        "包详情",
+        "软件信息",
+        "rpm -qi",
+        "dpkg -s",
+        "yum info",
+        "包的版本"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "params": [
+        {
+          "name": "pkg",
+          "required": false,
+          "extract": "pkg"
+        }
+      ],
+      "cmd_template": [
+        "{pkg_info} {pkg}",
+        "yum info {pkg}",
+        "apt-cache show {pkg}"
+      ],
+      "tips": [
+        "看已装包用 rpm -qi / dpkg -s；仓库元数据用 yum info / apt-cache show"
       ]
     }
   ]

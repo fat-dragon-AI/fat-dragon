@@ -1,0 +1,146 @@
+{
+  "n": 165,
+  "accuracy@1": 0.897,
+  "accuracy@5": 0.9939,
+  "accuracy@10": 1.0,
+  "core_n": 20,
+  "core_accuracy@1": 1.0,
+  "by_prefix": {
+    "archive": {
+      "n": 2,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    },
+    "cron": {
+      "n": 1,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    },
+    "docker": {
+      "n": 9,
+      "accuracy@1": 0.8889,
+      "accuracy@10": 1.0
+    },
+    "echo": {
+      "n": 13,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    },
+    "env": {
+      "n": 6,
+      "accuracy@1": 0.8333,
+      "accuracy@10": 1.0
+    },
+    "file": {
+      "n": 9,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    },
+    "firewall": {
+      "n": 2,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    },
+    "git": {
+      "n": 4,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    },
+    "java": {
+      "n": 21,
+      "accuracy@1": 0.8095,
+      "accuracy@10": 1.0
+    },
+    "jdk": {
+      "n": 2,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    },
+    "jvm": {
+      "n": 11,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    },
+    "k8s": {
+      "n": 3,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    },
+    "log": {
+      "n": 2,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    },
+    "mvn": {
+      "n": 5,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    },
+    "mysql": {
+      "n": 1,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    },
+    "net": {
+      "n": 11,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    },
+    "nginx": {
+      "n": 6,
+      "accuracy@1": 0.6667,
+      "accuracy@10": 1.0
+    },
+    "nslookup": {
+      "n": 7,
+      "accuracy@1": 0.8571,
+      "accuracy@10": 1.0
+    },
+    "perm": {
+      "n": 9,
+      "accuracy@1": 0.8889,
+      "accuracy@10": 1.0
+    },
+    "pkg": {
+      "n": 10,
+      "accuracy@1": 0.7,
+      "accuracy@10": 1.0
+    },
+    "redis": {
+      "n": 1,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    },
+    "selinux": {
+      "n": 1,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    },
+    "sudo": {
+      "n": 1,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    },
+    "svc": {
+      "n": 5,
+      "accuracy@1": 0.4,
+      "accuracy@10": 1.0
+    },
+    "swap": {
+      "n": 1,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    },
+    "sys": {
+      "n": 18,
+      "accuracy@1": 0.9444,
+      "accuracy@10": 1.0
+    },
+    "user": {
+      "n": 4,
+      "accuracy@1": 1.0,
+      "accuracy@10": 1.0
+    }
+  },
+  "misses": []
+}

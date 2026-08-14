@@ -152,6 +152,8 @@ lch -agent
 | 磁盘快满了 | `df -h` / `df -i` |
 | 哪个目录占空间 | `du -sh` / `du -h --max-depth=1` |
 | 本机ip / 网关 / dns | `ip -br addr` / `ip route` / `cat /etc/resolv.conf` |
+| nslookup / 查MX / 反向解析 | `nslookup {host}` / `-type=MX` / `nslookup {ip}` |
+| 软件列表 / 卸载 / 命令在哪 / 本体位置 | `{pkg_list}` / `{pkg_remove}` / `which` / `{pkg_files}` |
 | 看一下当前目录 | `ls -lah` |
 | 找文件 / 搜内容 | `find` / `grep`/`rg` |
 | nginx 服务状态 / 重启 sshd | `systemctl status/restart …` |
@@ -167,7 +169,11 @@ lch -agent
 | docker 有哪些容器 / 看容器日志 | `docker ps` / `docker logs` |
 | 进入容器 / 删除容器 | `docker exec -it` / `docker stop`→`rm` |
 | 改一下文件权限 / 改属主 | `ls`→`chmod` / `ls`→`chown` |
+| 文件归属 / 文件是谁的 | `ls -lah` / `stat` 看属主 |
 | 查看PATH / 加入path | `echo $PATH` / 写入 `~/.bashrc` |
+| 打印文字 / 打印环境变量 | `echo '…'` / `echo "$HOME"` |
+| 列出环境变量 / 退出码 | `env`/`printenv` / `echo $?` |
+| echo写入文件 | `echo '…' >` 或 `>>` 文件 |
 | 我是谁 | `whoami` / `id` |
 | 防火墙开了没 / 开放 8080 端口 | `firewall-cmd`/`ufw` |
 | mysql / redis / 有哪些 pod | `systemctl`+客户端 / `kubectl get pods` |
@@ -185,14 +191,18 @@ lch -agent
 | `{path}` | 路径 | 文中 `/var/log/...` |
 | `{link}` | 软链路径 | 创建软链时的第二段路径 |
 | `{owner}` | 属主 | `chown www-data:www-data` / `归还给 lilong` |
+| `{name}` | 环境变量名 | `echo $HOME` / `打印 JAVA_HOME` |
+| `{text}` | 打印/写入内容 | `打印 'hello'` |
 | `{mode}` | 权限位 | 常留占位，手补 `755`/`644` |
-| `{host}` | 主机 | `ping 8.8.8.8` |
+| `{host}` | 主机 | `ping 8.8.8.8` / `nslookup baidu.com` |
+| `{dns}` | DNS 服务器 | `用8.8.8.8解析` / `nslookup 域名 8.8.8.8` |
+| `{qtype}` | DNS 记录类型 | `查MX记录` / `-type=TXT` |
 | `{service}` | 服务名 | `重启一下 sshd` |
 | `{container}` | 容器 | `容器 nginx` |
 | `{proc_name}` | 进程名 | `有没有 nginx 进程` |
 | `{file_keyword}` | 文件名/关键词 | `找 application.yml` |
-| `{pkg}` | 包名 | `装个 htop` |
-| `{pkg_install}` 等 | 发行版适配 | 由 `system_adapt.json` 填充 |
+| `{pkg}` | 包名 | `装个 htop` / `卸载 nginx` / `which nginx` |
+| `{pkg_install}` / `{pkg_remove}` / `{pkg_list}` / `{pkg_files}` 等 | 发行版适配 | 由 `system_adapt.json` 填充 |
 
 ## 环境变量
 
@@ -270,7 +280,7 @@ file bin/lch   # 应为 ARM aarch64
 - 设计：`.docs/Linux中文离线指令助手-落地总体详细设计-v2.md`
 - 语料：`.docs/Linux常用规则语料-v1.md`
 - ARM 打包：`packaging/qemu-arm64/README.md`
-- 测试：`./scripts/run_tests.sh`
+- 测试：`./scripts/run_tests.sh`；命中率基准：`PYTHONPATH=. python3 scripts/bench_corpus.py`
 - 历史变更归档：`.ignore/docs/`（Cursor Agent 不索引；见 `.cursorignore`）
 
 打包产物中的 `VERSION` 含 `rules_sha256_16`，可与源码规则对照是否同批。

@@ -24,7 +24,10 @@ class DangerAndRiskTest(unittest.TestCase):
     def test_danger(self) -> None:
         self.assertTrue(is_dangerous_cmd("rm -rf /"))
         self.assertTrue(is_dangerous_cmd("rm -fr /tmp/x"))
-        self.assertFalse(is_dangerous_cmd("ls -lah"))
+        self.assertTrue(is_dangerous_cmd("rm --recursive --force /tmp/x"))
+        self.assertTrue(is_dangerous_cmd("find /tmp -delete"))
+        self.assertTrue(is_dangerous_cmd("wipefs /dev/sda"))
+        self.assertTrue(is_dangerous_cmd("mkfs.ext4 /dev/sdb1"))
 
     def test_manual_risk(self) -> None:
         self.assertEqual(estimate_manual_risk("ls"), "low")

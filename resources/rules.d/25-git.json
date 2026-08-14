@@ -1,0 +1,78 @@
+{
+  "set": "25-git",
+  "desc": "Git 常用",
+  "rules": [
+    {
+      "intent_id": "git.status",
+      "desc": "查看 git 工作区状态",
+      "keywords": [
+        "git状态",
+        "git status",
+        "工作区改了啥",
+        "有没有未提交",
+        "git怎么了"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "cmd_template": [
+        "git status",
+        "git status -sb"
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "git.log",
+      "desc": "查看 git 提交历史",
+      "keywords": [
+        "git日志",
+        "git log",
+        "提交历史",
+        "谁提交的",
+        "最近提交"
+      ],
+      "weight": 9,
+      "risk_level": "low",
+      "cmd_template": [
+        "git log --oneline -n 20",
+        "git log -n 10 --stat"
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "git.diff",
+      "desc": "查看 git 差异",
+      "keywords": [
+        "git diff",
+        "看改动",
+        "代码差异",
+        "对比未提交"
+      ],
+      "weight": 9,
+      "risk_level": "low",
+      "cmd_template": [
+        "git diff",
+        "git diff --stat"
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "git.pull",
+      "desc": "拉取远程更新",
+      "keywords": [
+        "git pull",
+        "拉代码",
+        "拉取更新",
+        "同步远程"
+      ],
+      "weight": 8,
+      "risk_level": "medium",
+      "cmd_template": [
+        "git pull --ff-only",
+        "git fetch --all --prune && git status"
+      ],
+      "tips": [
+        "优先 --ff-only，避免无意合并"
+      ]
+    }
+  ]
+}

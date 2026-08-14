@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 
 _FULLWIDTH = str.maketrans(
     {
@@ -19,6 +20,7 @@ _FULLWIDTH = str.maketrans(
 
 
 def preprocess(text: str) -> str:
-    t = (text or "").strip().translate(_FULLWIDTH)
+    t = unicodedata.normalize("NFKC", text or "")
+    t = t.strip().translate(_FULLWIDTH)
     t = re.sub(r"\s+", " ", t)
     return t

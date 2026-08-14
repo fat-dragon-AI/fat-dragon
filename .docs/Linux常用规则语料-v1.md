@@ -5,7 +5,7 @@
 | 日期 | 2026-08-10 |
 | 规则文件 | `resources/rules.json` + `resources/rules.d/*.json` |
 | 对应设计 | `.docs/Linux中文离线指令助手-落地总体详细设计-v2.md`（schema v1.0） |
-| 规则条数 | 87（含软链位置约定、PATH 写入等） |
+| 规则条数 | 约 150（含 git/压缩/curl/用户/swap/SELinux 等） |
 
 ## 1. 覆盖范围
 
@@ -14,15 +14,16 @@
 | 系统监控 | `sys.mem/cpu/load/disk/uptime/info` | 内存占用、CPU 负载、磁盘、开机、系统信息 |
 | 硬件与配置 | `sys.cpu.model` / `sys.mem.model` / `sys.hw.*` / `sys.config.*` / `sys.bios.*` / `sys.block.*` | CPU/内存型号、整机硬件、配置摘要、BIOS/主板、磁盘型号 |
 | 进程 | `sys.process.*` | 列表、查找、结束（high） |
-| 网络 | `net.*` | 端口、ping、IP、网卡、路由、DNS、连接 |
+| 网络 | `net.*` / `nslookup.*` | 端口、ping、IP、网卡、路由、DNS、nslookup、连接 |
 | 文件/日志 | `file.*` / `log.journal` | 查找、内容搜、列目录、tail、软链、journalctl |
+| Shell / echo | `echo.*` | 打印文字、环境变量、退出码、写入文件、转义 |
 | 环境变量 | `env.path.*` | 查看 / 会话 export / 持久化写入 / source |
 | 服务 | `svc.*` | status/start/stop/restart/list |
-| 软件包 | `pkg.install` | 使用 `{pkg_install}` 适配 |
+| 软件包 | `pkg.install/list/remove/which/files/info` | 安装、列表、卸载、命令位置、本体路径、包详情 |
 | Nginx | `nginx.*` | 配置查看/校验、reload/restart、日志 |
 | JVM / Java | `jvm.*` / `java.*` / `jdk.install.17` / `mvn.*` | 版本、进程、jar 启停/nohup/systemd、编译运行、Maven |
 | Docker | `docker.*` | ps/logs/exec/启停删/镜像/compose |
-| 用户权限 | `user.*` / `perm.chmod` / `perm.chown` | whoami、chmod / chown（high） |
+| 用户权限 | `user.*` / `perm.chmod` / `perm.chown` / `perm.owner.view` | whoami、chmod / chown / 查看属主 |
 | 防火墙/定时/时间 | `firewall.*` / `cron.*` / `sys.date.time` | 常用排查 |
 
 ## 2. 回归语料（输入 → 期望 intent_id）
@@ -54,6 +55,13 @@
 | 看一下网卡 | net.nic.info |
 | 默认网关是啥 | net.route |
 | dns怎么配的 | net.dns |
+| nslookup | nslookup.lookup |
+| nslookup一下 baidu.com | nslookup.lookup |
+| 用8.8.8.8解析 | nslookup.server |
+| 查MX记录 | nslookup.type |
+| 反向解析 | nslookup.reverse |
+| nslookup调试 | nslookup.debug |
+| nslookup交互 | nslookup.interactive |
 | 找一下叫 application.yml 的文件 | file.find.name |
 | 在文件里搜 error | file.find.content |
 | 看一下当前目录 | file.list |
@@ -64,6 +72,15 @@
 | 停掉 redis | svc.stop |
 | 现在跑着哪些服务 | svc.list |
 | 用包管理器装个 htop | pkg.install |
+| 软件列表 | pkg.list |
+| 已装软件 | pkg.list |
+| 卸载软件 | pkg.remove |
+| 卸载 nginx | pkg.remove |
+| 命令在哪 | pkg.which |
+| which nginx | pkg.which |
+| 软件本体位置 | pkg.files |
+| nginx装在哪 | pkg.files |
+| 软件包信息 | pkg.info |
 | nginx 配置校验一下 | nginx.config.test |
 | 看 nginx 配置 | nginx.config.view |
 | 重载 nginx | nginx.reload |
@@ -121,6 +138,10 @@
 | 改属主 | perm.chown |
 | chown | perm.chown |
 | 归还给当前用户 | perm.chown |
+| 文件归属 | perm.owner.view |
+| 看文件归属 | perm.owner.view |
+| 文件是谁的 | perm.owner.view |
+| 改文件归属 | perm.chown |
 | 防火墙开了没 | firewall.status |
 | 有哪些定时任务 | cron.list |
 | 看系统日志 | log.journal |
@@ -139,10 +160,43 @@
 | 写入PATH | env.path.write |
 | 加入path | env.path.write |
 | path | env.path.view |
+| 打印文字 | echo.print |
+| echo hello | echo.print |
+| 打印环境变量 | echo.env.var |
+| echo $HOME | echo.env.var |
+| 列出环境变量 | echo.env.list |
+| 全部环境变量 | echo.env.list |
+| 退出码 | echo.exit.status |
+| echo $? | echo.exit.status |
+| 当前shell pid | echo.shell.pid |
+| echo -e | echo.escape |
+| echo -n | echo.no.newline |
+| echo写入文件 | echo.write.file |
+| echo管道 | echo.pipe |
 | java | java.version |
 | docker | docker.ps |
 | nginx | nginx.config.view |
 | PATH生效 | env.path.source |
+| git状态 | git.status |
+| git日志 | git.log |
+| git diff | git.diff |
+| 拉代码 | git.pull |
+| 打包目录 | archive.tar.pack |
+| 解压tar包 | archive.tar.unpack |
+| curl探测 | net.curl |
+| 路由追踪 | net.traceroute |
+| 已建立连接 | net.ss.established |
+| 有哪些用户 | user.list |
+| 添加用户 | user.add |
+| 改密码 | user.passwd |
+| sudo权限 | sudo.list |
+| swap用了多少 | swap.status |
+| selinux开了没 | selinux.status |
+| 复制文件 | file.copy |
+| 移动文件 | file.move |
+| k8s服务 | k8s.svc |
+| pod详情 | k8s.desc |
+| 开机日志 | log.journal |
 
 ## 3. 使用说明
 

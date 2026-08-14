@@ -1,0 +1,81 @@
+{
+  "set": "22-net-extra",
+  "desc": "curl traceroute 已建立连接",
+  "rules": [
+    {
+      "intent_id": "net.curl",
+      "desc": "用 curl 探测 HTTP",
+      "keywords": [
+        "curl",
+        "http探测",
+        "访问网址",
+        "测一下网站",
+        "curl一下",
+        "http状态码"
+      ],
+      "weight": 9,
+      "params": [
+        {
+          "name": "host",
+          "required": false,
+          "extract": "host"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "curl -I {host}",
+        "curl -sS -o /dev/null -w '%{http_code}\\n' {host}",
+        "curl -v {host}"
+      ],
+      "tips": [
+        "将 {host} 换成 URL，如 https://example.com"
+      ]
+    },
+    {
+      "intent_id": "net.traceroute",
+      "desc": "路由追踪 traceroute",
+      "keywords": [
+        "traceroute",
+        "路由追踪",
+        "tracepath",
+        "看经过哪些跳",
+        "网络路径"
+      ],
+      "weight": 8,
+      "params": [
+        {
+          "name": "host",
+          "required": true,
+          "extract": "host"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "traceroute {host}",
+        "tracepath {host}",
+        "mtr -r -c 4 {host}"
+      ],
+      "tips": [
+        "traceroute/mtr 可能未安装"
+      ]
+    },
+    {
+      "intent_id": "net.ss.established",
+      "desc": "查看已建立的网络连接",
+      "keywords": [
+        "已建立连接",
+        "established",
+        "谁连着我",
+        "tcp已连接",
+        "当前连接"
+      ],
+      "weight": 8,
+      "risk_level": "low",
+      "cmd_template": [
+        "ss -antp state established",
+        "ss -antup state established"
+      ],
+      "tips": []
+    }
+  ]
+}

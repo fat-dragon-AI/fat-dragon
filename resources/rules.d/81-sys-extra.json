@@ -1,0 +1,129 @@
+{
+  "set": "81-sys-extra",
+  "desc": "用户 sudo swap SELinux",
+  "rules": [
+    {
+      "intent_id": "user.list",
+      "desc": "列出登录用户与账号",
+      "keywords": [
+        "有哪些用户",
+        "用户列表",
+        "谁登录了",
+        "登录用户",
+        "系统账号"
+      ],
+      "weight": 8,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "who → last → passwd",
+          "stop_on_error": false,
+          "steps": [
+            "who",
+            "w",
+            "getent passwd | awk -F: '$3>=1000 && $3<65534 {print}'"
+          ]
+        }
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "user.add",
+      "desc": "新增系统用户（示例）",
+      "keywords": [
+        "添加用户",
+        "新建用户",
+        "useradd",
+        "adduser",
+        "开个账号"
+      ],
+      "weight": 8,
+      "risk_level": "high",
+      "cmd_template": [
+        "sudo useradd -m {name}",
+        "sudo adduser {name}"
+      ],
+      "tips": [
+        "将 {name} 换成用户名；Debian 常用 adduser"
+      ]
+    },
+    {
+      "intent_id": "user.passwd",
+      "desc": "修改用户密码",
+      "keywords": [
+        "改密码",
+        "passwd",
+        "重置密码",
+        "修改密码"
+      ],
+      "weight": 8,
+      "risk_level": "high",
+      "cmd_template": [
+        "passwd",
+        "sudo passwd {name}"
+      ],
+      "tips": [
+        "交互命令，确认后终端直通"
+      ]
+    },
+    {
+      "intent_id": "sudo.list",
+      "desc": "查看 sudo 权限",
+      "keywords": [
+        "sudo权限",
+        "我能sudo吗",
+        "sudoers",
+        "sudo -l",
+        "提权列表"
+      ],
+      "weight": 8,
+      "risk_level": "low",
+      "cmd_template": [
+        "sudo -l",
+        "sudo grep -R . /etc/sudoers /etc/sudoers.d 2>/dev/null | grep -v '^#'"
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "swap.status",
+      "desc": "查看 swap 使用",
+      "keywords": [
+        "swap",
+        "交换分区",
+        "swap用了多少",
+        "虚拟内存",
+        "swapon"
+      ],
+      "weight": 8,
+      "risk_level": "low",
+      "cmd_template": [
+        "swapon --show",
+        "free -h",
+        "cat /proc/swaps"
+      ],
+      "tips": []
+    },
+    {
+      "intent_id": "selinux.status",
+      "desc": "查看 SELinux 状态",
+      "keywords": [
+        "selinux",
+        "selinux开了没",
+        "getenforce",
+        "强制访问控制",
+        "sestatus"
+      ],
+      "weight": 8,
+      "risk_level": "low",
+      "cmd_template": [
+        "getenforce",
+        "sestatus",
+        "cat /sys/fs/selinux/enforce 2>/dev/null || echo no_selinux"
+      ],
+      "tips": [
+        "Debian 系通常未启用 SELinux"
+      ]
+    }
+  ]
+}

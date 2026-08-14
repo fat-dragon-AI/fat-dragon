@@ -1,0 +1,63 @@
+{
+  "set": "32-archive",
+  "desc": "压缩解压",
+  "rules": [
+    {
+      "intent_id": "archive.tar.pack",
+      "desc": "打包 tar.gz",
+      "keywords": [
+        "打包",
+        "压缩目录",
+        "打tar包",
+        "打包目录",
+        "tar czf",
+        "做成压缩包"
+      ],
+      "weight": 9,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "tar -czvf archive.tar.gz {path}",
+        "tar -czvf \"$(basename {path}).tar.gz\" {path}"
+      ],
+      "tips": [
+        "将 {path} 换成要打包的目录"
+      ]
+    },
+    {
+      "intent_id": "archive.tar.unpack",
+      "desc": "解压 tar.gz / tar.xz",
+      "keywords": [
+        "解压",
+        "解包",
+        "解开压缩包",
+        "解压tar包",
+        "tar xzf",
+        "untar"
+      ],
+      "weight": 9,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "tar -tzvf {path} | head",
+        "tar -xzvf {path}",
+        "tar -xJvf {path}"
+      ],
+      "tips": [
+        "先 -t 看内容再解压，避免覆盖"
+      ]
+    }
+  ]
+}

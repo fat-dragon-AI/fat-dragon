@@ -44,6 +44,7 @@
         "jstat",
         "gc情况",
         "看gc",
+        "看 gc",
         "垃圾回收",
         "jvm gc",
         "gc"
@@ -510,20 +511,20 @@
           "label": "从模板写出 start.sh / stop.sh 并 chmod",
           "stop_on_error": true,
           "steps": [
-            "DIR=\"$(cd \"$(dirname {path})\" && pwd)\"; JAR_NAME=\"$(basename {path})\"; sed \"s|@JAR_NAME@|${JAR_NAME}|g\" \"{templates_root}/java/start.sh.tpl\" > \"$DIR/start.sh\"",
-            "DIR=\"$(cd \"$(dirname {path})\" && pwd)\"; cp \"{templates_root}/java/stop.sh.tpl\" \"$DIR/stop.sh\"",
-            "chmod +x \"$(dirname {path})/start.sh\" \"$(dirname {path})/stop.sh\" && ls -lah \"$(dirname {path})/start.sh\" \"$(dirname {path})/stop.sh\""
+            "DIR=\"$(cd \"$(dirname -- {path})\" && pwd)\"; JAR_NAME=\"$(basename -- {path})\"; sed \"s|@JAR_NAME@|${JAR_NAME}|g\" \"{templates_root}/java/start.sh.tpl\" > \"$DIR/start.sh\"",
+            "DIR=\"$(cd \"$(dirname -- {path})\" && pwd)\"; cp \"{templates_root}/java/stop.sh.tpl\" \"$DIR/stop.sh\"",
+            "chmod +x \"$(dirname -- {path})/start.sh\" \"$(dirname -- {path})/stop.sh\" && ls -lah \"$(dirname -- {path})/start.sh\" \"$(dirname -- {path})/stop.sh\""
           ]
         },
         {
           "kind": "single",
           "label": "执行 start.sh",
-          "cmd": "\"$(cd \"$(dirname {path})\" && pwd)/start.sh\""
+          "cmd": "\"$(cd \"$(dirname -- {path})\" && pwd)/start.sh\""
         },
         {
           "kind": "single",
           "label": "执行 stop.sh",
-          "cmd": "\"$(cd \"$(dirname {path})\" && pwd)/stop.sh\""
+          "cmd": "\"$(cd \"$(dirname -- {path})\" && pwd)/stop.sh\""
         }
       ],
       "tips": [

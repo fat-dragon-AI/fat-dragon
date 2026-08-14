@@ -3,11 +3,12 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 _jieba: Any = None
 _load_attempted = False
 _load_error: str | None = None
+_added_words: set[str] = set()
 
 DEFAULT_STOPWORDS = frozenset(
     {
@@ -84,20 +85,46 @@ def ensure_jieba(dict_path: Path | None = None) -> bool:
             jieba.set_dictionary(str(dict_path))
         except Exception:  # noqa: BLE001
             pass
-    # 静默初始化，避免首次切词打印
-    jieba.initialize()
+    try:
+        jieba.initialize()
+    except Exception as e:  # noqa: BLE001
+        _load_error = str(e)
+        return False
     _jieba = jieba
     return True
 
 
-def tokenize(text: str, dict_path: Path | None = None) -> list[str]:
+def add_user_words(words: Iterable[str]) -> None:
+    """把规则关键词注入 jieba，保证整词切分一致。"""
+    if not ensure_jieba():
+        return
+    assert _jieba is not None
+    for w in words:
+        w = (w or "").strip()
+        if not w or w in _added_words:
+            continue
+        try:
+            _jieba.add_word(w)
+            _added_words.add(w)
+        except Exception:  # noqa: BLE001
+            continue
+
+
+def tokenize(
+    text: str,
+    dict_path: Path | None = None,
+    protected: set[str] | None = None,
+) -> list[str]:
     if not ensure_jieba(dict_path):
         return []
     assert _jieba is not None
+    keep = {p.lower() for p in (protected or set())}
     tokens = []
     for t in _jieba.cut(text, cut_all=False):
         t = t.strip()
-        if not t or t in DEFAULT_STOPWORDS:
+        if not t:
+            continue
+        if t in DEFAULT_STOPWORDS and t.lower() not in keep and t not in keep:
             continue
         if len(t) == 1 and not t.isalnum():
             continue

@@ -1,0 +1,69 @@
+{
+  "set": "31-file-extra",
+  "desc": "复制移动",
+  "rules": [
+    {
+      "intent_id": "file.copy",
+      "desc": "复制文件或目录",
+      "keywords": [
+        "复制文件",
+        "拷贝文件",
+        "cp一下",
+        "复制目录",
+        "拷贝过去"
+      ],
+      "weight": 8,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        },
+        {
+          "name": "link",
+          "required": false,
+          "extract": "link"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "cp -a {path} {link}",
+        "cp -ai {path} {link}"
+      ],
+      "tips": [
+        "{path} 源，{link} 目标；目录加 -a"
+      ]
+    },
+    {
+      "intent_id": "file.move",
+      "desc": "移动或重命名",
+      "keywords": [
+        "移动文件",
+        "重命名",
+        "mv一下",
+        "挪到",
+        "改名"
+      ],
+      "weight": 8,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        },
+        {
+          "name": "link",
+          "required": false,
+          "extract": "link"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "mv -i {path} {link}"
+      ],
+      "tips": [
+        "{path} 源，{link} 目标；-i 避免覆盖"
+      ]
+    }
+  ]
+}

@@ -109,6 +109,46 @@
       "tips": [
         "需已配置 kubeconfig"
       ]
+    },
+    {
+      "intent_id": "k8s.svc",
+      "desc": "查看 Kubernetes Service",
+      "keywords": [
+        "k8s svc",
+        "k8s服务",
+        "kubectl get svc",
+        "有哪些service",
+        "kubernetes service"
+      ],
+      "weight": 8,
+      "risk_level": "low",
+      "cmd_template": [
+        "kubectl get svc -A",
+        "kubectl get svc -o wide"
+      ],
+      "tips": [
+        "需已配置 kubeconfig"
+      ]
+    },
+    {
+      "intent_id": "k8s.desc",
+      "desc": "查看 Pod 详情",
+      "keywords": [
+        "k8s描述",
+        "kubectl describe",
+        "pod详情",
+        "看pod事件",
+        "describe pod"
+      ],
+      "weight": 8,
+      "risk_level": "low",
+      "cmd_template": [
+        "kubectl describe pod {name}",
+        "kubectl get pod {name} -o yaml"
+      ],
+      "tips": [
+        "将 {name} 换成 Pod 名；可加 -n namespace"
+      ]
     }
   ]
 }

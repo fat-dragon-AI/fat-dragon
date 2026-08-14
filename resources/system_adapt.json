@@ -11,14 +11,94 @@
       "placeholders": {
         "pkg_install": "apt-get install -y",
         "pkg_update": "apt-get update",
+        "pkg_remove": "apt-get remove -y",
+        "pkg_purge": "apt-get purge -y",
+        "pkg_list": "dpkg -l",
+        "pkg_files": "dpkg -L",
+        "pkg_owns": "dpkg -S",
+        "pkg_info": "dpkg -s",
         "service_restart": "systemctl restart"
       }
     },
+    "fedora": {
+      "match": ["fedora"],
+      "placeholders": {
+        "pkg_install": "dnf install -y",
+        "pkg_update": "dnf makecache",
+        "pkg_remove": "dnf remove -y",
+        "pkg_purge": "dnf remove -y",
+        "pkg_list": "rpm -qa",
+        "pkg_files": "rpm -ql",
+        "pkg_owns": "rpm -qf",
+        "pkg_info": "rpm -qi",
+        "service_restart": "systemctl restart"
+      }
+    },
+    "arch": {
+      "match": ["arch", "manjaro", "endeavouros"],
+      "placeholders": {
+        "pkg_install": "pacman -S --noconfirm",
+        "pkg_update": "pacman -Sy",
+        "pkg_remove": "pacman -R --noconfirm",
+        "pkg_purge": "pacman -Rns --noconfirm",
+        "pkg_list": "pacman -Q",
+        "pkg_files": "pacman -Ql",
+        "pkg_owns": "pacman -Qo",
+        "pkg_info": "pacman -Qi",
+        "service_restart": "systemctl restart"
+      }
+    },
+    "suse": {
+      "match": ["opensuse", "opensuse-leap", "opensuse-tumbleweed", "sles", "suse"],
+      "placeholders": {
+        "pkg_install": "zypper install -y",
+        "pkg_update": "zypper refresh",
+        "pkg_remove": "zypper remove -y",
+        "pkg_purge": "zypper remove -y",
+        "pkg_list": "rpm -qa",
+        "pkg_files": "rpm -ql",
+        "pkg_owns": "rpm -qf",
+        "pkg_info": "rpm -qi",
+        "service_restart": "systemctl restart"
+      }
+    },
+    "alpine": {
+      "match": ["alpine"],
+      "placeholders": {
+        "pkg_install": "apk add",
+        "pkg_update": "apk update",
+        "pkg_remove": "apk del",
+        "pkg_purge": "apk del",
+        "pkg_list": "apk info",
+        "pkg_files": "apk info -L",
+        "pkg_owns": "apk info -W",
+        "pkg_info": "apk info -a",
+        "service_restart": "rc-service"
+      }
+    },
     "rhel": {
-      "match": ["rhel", "centos", "rocky", "alinux", "kylin", "anolis", "opencloudos", "fedora"],
+      "match": ["rhel", "centos", "rocky", "almalinux", "alinux", "kylin", "anolis", "opencloudos"],
+      "dnf_min_major": 8,
       "placeholders": {
         "pkg_install": "yum install -y",
         "pkg_update": "yum makecache",
+        "pkg_remove": "yum remove -y",
+        "pkg_purge": "yum remove -y",
+        "pkg_list": "rpm -qa",
+        "pkg_files": "rpm -ql",
+        "pkg_owns": "rpm -qf",
+        "pkg_info": "rpm -qi",
+        "service_restart": "systemctl restart"
+      },
+      "dnf_placeholders": {
+        "pkg_install": "dnf install -y",
+        "pkg_update": "dnf makecache",
+        "pkg_remove": "dnf remove -y",
+        "pkg_purge": "dnf remove -y",
+        "pkg_list": "rpm -qa",
+        "pkg_files": "rpm -ql",
+        "pkg_owns": "rpm -qf",
+        "pkg_info": "rpm -qi",
         "service_restart": "systemctl restart"
       }
     }

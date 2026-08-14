@@ -68,6 +68,8 @@
       "keywords": [
         "列目录",
         "看目录",
+        "当前目录",
+        "看一下当前目录",
         "ls",
         "目录有什么",
         "列出文件",
@@ -96,6 +98,7 @@
         "日志尾部",
         "tail日志",
         "跟踪日志",
+        "跟踪一下",
         "实时日志",
         "刷日志",
         "tail",
@@ -123,10 +126,11 @@
       "intent_id": "log.journal",
       "desc": "查看 systemd 日志",
       "keywords": [
-        "journalctl",
         "系统日志",
+        "开机日志",
         "systemd日志",
         "看系统日志",
+        "journalctl",
         "journal"
       ],
       "weight": 9,

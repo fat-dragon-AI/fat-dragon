@@ -15,8 +15,14 @@
         "容器"
       ],
       "weight": 12,
+      "risk_level": "low",
+      "cmd_template": [
+        "docker ps",
+        "docker ps -a",
+        "docker ps -a --format 'table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Ports}}'"
+      ],
       "tips": [
-        "仅输入 docker 时会列出本组常用意图，再选编号看具体命令"
+        "docker ps 仅运行中；-a 含已退出。仅输入 docker 时也会列出本组其它意图"
       ]
     },
     {

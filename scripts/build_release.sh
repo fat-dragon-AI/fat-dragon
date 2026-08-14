@@ -7,25 +7,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 # 与 bin/lch、install_build_deps.sh 一致：避免 PATH 落到无 pip/无 PyInstaller 的系统 python
-pick_python() {
-  if [[ -n "${LCH_PYTHON:-}" && -x "${LCH_PYTHON}" ]]; then
-    printf '%s\n' "$LCH_PYTHON"
-    return
-  fi
-  if [[ -x "$ROOT/.venv/bin/python" ]]; then
-    printf '%s\n' "$ROOT/.venv/bin/python"
-    return
-  fi
-  if [[ -x "$HOME/.local/miniconda3/bin/python3" ]]; then
-    printf '%s\n' "$HOME/.local/miniconda3/bin/python3"
-    return
-  fi
-  if [[ -x "$HOME/miniconda3/bin/python3" ]]; then
-    printf '%s\n' "$HOME/miniconda3/bin/python3"
-    return
-  fi
-  command -v python3
-}
+# shellcheck source=scripts/lib/python_pick.sh
+. "$ROOT/scripts/lib/python_pick.sh"
 
 PY="$(pick_python)"
 

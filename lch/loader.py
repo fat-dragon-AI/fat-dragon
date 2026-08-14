@@ -68,9 +68,25 @@ def _expand_runnables(raw: dict[str, Any]) -> list[Runnable]:
     return [Runnable(kind="single", cmd=t) for t in templates]
 
 
+VALID_RISKS = {"low", "medium", "high", "critical"}
+
+
 def _parse_rule(raw: dict[str, Any], source: str = "") -> Rule | None:
     if raw.get("enabled", True) is False:
         return None
+    iid = raw.get("intent_id")
+    if not iid:
+        raise ValueError(f"规则缺少 intent_id（来源 {source}）")
+    try:
+        weight = float(raw.get("weight", 1))
+    except (TypeError, ValueError) as e:
+        raise ValueError(f"规则 {iid} weight 非法（来源 {source}）: {e}") from e
+    risk = str(raw.get("risk_level") or "low").lower()
+    if risk not in VALID_RISKS:
+        risk = "low"
+    keywords = list(raw.get("keywords") or [])
+    kw_weights = dict(raw.get("keyword_weights") or {})
+    kw_weights = {k: v for k, v in kw_weights.items() if k in set(keywords)}
     runnables = _expand_runnables(raw)
     resource = raw.get("resource")
     if resource and not raw.get("candidates"):
@@ -85,13 +101,13 @@ def _parse_rule(raw: dict[str, Any], source: str = "") -> Rule | None:
                 )
             )
     return Rule(
-        intent_id=raw["intent_id"],
+        intent_id=str(iid),
         desc=raw.get("desc", ""),
-        keywords=list(raw.get("keywords") or []),
-        weight=float(raw.get("weight", 1)),
-        risk_level=raw.get("risk_level", "low"),
+        keywords=keywords,
+        weight=weight,
+        risk_level=risk,
         tips=list(raw.get("tips") or []),
-        keyword_weights=dict(raw.get("keyword_weights") or {}),
+        keyword_weights=kw_weights,
         params=list(raw.get("params") or []),
         runnables=runnables,
         resource=resource,
@@ -157,6 +173,8 @@ def load_rules_bundle(path: Path) -> RulesBundle:
     rules: list[Rule] = []
     seen_ids: dict[str, str] = {}
     for raw, src in raw_rules:
+        if raw.get("enabled", True) is False:
+            continue
         iid = raw.get("intent_id")
         if not iid:
             raise ValueError(f"规则缺少 intent_id（来源 {src}）")

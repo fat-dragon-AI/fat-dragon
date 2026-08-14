@@ -35,11 +35,96 @@ def resolve_resource_dir(rule: Rule, soft_res: Path, arch: str) -> tuple[str, bo
     return str(p), p.is_dir()
 
 
+# 填入 shell 命令时需引用的用户抽出值
+_QUOTE_KEYS = frozenset(
+    {
+        "path",
+        "link",
+        "text",
+        "host",
+        "file_keyword",
+        "owner",
+        "container",
+        "pkg",
+        "proc_name",
+        "iface",
+        "name",
+        "service",
+        "dns",
+    }
+)
+
+_PLACEHOLDER_TOKEN = re.compile(r"\{([a-zA-Z_]+)\}")
+
+# awk '{print}' 等非规则占位，不列入「待补参数」
+_KNOWN_PLACEHOLDERS = frozenset(
+    {
+        "port",
+        "pid",
+        "file_keyword",
+        "container",
+        "image",
+        "service",
+        "host",
+        "dns",
+        "qtype",
+        "path",
+        "link",
+        "pkg",
+        "proc_name",
+        "mode",
+        "owner",
+        "name",
+        "text",
+        "iface",
+        "resource_dir",
+        "templates_root",
+        "soft_res_root",
+        "arch",
+        "pkg_install",
+        "pkg_update",
+        "pkg_remove",
+        "pkg_purge",
+        "pkg_list",
+        "pkg_files",
+        "pkg_owns",
+        "pkg_info",
+        "service_restart",
+    }
+)
+
+
+def shell_single_quote(value: str) -> str:
+    """POSIX 单引号转义。"""
+    return "'" + value.replace("'", "'\\''") + "'"
+
+
 def fill_template(tpl: str, mapping: dict[str, str]) -> str:
-    out = tpl
-    for k, v in mapping.items():
-        out = out.replace("{" + k + "}", v)
-    return out
+    """单遍替换。用户抽出值：未在引号内则包单引号；已在引号内只转义内部引号。"""
+
+    def repl(m: re.Match[str]) -> str:
+        key = m.group(1)
+        if key not in mapping:
+            return m.group(0)
+        val = mapping[key]
+        placeholder = "{" + key + "}"
+        start, end = m.start(), m.end()
+        prev = tpl[start - 1] if start > 0 else ""
+        nxt = tpl[end] if end < len(tpl) else ""
+        already_quoted = prev in "'\"" and nxt == prev
+        if val == placeholder:
+            if already_quoted or key not in _QUOTE_KEYS:
+                return placeholder
+            return "'" + placeholder + "'"
+        if already_quoted:
+            if prev == "'":
+                return val.replace("'", "'\\''")
+            return val.replace("\\", "\\\\").replace('"', '\\"')
+        if key in _QUOTE_KEYS:
+            return shell_single_quote(val)
+        return val
+
+    return _PLACEHOLDER_TOKEN.sub(repl, tpl)
 
 
 def build_mapping(
@@ -58,12 +143,16 @@ def build_mapping(
         "image": params.get("image", "{image}"),
         "service": params.get("service", "{service}"),
         "host": params.get("host", "{host}"),
+        "dns": params.get("dns", "{dns}"),
+        "qtype": params.get("qtype", "{qtype}"),
         "path": params.get("path", "{path}"),
         "link": params.get("link", "{link}"),
         "pkg": params.get("pkg", "{pkg}"),
         "proc_name": params.get("proc_name", "{proc_name}"),
         "mode": params.get("mode", "{mode}"),
         "owner": params.get("owner", "{owner}"),
+        "name": params.get("name", "{name}"),
+        "text": params.get("text", "{text}"),
         "iface": params.get("iface", "{iface}"),
         "resource_dir": resource_dir or "{resource_dir}",
         "templates_root": templates_root or "{templates_root}",
@@ -71,8 +160,15 @@ def build_mapping(
         "arch": arch,
         "pkg_install": placeholders.get("pkg_install", "{pkg_install}"),
         "pkg_update": placeholders.get("pkg_update", "{pkg_update}"),
-        "service_restart": placeholders.get("service_restart", "systemctl restart"),
+        "pkg_remove": placeholders.get("pkg_remove", "{pkg_remove}"),
+        "pkg_purge": placeholders.get("pkg_purge", "{pkg_purge}"),
+        "pkg_list": placeholders.get("pkg_list", "{pkg_list}"),
+        "pkg_files": placeholders.get("pkg_files", "{pkg_files}"),
+        "pkg_owns": placeholders.get("pkg_owns", "{pkg_owns}"),
+        "pkg_info": placeholders.get("pkg_info", "{pkg_info}"),
+        "service_restart": placeholders.get("service_restart", "{service_restart}"),
     }
+    mapping.update({k: v for k, v in params.items() if k not in mapping})
     return mapping
 
 
@@ -90,8 +186,6 @@ def render_runnable(runnable: Runnable, mapping: dict[str, str]) -> Runnable:
     )
 
 
-_PLACEHOLDER_RE = re.compile(r"\{[a-zA-Z_]+\}")
-
-
 def missing_placeholders(text: str) -> list[str]:
-    return sorted(set(_PLACEHOLDER_RE.findall(text)))
+    found = set(_PLACEHOLDER_TOKEN.findall(text))
+    return sorted("{" + k + "}" for k in found if k in _KNOWN_PLACEHOLDERS)

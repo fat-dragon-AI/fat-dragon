@@ -1,0 +1,221 @@
+{
+  "set": "21-nslookup",
+  "desc": "nslookup 常用：正向/反向解析、指定服务器与记录类型",
+  "rules": [
+    {
+      "intent_id": "nslookup.lookup",
+      "desc": "用 nslookup 正向解析域名",
+      "keywords": [
+        "nslookup",
+        "nslookup一下",
+        "用nslookup查",
+        "nslookup域名",
+        "nslookup查询",
+        "nslookup解析"
+      ],
+      "weight": 12,
+      "risk_level": "low",
+      "params": [
+        {
+          "name": "host",
+          "required": false,
+          "extract": "host"
+        }
+      ],
+      "cmd_template": [
+        "nslookup {host}",
+        "nslookup -type=A {host}",
+        "nslookup -type=AAAA {host}"
+      ],
+      "tips": [
+        "将 {host} 换成域名，如 baidu.com、www.example.com；未安装时 Debian/Ubuntu 装 dnsutils，RHEL/CentOS 装 bind-utils"
+      ]
+    },
+    {
+      "intent_id": "nslookup.server",
+      "desc": "指定 DNS 服务器做 nslookup",
+      "keywords": [
+        "nslookup指定服务器",
+        "指定dns服务器",
+        "用8.8.8.8解析",
+        "指定dns查",
+        "换dns服务器查",
+        "nslookup 8.8.8.8",
+        "用114解析"
+      ],
+      "weight": 13,
+      "risk_level": "low",
+      "params": [
+        {
+          "name": "host",
+          "required": false,
+          "extract": "host"
+        },
+        {
+          "name": "dns",
+          "required": false,
+          "extract": "dns"
+        }
+      ],
+      "cmd_template": [
+        "nslookup {host} {dns}",
+        "nslookup {host} 8.8.8.8",
+        "nslookup {host} 114.114.114.114",
+        "nslookup {host} 223.5.5.5"
+      ],
+      "tips": [
+        "语法：nslookup 域名 DNS服务器；8.8.8.8 为 Google，114.114.114.114 为 114DNS，223.5.5.5 为阿里 DNS"
+      ]
+    },
+    {
+      "intent_id": "nslookup.type",
+      "desc": "按记录类型查询（A/MX/NS/TXT 等）",
+      "keywords": [
+        "nslookup类型",
+        "MX记录",
+        "查MX",
+        "TXT记录",
+        "NS记录",
+        "CNAME记录",
+        "SOA记录",
+        "AAAA记录",
+        "邮件交换记录",
+        "查txt记录"
+      ],
+      "weight": 12,
+      "risk_level": "low",
+      "params": [
+        {
+          "name": "host",
+          "required": false,
+          "extract": "host"
+        },
+        {
+          "name": "qtype",
+          "required": false,
+          "extract": "qtype"
+        }
+      ],
+      "candidates": [
+        {
+          "kind": "single",
+          "label": "指定类型 -type",
+          "cmd": "nslookup -type={qtype} {host}"
+        },
+        {
+          "kind": "single",
+          "label": "A 地址",
+          "cmd": "nslookup -type=A {host}"
+        },
+        {
+          "kind": "single",
+          "label": "AAAA IPv6",
+          "cmd": "nslookup -type=AAAA {host}"
+        },
+        {
+          "kind": "single",
+          "label": "MX 邮件",
+          "cmd": "nslookup -type=MX {host}"
+        },
+        {
+          "kind": "single",
+          "label": "NS 权威",
+          "cmd": "nslookup -type=NS {host}"
+        },
+        {
+          "kind": "single",
+          "label": "TXT",
+          "cmd": "nslookup -type=TXT {host}"
+        },
+        {
+          "kind": "single",
+          "label": "CNAME 别名",
+          "cmd": "nslookup -type=CNAME {host}"
+        },
+        {
+          "kind": "single",
+          "label": "SOA",
+          "cmd": "nslookup -type=SOA {host}"
+        }
+      ],
+      "tips": [
+        "将 {qtype} 换成 A / AAAA / MX / NS / TXT / CNAME / SOA / PTR；也可用 -query=MX"
+      ]
+    },
+    {
+      "intent_id": "nslookup.reverse",
+      "desc": "反向解析：IP 反查域名（PTR）",
+      "keywords": [
+        "反向解析",
+        "反查ip",
+        "反查域名",
+        "ptr记录",
+        "nslookup反查",
+        "ip反查域名",
+        "反查这个ip"
+      ],
+      "weight": 12,
+      "risk_level": "low",
+      "params": [
+        {
+          "name": "host",
+          "required": false,
+          "extract": "host"
+        }
+      ],
+      "cmd_template": [
+        "nslookup {host}",
+        "nslookup -type=PTR {host}"
+      ],
+      "tips": [
+        "将 {host} 换成 IP，如 8.8.8.8；无 PTR 时会报 NXDOMAIN，属正常"
+      ]
+    },
+    {
+      "intent_id": "nslookup.debug",
+      "desc": "nslookup 调试 / 看完整解析过程",
+      "keywords": [
+        "nslookup调试",
+        "nslookup -debug",
+        "nslookup详细",
+        "nslookup debug",
+        "nslookup过程",
+        "解析过程详细"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "params": [
+        {
+          "name": "host",
+          "required": false,
+          "extract": "host"
+        }
+      ],
+      "cmd_template": [
+        "nslookup -debug {host}",
+        "nslookup -d2 {host}"
+      ],
+      "tips": [
+        "-debug 打印查询过程；-d2 更详细（含报文）"
+      ]
+    },
+    {
+      "intent_id": "nslookup.interactive",
+      "desc": "进入 nslookup 交互模式",
+      "keywords": [
+        "nslookup交互",
+        "进入nslookup",
+        "nslookup交互模式",
+        "nslookup进交互"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "cmd_template": [
+        "nslookup"
+      ],
+      "tips": [
+        "交互内常用：server 8.8.8.8 换服务器；set type=MX 改类型；输入域名查询；exit 退出"
+      ]
+    }
+  ]
+}

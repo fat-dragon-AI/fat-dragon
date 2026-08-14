@@ -9,6 +9,7 @@
         "端口占用",
         "端口被谁占用",
         "谁占用了端口",
+        "谁在听",
         "端口监听",
         "查端口",
         "port",
@@ -91,6 +92,7 @@
       "desc": "查看网卡信息",
       "keywords": [
         "网卡",
+        "看一下网卡",
         "网卡信息",
         "网卡状态",
         "网口",
@@ -99,6 +101,13 @@
         "网卡名"
       ],
       "weight": 8,
+      "params": [
+        {
+          "name": "iface",
+          "required": false,
+          "extract": "iface"
+        }
+      ],
       "risk_level": "low",
       "cmd_template": [
         "ip link",
@@ -134,6 +143,7 @@
       "desc": "查看DNS配置与解析",
       "keywords": [
         "dns",
+        "dns怎么配",
         "域名解析",
         "nameserver",
         "解析域名",
@@ -153,10 +163,11 @@
       "cmd_template": [
         "cat /etc/resolv.conf",
         "getent hosts {host}",
-        "dig {host} +short"
+        "dig {host} +short",
+        "nslookup {host}"
       ],
       "tips": [
-        "dig 可能未安装；可用 getent 或 nslookup"
+        "dig / nslookup 可能未安装；查记录类型、指定服务器见 nslookup.* 规则"
       ]
     },
     {

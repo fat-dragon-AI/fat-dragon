@@ -27,11 +27,11 @@ LCH_PYTHON="$HOME/.local/miniconda3/bin/python3" ./scripts/install_build_deps.sh
 
 ### 解释器选择顺序
 
+逻辑在 `scripts/lib/python_pick.sh`，由 `bin/lch` 与构建脚本共用：
+
 1. `$LCH_PYTHON`  
 2. `$ROOT/.venv/bin/python`  
-3. `$HOME/.local/miniconda3/bin/python3`  
-4. `$HOME/miniconda3/bin/python3`  
-5. `PATH` 中的 `python3`
+3. `PATH` 中的 `python3`（找不到则报错退出）
 
 ### 镜像
 
@@ -125,6 +125,16 @@ QEMU 构建脚本结束时也会自动执行同等 chown。工作目录现按架
 ```
 
 解释器选择顺序与 `install_build_deps.sh` 相同。
+
+---
+
+## 2.2 `bench_corpus.py`
+
+生产默认阈值下统计语料 accuracy@1/@5/@10，写入 `.docs/命中率对照-重构后.md`。
+
+```bash
+PYTHONPATH=. python3 scripts/bench_corpus.py
+```
 
 ---
 

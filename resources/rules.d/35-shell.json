@@ -1,0 +1,281 @@
+{
+  "set": "35-shell",
+  "desc": "Shell 常用：echo / 打印环境变量与退出码",
+  "rules": [
+    {
+      "intent_id": "echo.print",
+      "desc": "用 echo 打印一段文字",
+      "keywords": [
+        "echo打印",
+        "打印文字",
+        "echo一下",
+        "echo hello",
+        "输出一行",
+        "打印这句话",
+        "echo字符串",
+        "打印字符串"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "params": [
+        {
+          "name": "text",
+          "required": false,
+          "extract": "text"
+        }
+      ],
+      "cmd_template": [
+        "echo '{text}'",
+        "echo \"{text}\"",
+        "printf '%s\\n' '{text}'"
+      ],
+      "tips": [
+        "将 {text} 换成要打印的内容；含空格或特殊字符优先用单引号"
+      ]
+    },
+    {
+      "intent_id": "echo.env.var",
+      "desc": "用 echo 打印某个环境变量",
+      "keywords": [
+        "打印环境变量",
+        "echo变量",
+        "看环境变量值",
+        "echo $HOME",
+        "打印$HOME",
+        "输出环境变量",
+        "变量值是多少",
+        "echo env"
+      ],
+      "weight": 12,
+      "risk_level": "low",
+      "params": [
+        {
+          "name": "name",
+          "required": false,
+          "extract": "name"
+        }
+      ],
+      "cmd_template": [
+        "echo \"${name}\"",
+        "printenv {name}",
+        "printf '%s=%s\\n' '{name}' \"${name}\""
+      ],
+      "tips": [
+        "将 {name} 换成变量名，如 HOME、USER、SHELL、LANG；也可用 printenv HOME"
+      ]
+    },
+    {
+      "intent_id": "echo.env.list",
+      "desc": "列出当前环境变量",
+      "keywords": [
+        "列出环境变量",
+        "全部环境变量",
+        "所有环境变量",
+        "printenv",
+        "env命令",
+        "看全部环境变量",
+        "导出环境变量列表",
+        "export -p"
+      ],
+      "weight": 12,
+      "risk_level": "low",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "env → printenv → export -p",
+          "stop_on_error": false,
+          "steps": [
+            "env | sort | head -n 50",
+            "printenv | sort | head -n 50",
+            "export -p | head -n 50"
+          ]
+        }
+      ],
+      "tips": [
+        "输出可能很长；可再 grep 过滤，如 env | grep -i java"
+      ]
+    },
+    {
+      "intent_id": "echo.exit.status",
+      "desc": "查看上一条命令退出码",
+      "keywords": [
+        "退出码",
+        "返回值",
+        "上一条成功了吗",
+        "echo $?",
+        "上一条退出码",
+        "命令返回码",
+        "上条命令结果",
+        "$?"
+      ],
+      "weight": 11,
+      "risk_level": "low",
+      "cmd_template": [
+        "echo $?",
+        "echo \"exit=$?\""
+      ],
+      "tips": [
+        "0 通常表示成功；须紧接在要检查的命令之后执行"
+      ]
+    },
+    {
+      "intent_id": "echo.shell.pid",
+      "desc": "查看当前 Shell 进程号",
+      "keywords": [
+        "当前shell pid",
+        "echo $$",
+        "当前进程号",
+        "shell的pid",
+        "本shell pid",
+        "$$"
+      ],
+      "weight": 9,
+      "risk_level": "low",
+      "cmd_template": [
+        "echo $$",
+        "echo \"pid=$$ ppid=$PPID\"",
+        "echo $BASHPID"
+      ],
+      "tips": [
+        "$$ 为当前 shell PID；BASHPID 在子 shell 中可能不同"
+      ]
+    },
+    {
+      "intent_id": "echo.escape",
+      "desc": "echo -e 解释转义（换行/制表等）",
+      "keywords": [
+        "echo -e",
+        "echo换行",
+        "echo转义",
+        "打印换行",
+        "echo制表符",
+        "echo颜色",
+        "转义输出"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "params": [
+        {
+          "name": "text",
+          "required": false,
+          "extract": "text"
+        }
+      ],
+      "cmd_template": [
+        "echo -e '{text}'",
+        "echo -e 'line1\\nline2'",
+        "echo -e '\\t缩进示例'",
+        "printf 'a\\tb\\n'"
+      ],
+      "tips": [
+        "将 {text} 换成含 \\n \\t 的串；颜色示例：echo -e '\\033[32mOK\\033[0m'"
+      ]
+    },
+    {
+      "intent_id": "echo.no.newline",
+      "desc": "echo -n 不换行输出",
+      "keywords": [
+        "echo -n",
+        "不换行打印",
+        "不换行输出",
+        "echo不换行"
+      ],
+      "weight": 9,
+      "risk_level": "low",
+      "params": [
+        {
+          "name": "text",
+          "required": false,
+          "extract": "text"
+        }
+      ],
+      "cmd_template": [
+        "echo -n '{text}'",
+        "printf '%s' '{text}'"
+      ],
+      "tips": [
+        "常用于提示后读入：echo -n '密码: '; read -s"
+      ]
+    },
+    {
+      "intent_id": "echo.write.file",
+      "desc": "用 echo 写入或追加到文件",
+      "keywords": [
+        "echo写入文件",
+        "echo追加文件",
+        "写入一行到文件",
+        "追加一行",
+        "echo重定向",
+        "echo >",
+        "echo >>",
+        "把内容写到文件"
+      ],
+      "weight": 11,
+      "risk_level": "medium",
+      "params": [
+        {
+          "name": "text",
+          "required": false,
+          "extract": "text"
+        },
+        {
+          "name": "path",
+          "required": false,
+          "extract": "path"
+        }
+      ],
+      "candidates": [
+        {
+          "kind": "single",
+          "label": "覆盖写入 >",
+          "cmd": "echo '{text}' > {path}"
+        },
+        {
+          "kind": "single",
+          "label": "追加写入 >>",
+          "cmd": "echo '{text}' >> {path}"
+        },
+        {
+          "kind": "sequence",
+          "label": "写入后查看尾部",
+          "stop_on_error": true,
+          "steps": [
+            "echo '{text}' >> {path}",
+            "tail -n 5 {path}"
+          ]
+        }
+      ],
+      "tips": [
+        "将 {path} 换成目标文件；> 会覆盖，>> 追加；勿对重要配置盲目覆盖"
+      ]
+    },
+    {
+      "intent_id": "echo.pipe",
+      "desc": "echo 管道传给后续命令",
+      "keywords": [
+        "echo管道",
+        "echo |",
+        "echo传给",
+        "管道打印",
+        "echo给命令"
+      ],
+      "weight": 9,
+      "risk_level": "low",
+      "params": [
+        {
+          "name": "text",
+          "required": false,
+          "extract": "text"
+        }
+      ],
+      "cmd_template": [
+        "echo '{text}' | cat",
+        "echo '{text}' | wc -c",
+        "echo '{text}' | od -c | head"
+      ],
+      "tips": [
+        "把 cat/wc 换成实际命令；二进制查看可用 od/xxd"
+      ]
+    }
+  ]
+}

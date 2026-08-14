@@ -64,6 +64,8 @@ def format_hit_detail(
         lines.append("【资源】")
         lines.append(f"  目录: {hit.resource_dir}  [{status}]")
     lines.append(f"【风险】{hit.risk_level}")
+    if hit.negated:
+        lines.append("【注意】输入含否定语气，请确认意图后再执行。")
     if hit.missing:
         lines.append("【待补参数】" + " ".join(hit.missing))
     if hit.tips:
