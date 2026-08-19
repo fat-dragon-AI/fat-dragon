@@ -51,6 +51,9 @@ _QUOTE_KEYS = frozenset(
         "name",
         "service",
         "dns",
+        "user",
+        "value",
+        "model",
     }
 )
 
@@ -76,7 +79,11 @@ _KNOWN_PLACEHOLDERS = frozenset(
         "owner",
         "name",
         "text",
+        "value",
+        "model",
+        "varname",
         "iface",
+        "user",
         "resource_dir",
         "templates_root",
         "soft_res_root",
@@ -153,7 +160,11 @@ def build_mapping(
         "owner": params.get("owner", "{owner}"),
         "name": params.get("name", "{name}"),
         "text": params.get("text", "{text}"),
+        "value": params.get("value", params.get("text", "{value}")),
+        "varname": params.get("name", params.get("varname", "{varname}")),
+        "model": params.get("model", "{model}"),
         "iface": params.get("iface", "{iface}"),
+        "user": params.get("user", "{user}"),
         "resource_dir": resource_dir or "{resource_dir}",
         "templates_root": templates_root or "{templates_root}",
         "soft_res_root": str(soft_res),

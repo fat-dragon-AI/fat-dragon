@@ -135,7 +135,7 @@ lch -agent
 | `agent>` | `!命令` / `！命令` | 强制 shell（策略同上） |
 | `agent>` | 英文命令（无前缀） | 手输当 shell；风险按命令估计，不继承意图 |
 | `agent>` | 空行 / `n` / `/cancel` | 回 `lch>` |
-| `step>` | `y` / 手改 / `s` / `all` / `n` | 执行本步 / 改命令 / 跳过 / 跑剩余 / 返回 |
+| `step>` | `y` / 手改 / `s` 或 `跳过` / `all` / `n` | 执行本步 / 改命令 / 跳过本步 / 跑剩余 / 返回 |
 | `script>` | `e` / `r` / `x` / `n` | 导出 / 跑源 / 跑副本 / 返回 |
 
 含 `--config`、`passwd`、`vim` 等交互命令：确认后终端直通。
@@ -157,6 +157,10 @@ lch -agent
 | 看一下当前目录 | `ls -lah` |
 | 找文件 / 搜内容 | `find` / `grep`/`rg` |
 | nginx 服务状态 / 重启 sshd | `systemctl status/restart …` |
+| 刷新systemd / 查看异常服务 | `systemctl daemon-reload` / `systemctl --failed` |
+| 新建systemd服务 / service示例 | 模板写出 unit → `daemon-reload` / `enable --now` |
+| 查看服务配置 / unit 路径 | `systemctl cat` / `systemctl show -p FragmentPath` |
+| 开机自启 / 取消自启 | `systemctl enable` / `disable` |
 | nginx 配置校验 / 重载 | `nginx -t` / `systemctl reload nginx` |
 | java版本 / 有哪些 java 进程 | `java -version` / `jps -lvm`（可接 ps） |
 | nohup启动jar / 后台跑jar | `nohup java -jar …` + pid/日志 |
@@ -167,10 +171,16 @@ lch -agent
 | spring-boot:run | `mvn spring-boot:run` |
 | 切换java版本 | `update-alternatives --config java`（逐步） |
 | docker 有哪些容器 / 看容器日志 | `docker ps` / `docker logs` |
+| ollama列表 / 跑模型 / 自建GGUF | `ollama list` / `run` / `create -f Modelfile` |
+| 清理ollama缓存 / 下载gguf | 清 partial blobs / `wget -c` hf-mirror |
 | 进入容器 / 删除容器 | `docker exec -it` / `docker stop`→`rm` |
+| 传到服务器 / scp传文件夹 | `scp` / `scp -r` 本地→远程 |
+| 从远程拉文件 / 拉文件夹回来 | `scp` / `scp -r` 远程→本地 |
 | 改一下文件权限 / 改属主 | `ls`→`chmod` / `ls`→`chown` |
 | 文件归属 / 文件是谁的 | `ls -lah` / `stat` 看属主 |
 | 查看PATH / 加入path | `echo $PATH` / 写入 `~/.bashrc` |
+| 设置环境变量 / export | `export NAME=value`（当前终端） |
+| 设置代理 / 取消代理 | `http_proxy`/`https_proxy` / `unset …_proxy` |
 | 打印文字 / 打印环境变量 | `echo '…'` / `echo "$HOME"` |
 | 列出环境变量 / 退出码 | `env`/`printenv` / `echo $?` |
 | echo写入文件 | `echo '…' >` 或 `>>` 文件 |
@@ -188,10 +198,12 @@ lch -agent
 |--------|------|----------|
 | `{port}` | 端口 | `8080端口` |
 | `{pid}` | 进程号 | `杀掉 12345` |
-| `{path}` | 路径 | 文中 `/var/log/...` |
-| `{link}` | 软链路径 | 创建软链时的第二段路径 |
+| `{path}` | 路径 | 文中 `/var/log/...`；scp 时为**本地**路径 |
+| `{link}` | 第二路径 | 软链目标；scp 时为**远端**路径 |
+| `{user}` | 远程用户 | `root@10.0.0.1:/tmp` / `用户 root` |
 | `{owner}` | 属主 | `chown www-data:www-data` / `归还给 lilong` |
-| `{name}` | 环境变量名 | `echo $HOME` / `打印 JAVA_HOME` |
+| `{name}` / `{varname}` | 环境变量名 | `echo $HOME` / `export FOO=…`（varname 导出时不加引号） |
+| `{value}` | 环境变量值 / 代理 URL | `export FOO=bar` / `http://127.0.0.1:7890` |
 | `{text}` | 打印/写入内容 | `打印 'hello'` |
 | `{mode}` | 权限位 | 常留占位，手补 `755`/`644` |
 | `{host}` | 主机 | `ping 8.8.8.8` / `nslookup baidu.com` |
@@ -202,6 +214,7 @@ lch -agent
 | `{proc_name}` | 进程名 | `有没有 nginx 进程` |
 | `{file_keyword}` | 文件名/关键词 | `找 application.yml` |
 | `{pkg}` | 包名 | `装个 htop` / `卸载 nginx` / `which nginx` |
+| `{model}` | Ollama 模型名 | `ollama show qwen2.5:3b` / `ollama run …` |
 | `{pkg_install}` / `{pkg_remove}` / `{pkg_list}` / `{pkg_files}` 等 | 发行版适配 | 由 `system_adapt.json` 填充 |
 
 ## 环境变量

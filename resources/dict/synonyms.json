@@ -6,6 +6,23 @@
     ["改属主", "改文件归属", "修改属主", "chown", "改所有者"],
     ["容器列表", "有哪些容器", "docker ps", "看容器"],
     ["进入容器", "进容器", "docker exec"],
-    ["系统日志", "开机日志", "journalctl", "systemd日志"]
+    ["系统日志", "开机日志", "journalctl", "systemd日志"],
+    ["传到服务器", "传到远程", "上传到服务器", "传文件到远程"],
+    ["传目录到服务器", "传文件夹到远程", "scp传目录", "scp传文件夹"],
+    ["从远程拉文件", "拉到本机", "远程拷回来", "scp拉文件"],
+    ["从远程拉目录", "从远程拉文件夹", "拉文件夹回来", "scp下载目录"],
+    ["刷新systemd", "daemon-reload", "重载systemd", "systemd刷新"],
+    ["查看异常服务", "失败的服务", "哪些服务挂了", "systemctl --failed"],
+    ["查看服务配置", "看unit配置", "systemctl cat", "服务配置文件"],
+    ["设置自启", "enable服务", "开启自启", "systemctl enable"],
+    ["取消自启", "关掉自启", "disable服务", "取消开机启动"],
+    ["是否开机自启", "有没有自启", "is-enabled", "查自启"],
+    ["新建systemd服务", "创建systemd服务", "写service文件", "systemd服务示例", "unit示例"],
+    ["设置环境变量", "export环境变量", "临时环境变量", "export变量"],
+    ["设置代理", "终端代理", "http_proxy", "代理环境变量", "export代理"],
+    ["取消代理", "关掉代理", "unset代理", "清除代理"],
+    ["ollama列表", "有哪些ollama模型", "列出ollama模型", "ollama list"],
+    ["ollama自建模型", "ollama打包模型", "打包ollama模型", "gguf导入ollama", "写Modelfile", "从gguf创建模型"],
+    ["清理ollama缓存", "ollama EOF", "下载损坏清理", "清理blobs"]
   ]
 }

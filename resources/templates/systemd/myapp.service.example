@@ -1,0 +1,24 @@
+# 示例：/etc/systemd/system/myapp.service
+# 用法：改 Description / User / WorkingDirectory / ExecStart 后
+#   sudo cp myapp.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now myapp
+#   systemctl status myapp
+#   journalctl -u myapp -f
+
+[Unit]
+Description=Example app myapp
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/myapp
+ExecStart=/opt/myapp/bin/myapp --config /opt/myapp/conf/app.yaml
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -109,6 +109,31 @@ class RenderQuoteTest(unittest.TestCase):
         self.assertIn("dirname -- '/opt/app/app.jar'", filled)
         self.assertIn("basename -- '/opt/app/app.jar'", filled)
 
+    def test_scp_user_host_quoted(self) -> None:
+        out = fill_template(
+            "scp {path} {user}@{host}:{link}",
+            {
+                "path": "/tmp/a.log",
+                "user": "root",
+                "host": "10.0.0.1",
+                "link": "/var/tmp",
+            },
+        )
+        self.assertEqual(out, "scp '/tmp/a.log' 'root'@'10.0.0.1':'/var/tmp'")
+
+    def test_export_varname_unquoted_value_quoted(self) -> None:
+        from lch.render import build_mapping
+
+        mapping = build_mapping(
+            {"name": "FOO", "value": "http://127.0.0.1:7890"},
+            {},
+            "",
+            Path("."),
+            "x64",
+        )
+        out = fill_template("export {varname}={value}", mapping)
+        self.assertEqual(out, "export FOO='http://127.0.0.1:7890'")
+
 
 class StepModeTest(unittest.TestCase):
     def test_cancel_returns_continue(self) -> None:
@@ -121,6 +146,36 @@ class StepModeTest(unittest.TestCase):
             return next(answers)
 
         runnable = Runnable(kind="sequence", label="t", steps=["echo 1", "echo 2"])
+        action = run_step_mode(Dummy(), runnable, "low", "t.intent", input_fn=fake_input)
+        self.assertEqual(action, "continue")
+
+    def test_skip_advances_then_cancel(self) -> None:
+        class Dummy:
+            home = Path(tempfile.mkdtemp())
+
+        answers = iter(["s", "跳过", "n"])
+
+        def fake_input(_prompt: str) -> str:
+            return next(answers)
+
+        runnable = Runnable(
+            kind="sequence",
+            label="t",
+            steps=["echo 1", "echo 2", "echo 3"],
+        )
+        action = run_step_mode(Dummy(), runnable, "low", "t.intent", input_fn=fake_input)
+        self.assertEqual(action, "continue")
+
+    def test_skip_all_steps_finishes(self) -> None:
+        class Dummy:
+            home = Path(tempfile.mkdtemp())
+
+        answers = iter(["skip", "略过"])
+
+        def fake_input(_prompt: str) -> str:
+            return next(answers)
+
+        runnable = Runnable(kind="sequence", label="t", steps=["echo a", "echo b"])
         action = run_step_mode(Dummy(), runnable, "low", "t.intent", input_fn=fake_input)
         self.assertEqual(action, "continue")
 

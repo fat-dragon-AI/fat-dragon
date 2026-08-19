@@ -1,0 +1,371 @@
+{
+  "set": "41-systemd",
+  "desc": "systemd 常用：刷新、列表、失败排查、查看 unit 配置",
+  "rules": [
+    {
+      "intent_id": "svc.daemon.reload",
+      "desc": "刷新 systemd（daemon-reload）",
+      "keywords": [
+        "刷新systemd",
+        "systemd刷新",
+        "daemon-reload",
+        "重载systemd",
+        "systemd重载配置",
+        "改完unit刷新",
+        "systemctl daemon-reload"
+      ],
+      "weight": 12,
+      "risk_level": "medium",
+      "cmd_template": [
+        "sudo systemctl daemon-reload",
+        "systemctl daemon-reload"
+      ],
+      "tips": [
+        "改完 /etc/systemd/system 下的 unit 后执行；不等于 reload 某个服务"
+      ]
+    },
+    {
+      "intent_id": "svc.reload",
+      "desc": "重载单个服务配置（reload）",
+      "keywords": [
+        "重载服务",
+        "reload服务",
+        "热重载服务",
+        "不重启重载",
+        "systemctl reload"
+      ],
+      "weight": 10,
+      "params": [
+        {
+          "name": "service",
+          "required": true,
+          "extract": "service"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "systemctl reload {service}",
+        "sudo systemctl reload {service}"
+      ],
+      "tips": [
+        "服务需支持 reload；不支持时用 restart。改 unit 文件本身请用 daemon-reload"
+      ]
+    },
+    {
+      "intent_id": "svc.list.failed",
+      "desc": "查看失败/异常的 systemd 单元",
+      "keywords": [
+        "查看异常服务",
+        "失败的服务",
+        "哪些服务挂了",
+        "systemd失败",
+        "服务启动失败",
+        "failed服务",
+        "systemctl --failed",
+        "查看失败单元"
+      ],
+      "weight": 12,
+      "risk_level": "low",
+      "cmd_template": [
+        "systemctl --failed",
+        "systemctl list-units --state=failed",
+        "systemctl list-units --type=service --state=failed"
+      ],
+      "tips": [
+        "再对具体服务：systemctl status / journalctl -u"
+      ]
+    },
+    {
+      "intent_id": "svc.list.units",
+      "desc": "列出 systemd 单元（含未运行）",
+      "keywords": [
+        "列出所有服务",
+        "全部服务列表",
+        "systemd单元列表",
+        "list-units",
+        "有哪些unit",
+        "列出unit"
+      ],
+      "weight": 10,
+      "risk_level": "low",
+      "cmd_template": [
+        "systemctl list-units --type=service --all",
+        "systemctl list-units --type=service --state=running",
+        "systemctl list-units --all | head -n 80"
+      ],
+      "tips": [
+        "仅看运行中也可用「现在跑着哪些服务」→ svc.list"
+      ]
+    },
+    {
+      "intent_id": "svc.list.unitfiles",
+      "desc": "列出 unit 文件与启用状态",
+      "keywords": [
+        "unit文件列表",
+        "list-unit-files",
+        "哪些服务开机自启",
+        "服务启用状态列表",
+        "列出unit文件"
+      ],
+      "weight": 11,
+      "risk_level": "low",
+      "cmd_template": [
+        "systemctl list-unit-files --type=service | head -n 80",
+        "systemctl list-unit-files --type=service --state=enabled",
+        "systemctl list-unit-files --type=service | grep {service}"
+      ],
+      "params": [
+        {
+          "name": "service",
+          "required": false,
+          "extract": "service"
+        }
+      ],
+      "tips": [
+        "看单个是否自启：systemctl is-enabled"
+      ]
+    },
+    {
+      "intent_id": "svc.unit.cat",
+      "desc": "查看服务 unit 配置内容",
+      "keywords": [
+        "查看服务配置",
+        "看unit配置",
+        "服务配置文件",
+        "systemctl cat",
+        "查看unit文件",
+        "cat服务配置",
+        "服务unit内容"
+      ],
+      "weight": 12,
+      "params": [
+        {
+          "name": "service",
+          "required": true,
+          "extract": "service"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "systemctl cat {service}",
+        "systemctl cat {service}.service"
+      ],
+      "tips": [
+        "合并 drop-in；找文件路径用 FragmentPath / systemctl show"
+      ]
+    },
+    {
+      "intent_id": "svc.unit.show",
+      "desc": "查看服务属性与 unit 路径",
+      "keywords": [
+        "服务配置路径",
+        "unit文件路径",
+        "FragmentPath",
+        "systemctl show",
+        "服务属性",
+        "看服务详细属性"
+      ],
+      "weight": 11,
+      "params": [
+        {
+          "name": "service",
+          "required": true,
+          "extract": "service"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "systemctl show {service} -p FragmentPath -p DropInPaths -p UnitFileState -p ActiveState -p SubState",
+        "systemctl show {service} | head -n 80",
+        "systemctl status {service} --no-pager -l"
+      ],
+      "tips": [
+        "FragmentPath 为 unit 主文件；DropInPaths 为覆盖片段"
+      ]
+    },
+    {
+      "intent_id": "svc.enable",
+      "desc": "设置开机自启",
+      "keywords": [
+        "开机自启",
+        "设置自启",
+        "enable服务",
+        "开启自启",
+        "systemctl enable",
+        "开机启动服务"
+      ],
+      "weight": 10,
+      "params": [
+        {
+          "name": "service",
+          "required": true,
+          "extract": "service"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "sudo systemctl enable {service}",
+        "sudo systemctl enable --now {service}",
+        "systemctl is-enabled {service}"
+      ],
+      "tips": [
+        "enable --now：自启并立即启动"
+      ]
+    },
+    {
+      "intent_id": "svc.disable",
+      "desc": "取消开机自启",
+      "keywords": [
+        "取消自启",
+        "关掉自启",
+        "disable服务",
+        "取消开机启动",
+        "systemctl disable",
+        "禁止开机自启"
+      ],
+      "weight": 10,
+      "params": [
+        {
+          "name": "service",
+          "required": true,
+          "extract": "service"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "sudo systemctl disable {service}",
+        "sudo systemctl disable --now {service}",
+        "systemctl is-enabled {service}"
+      ],
+      "tips": [
+        "disable --now：取消自启并立即停止"
+      ]
+    },
+    {
+      "intent_id": "svc.is-enabled",
+      "desc": "查询是否开机自启",
+      "keywords": [
+        "是否开机自启",
+        "有没有自启",
+        "is-enabled",
+        "查自启",
+        "服务会不会开机起",
+        "查一下是否自启"
+      ],
+      "weight": 13,
+      "params": [
+        {
+          "name": "service",
+          "required": true,
+          "extract": "service"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "systemctl is-enabled {service}",
+        "systemctl is-active {service}",
+        "systemctl status {service} --no-pager | head -n 20"
+      ],
+      "tips": [
+        "enabled / disabled / static / masked"
+      ]
+    },
+    {
+      "intent_id": "svc.journal.unit",
+      "desc": "查看指定服务的 journal 日志",
+      "keywords": [
+        "看服务日志",
+        "服务journal",
+        "journalctl -u",
+        "某个服务的日志",
+        "服务报错日志",
+        "跟一下服务日志"
+      ],
+      "weight": 11,
+      "params": [
+        {
+          "name": "service",
+          "required": true,
+          "extract": "service"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "journalctl -u {service} -n 100 --no-pager",
+        "journalctl -u {service} -xe -n 50 --no-pager",
+        "journalctl -u {service} -f"
+      ],
+      "tips": [
+        "与「系统日志」log.journal 区分：本意图强调指定服务 -u"
+      ]
+    },
+    {
+      "intent_id": "svc.unit.create",
+      "desc": "新建 systemd service（示例 + 写出 unit）",
+      "keywords": [
+        "新建systemd服务",
+        "创建systemd服务",
+        "写service文件",
+        "新建unit",
+        "创建unit文件",
+        "systemd服务示例",
+        "service示例",
+        "unit示例",
+        "写一个service",
+        "注册systemd服务",
+        "新建service"
+      ],
+      "weight": 13,
+      "params": [
+        {
+          "name": "service",
+          "required": false,
+          "extract": "service"
+        },
+        {
+          "name": "path",
+          "required": false,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "high",
+      "candidates": [
+        {
+          "kind": "single",
+          "label": "打印完整 service 示例（不写入）",
+          "cmd": "cat \"{templates_root}/systemd/myapp.service.example\""
+        },
+        {
+          "kind": "single",
+          "label": "打印可替换模板（含 @占位符）",
+          "cmd": "cat \"{templates_root}/systemd/app.service.tpl\""
+        },
+        {
+          "kind": "sequence",
+          "label": "按模板写出 unit → daemon-reload（不启动）",
+          "stop_on_error": true,
+          "steps": [
+            "SVC=\"{service}\"; [[ \"$SVC\" == \"{service}\" || -z \"$SVC\" ]] && SVC=\"myapp\"; BIN=\"{path}\"; if [[ \"$BIN\" != \"{path}\" && -n \"$BIN\" ]]; then BIN=\"$(readlink -f \"$BIN\" 2>/dev/null || echo \"$BIN\")\"; WORK=\"$(dirname \"$BIN\")\"; EXEC=\"$BIN\"; else WORK=\"/opt/${SVC}\"; EXEC=\"/opt/${SVC}/bin/${SVC}\"; fi; USER_NAME=\"$(id -un)\"; UNIT=\"/etc/systemd/system/${SVC}.service\"; sed -e \"s|@DESCRIPTION@|App ${SVC}|g\" -e \"s|@USER@|${USER_NAME}|g\" -e \"s|@WORK_DIR@|${WORK}|g\" -e \"s|@EXEC_START@|${EXEC}|g\" \"{templates_root}/systemd/app.service.tpl\" | sudo tee \"$UNIT\" >/dev/null; echo \"wrote $UNIT\"; systemctl cat \"$SVC\"",
+            "sudo systemctl daemon-reload"
+          ]
+        },
+        {
+          "kind": "sequence",
+          "label": "写出 unit → daemon-reload → enable --now → status",
+          "stop_on_error": true,
+          "steps": [
+            "SVC=\"{service}\"; [[ \"$SVC\" == \"{service}\" || -z \"$SVC\" ]] && SVC=\"myapp\"; BIN=\"{path}\"; if [[ \"$BIN\" != \"{path}\" && -n \"$BIN\" ]]; then BIN=\"$(readlink -f \"$BIN\" 2>/dev/null || echo \"$BIN\")\"; WORK=\"$(dirname \"$BIN\")\"; EXEC=\"$BIN\"; else WORK=\"/opt/${SVC}\"; EXEC=\"/opt/${SVC}/bin/${SVC}\"; fi; USER_NAME=\"$(id -un)\"; UNIT=\"/etc/systemd/system/${SVC}.service\"; sed -e \"s|@DESCRIPTION@|App ${SVC}|g\" -e \"s|@USER@|${USER_NAME}|g\" -e \"s|@WORK_DIR@|${WORK}|g\" -e \"s|@EXEC_START@|${EXEC}|g\" \"{templates_root}/systemd/app.service.tpl\" | sudo tee \"$UNIT\" >/dev/null; echo \"wrote $UNIT\"",
+            "sudo systemctl daemon-reload",
+            "SVC=\"{service}\"; [[ \"$SVC\" == \"{service}\" || -z \"$SVC\" ]] && SVC=\"myapp\"; sudo systemctl enable --now \"$SVC\"",
+            "SVC=\"{service}\"; [[ \"$SVC\" == \"{service}\" || -z \"$SVC\" ]] && SVC=\"myapp\"; systemctl status \"$SVC\" --no-pager -l"
+          ]
+        }
+      ],
+      "tips": [
+        "口语可带服务名与可执行路径，如：新建systemd服务 myapp /opt/myapp/bin/myapp",
+        "Jar 应用优先用「把java放入systemd」；本意图为通用 Type=simple 模板",
+        "示例文件：resources/templates/systemd/myapp.service.example"
+      ]
+    }
+  ]
+}

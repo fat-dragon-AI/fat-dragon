@@ -67,7 +67,7 @@ def agent_help() -> None:
            手输英文/符号命令 → 按命令启发式风险确认（不继承当前意图）
            空行 / n / /cancel → 跳过本轮回到 lch>
            含 --config / passwd 等交互命令：确认后终端直通，菜单实时显示
-  step>    y / 手改 / s跳过 / all剩余 / n返回
+  step>    y / 手改 / s或跳过 / all剩余 / n返回
   script>  e导出 | r执行源 | x执行导出副本 | n返回
   /reload  重载规则
   /quit    结束会话

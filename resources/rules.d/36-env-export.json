@@ -1,0 +1,187 @@
+{
+  "set": "36-env-export",
+  "desc": "当前终端 export 环境变量；代理等示例",
+  "rules": [
+    {
+      "intent_id": "env.export.set",
+      "desc": "当前终端设置环境变量（export）",
+      "keywords": [
+        "export环境变量",
+        "设置环境变量",
+        "临时环境变量",
+        "当前终端export",
+        "export变量",
+        "会话环境变量",
+        "export设置",
+        "设个环境变量"
+      ],
+      "weight": 12,
+      "params": [
+        {
+          "name": "name",
+          "required": false,
+          "extract": "name"
+        },
+        {
+          "name": "value",
+          "required": false,
+          "extract": "value"
+        }
+      ],
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "single",
+          "label": "示例：自定义变量 MY_VAR",
+          "cmd": "export MY_VAR='hello'; echo \"$MY_VAR\""
+        },
+        {
+          "kind": "single",
+          "label": "示例：EDITOR / LANG",
+          "cmd": "export EDITOR=vim; export LANG=en_US.UTF-8; printenv EDITOR LANG"
+        },
+        {
+          "kind": "sequence",
+          "label": "export 指定变量 → 回显确认",
+          "stop_on_error": true,
+          "steps": [
+            "export {varname}={value}",
+            "printenv {varname}"
+          ]
+        }
+      ],
+      "tips": [
+        "仅当前终端/当前 shell 有效；新开终端需重设或写入 ~/.bashrc",
+        "口语示例：export FOO=bar；设置环境变量 FOO=bar",
+        "Agent 子进程里 export 不会回写到你原来的交互 shell；请在本机终端粘贴执行",
+        "代理相关见「设置代理」/ env.proxy.set；PATH 见「临时加PATH」"
+      ]
+    },
+    {
+      "intent_id": "env.proxy.set",
+      "desc": "当前终端设置 HTTP/HTTPS/SOCKS 代理环境变量",
+      "keywords": [
+        "设置代理",
+        "export代理",
+        "终端代理",
+        "http_proxy",
+        "https_proxy",
+        "设置http代理",
+        "开代理",
+        "all_proxy",
+        "socks代理",
+        "代理环境变量"
+      ],
+      "weight": 13,
+      "params": [
+        {
+          "name": "value",
+          "required": false,
+          "extract": "value"
+        },
+        {
+          "name": "host",
+          "required": false,
+          "extract": "host"
+        },
+        {
+          "name": "port",
+          "required": false,
+          "extract": "port"
+        }
+      ],
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "示例：本机 7890 HTTP 代理",
+          "stop_on_error": true,
+          "steps": [
+            "export http_proxy=http://127.0.0.1:7890",
+            "export https_proxy=http://127.0.0.1:7890",
+            "export HTTP_PROXY=$http_proxy HTTPS_PROXY=$https_proxy",
+            "export no_proxy=localhost,127.0.0.1,::1",
+            "env | grep -i proxy"
+          ]
+        },
+        {
+          "kind": "sequence",
+          "label": "示例：本机 7890 SOCKS5",
+          "stop_on_error": true,
+          "steps": [
+            "export all_proxy=socks5://127.0.0.1:7890",
+            "export ALL_PROXY=$all_proxy",
+            "export http_proxy=socks5://127.0.0.1:7890",
+            "export https_proxy=socks5://127.0.0.1:7890",
+            "env | grep -i proxy"
+          ]
+        },
+        {
+          "kind": "sequence",
+          "label": "按地址设置 http/https 代理并回显",
+          "stop_on_error": true,
+          "steps": [
+            "export http_proxy={value}",
+            "export https_proxy={value}",
+            "export HTTP_PROXY={value}",
+            "export HTTPS_PROXY={value}",
+            "export no_proxy=localhost,127.0.0.1,::1",
+            "env | grep -i proxy"
+          ]
+        }
+      ],
+      "tips": [
+        "将 {value} 换成代理 URL，如 http://127.0.0.1:7890 或 socks5://127.0.0.1:1080",
+        "也可说：设置代理 http://127.0.0.1:7890",
+        "仅当前终端有效；取消用「取消代理」；curl 可加 --noproxy '*'"
+      ]
+    },
+    {
+      "intent_id": "env.proxy.unset",
+      "desc": "取消当前终端的代理环境变量",
+      "keywords": [
+        "取消代理",
+        "关掉代理",
+        "unset代理",
+        "清除代理",
+        "unset http_proxy",
+        "取消http代理",
+        "关闭代理环境变量"
+      ],
+      "weight": 12,
+      "risk_level": "low",
+      "cmd_template": [
+        "unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY no_proxy NO_PROXY; env | grep -i proxy || echo 'proxy env cleared'"
+      ],
+      "tips": [
+        "只清当前 shell；写入 bashrc 的代理需手动删行或 source 新配置"
+      ]
+    },
+    {
+      "intent_id": "env.export.unset",
+      "desc": "取消某个环境变量（unset）",
+      "keywords": [
+        "unset环境变量",
+        "取消环境变量",
+        "删除环境变量",
+        "unset变量",
+        "清掉环境变量"
+      ],
+      "weight": 11,
+      "params": [
+        {
+          "name": "name",
+          "required": true,
+          "extract": "name"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "unset {varname}; printenv {varname} || echo '{varname} unset'"
+      ],
+      "tips": [
+        "将变量名换成如 MY_VAR；代理整组清除见「取消代理」"
+      ]
+    }
+  ]
+}

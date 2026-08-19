@@ -105,18 +105,65 @@ def extract_params(text: str, rule_params: list[dict[str, Any]] | None = None) -
     if m:
         params["container"] = m.group(1)
 
-    # 服务名（粗略）
+    # ollama 模型名：qwen2.5:3b / 模型名 xxx
     m = re.search(
-        r"(?:服务|重启|启动|停止|停掉)\s*(?:一下)?\s*([A-Za-z0-9_.\-]+)",
+        r"ollama\s+(?:show|rm|run|pull|create)\s+([A-Za-z0-9_.:\-]+)",
         text,
+        re.I,
     )
+    if not m:
+        m = re.search(
+            r"模型(?:名)?\s*[:=]?\s*([A-Za-z0-9_.:\-]+)",
+            text,
+        )
     if m:
         cand = m.group(1)
-        if cand not in ("服务", "一下", "一下服务"):
+        if cand.lower() not in ("列表", "量化", "详情", "缓存", "路径"):
+            params["model"] = cand
+
+    # 服务名（粗略）
+    _svc_stop = (
+        "服务",
+        "一下",
+        "一下服务",
+        "配置",
+        "列表",
+        "异常",
+        "日志",
+        "示例",
+        "文件",
+        "状态",
+        "自启",
+        "systemd",
+        "unit",
+        "journal",
+    )
+    m = re.search(
+        r"(?:服务名|unit名|单元名)\s*[:=]?\s*([A-Za-z0-9_.\-]+)",
+        text,
+        re.I,
+    )
+    if not m:
+        m = re.search(
+            r"新建(?:一个)?(?:systemd)?(?:的)?(?:服务|unit)\s+"
+            r"([A-Za-z0-9_.\-]+)",
+            text,
+            re.I,
+        )
+    if not m:
+        m = re.search(
+            r"(?:服务|重启|启动|停止|停掉)\s*(?:一下)?\s*([A-Za-z0-9_.\-]+)",
+            text,
+        )
+    if m:
+        cand = m.group(1)
+        if cand not in _svc_stop and cand.lower() not in _svc_stop:
             params["service"] = cand
     m = re.search(r"([A-Za-z0-9_.\-]+)\s*服务", text)
     if m:
-        params.setdefault("service", m.group(1))
+        cand = m.group(1)
+        if cand not in _svc_stop and cand.lower() not in _svc_stop:
+            params.setdefault("service", cand)
 
     # 主机：ping / nslookup / 解析|反查 / 域名 /（反查语境下的）IPv4
     m = re.search(r"ping\s*(?:一下\s*)?([A-Za-z0-9_.\-:]+)", text, re.I)
@@ -195,9 +242,14 @@ def extract_params(text: str, rule_params: list[dict[str, Any]] | None = None) -
                 params["qtype"] = val
                 break
 
-    # 路径：ASCII 路径字符，排除 URL
+    # 路径：ASCII 路径字符，排除 URL；user@host:/remote 整段留给 scp，避免 /var/log 内的 /log 被当成另一条本地路径
     stripped = re.sub(r"https?://\S+", " ", text)
-    paths = re.findall(r"(?<!:)(/[A-Za-z0-9_./\-]+)", stripped)
+    stripped_local = re.sub(
+        r"[A-Za-z_][A-Za-z0-9_.-]*@[A-Za-z0-9_.-]+:/[A-Za-z0-9_./-]*",
+        " ",
+        stripped,
+    )
+    paths = re.findall(r"(?<!:)(/[A-Za-z0-9_./\-]+)", stripped_local)
     if paths:
         params["path"] = paths[0]
         if len(paths) >= 2:
@@ -243,6 +295,64 @@ def extract_params(text: str, rule_params: list[dict[str, Any]] | None = None) -
         )
     if m:
         params["iface"] = m.group(1)
+
+    # scp：user@host:/remote ；本地 path，远端 link
+    _scpish = bool(
+        re.search(
+            r"scp|传到|传给远程|从远程|远程拷|拉回|拉到本机|传到服务器",
+            text,
+            re.I,
+        )
+    )
+    _downloadish = bool(
+        re.search(
+            r"从远程|从服务器拉|拉回|拉到本机|scp下载|下载到本机",
+            text,
+            re.I,
+        )
+    )
+    remote_from_at = ""
+    m = re.search(
+        r"([A-Za-z_][A-Za-z0-9_.-]*)@"
+        r"([A-Za-z0-9_.-]+)"
+        r"(?::(/[A-Za-z0-9_./-]*))?",
+        text,
+    )
+    if m:
+        remote_from_at = m.group(3) or ""
+        if _scpish or remote_from_at:
+            params["user"] = m.group(1)
+            params["host"] = m.group(2)
+            if remote_from_at:
+                params["link"] = remote_from_at
+                locals_ = [p for p in (paths if paths else []) if p != remote_from_at]
+                if locals_:
+                    params["path"] = locals_[0]
+    elif _scpish:
+        m = re.search(
+            r"(?:用户|账号|user)\s*[:=]?\s*([A-Za-z_][A-Za-z0-9_.-]*)",
+            text,
+            re.I,
+        )
+        if m and m.group(1).lower() not in ("列表", "账号"):
+            params["user"] = m.group(1)
+        if "host" not in params:
+            m = re.search(
+                rf"(?:传到|从)\s*(?:主机|服务器)?\s*"
+                rf"((?:[A-Za-z0-9-]+\.)+[A-Za-z]{{2,63}}|\d{{1,3}}(?:\.\d{{1,3}}){{3}})",
+                text,
+            )
+            if m:
+                params["host"] = m.group(1)
+    if _scpish and _downloadish and not remote_from_at and len(paths) >= 2:
+        params["link"] = paths[0]
+        params["path"] = paths[1]
+    if _scpish or "user" in params:
+        m = re.search(r"-P\s*(\d{2,5})", text)
+        if m:
+            val = int(m.group(1))
+            if 1 <= val <= 65535:
+                params["port"] = str(val)
 
     # 包名 / 命令名：安装、卸载、which、装在哪
     m = re.search(r"(?:装|安装)\s*(?:一个|个)?\s*([A-Za-z0-9_.\-]+)", text)
@@ -302,6 +412,40 @@ def extract_params(text: str, rule_params: list[dict[str, Any]] | None = None) -
         )
     if m:
         params["name"] = m.group(1)
+
+    # export NAME=value / 设置环境变量 FOO=bar / 代理 URL
+    m = re.search(
+        r"export\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(\S+)",
+        text,
+        re.I,
+    )
+    if not m:
+        m = re.search(
+            r"(?:设置|配置)?\s*环境变量\s+([A-Za-z_][A-Za-z0-9_]*)\s*"
+            r"(?:[=＝]|为|是)\s*(\S+)",
+            text,
+        )
+    if m:
+        params["name"] = m.group(1)
+        val = m.group(2).strip().strip("'\"")
+        if val:
+            params["value"] = val
+    if "value" not in params:
+        m = re.search(
+            r"((?:https?|socks5h?)://[^\s\"']+)",
+            text,
+            re.I,
+        )
+        if m and re.search(r"代理|proxy|export", text, re.I):
+            params["value"] = m.group(1)
+    if "value" not in params and re.search(r"代理|proxy", text, re.I):
+        if "host" in params and "port" in params:
+            params["value"] = f"http://{params['host']}:{params['port']}"
+        elif re.search(r"127\.0\.0\.1:(\d{2,5})", text):
+            m = re.search(r"(127\.0\.0\.1:(\d{2,5}))", text)
+            if m:
+                params["value"] = f"http://{m.group(1)}"
+                params.setdefault("port", m.group(2))
 
     # echo / 打印 的文本内容（引号优先）
     m = re.search(

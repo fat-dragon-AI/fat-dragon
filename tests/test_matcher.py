@@ -87,5 +87,126 @@ class NegationTest(unittest.TestCase):
         self.assertTrue(any(h.negated for h in hits if h.rule.intent_id == "nginx.restart"))
 
 
+class ScpIntentTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        from pathlib import Path
+
+        from lch.engine import Engine
+
+        cls.engine = Engine(Path(__file__).resolve().parents[1])
+
+    def test_scp_phrases_top1(self) -> None:
+        cases = [
+            ("传到服务器", "scp.upload.file"),
+            ("scp传文件夹", "scp.upload.dir"),
+            ("从远程拉文件", "scp.download.file"),
+            ("拉文件夹回来", "scp.download.dir"),
+        ]
+        for q, expect in cases:
+            hits = self.engine.query(q).hits
+            got = hits[0].intent_id if hits else None
+            self.assertEqual(got, expect, msg=q)
+
+    def test_local_copy_not_scp(self) -> None:
+        hits = self.engine.query("复制文件").hits
+        got = hits[0].intent_id if hits else None
+        self.assertEqual(got, "file.copy")
+
+
+class SystemdIntentTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        from pathlib import Path
+
+        from lch.engine import Engine
+
+        cls.engine = Engine(Path(__file__).resolve().parents[1])
+
+    def test_systemd_phrases_top1(self) -> None:
+        cases = [
+            ("刷新systemd", "svc.daemon.reload"),
+            ("查看异常服务", "svc.list.failed"),
+            ("查看服务配置", "svc.unit.cat"),
+            ("服务配置路径", "svc.unit.show"),
+            ("开机自启", "svc.enable"),
+            ("取消自启", "svc.disable"),
+            ("是否开机自启", "svc.is-enabled"),
+            ("看服务日志", "svc.journal.unit"),
+            ("新建systemd服务", "svc.unit.create"),
+            ("systemd服务示例", "svc.unit.create"),
+        ]
+        for q, expect in cases:
+            hits = self.engine.query(q).hits
+            got = hits[0].intent_id if hits else None
+            self.assertEqual(got, expect, msg=q)
+
+    def test_java_systemd_not_generic_create(self) -> None:
+        hits = self.engine.query("把java放入systemd").hits
+        got = hits[0].intent_id if hits else None
+        self.assertEqual(got, "java.systemd.unit")
+
+    def test_running_list_still_svc_list(self) -> None:
+        hits = self.engine.query("现在跑着哪些服务").hits
+        got = hits[0].intent_id if hits else None
+        self.assertEqual(got, "svc.list")
+
+
+class EnvExportIntentTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        from pathlib import Path
+
+        from lch.engine import Engine
+
+        cls.engine = Engine(Path(__file__).resolve().parents[1])
+
+    def test_export_and_proxy_top1(self) -> None:
+        cases = [
+            ("设置环境变量", "env.export.set"),
+            ("export环境变量", "env.export.set"),
+            ("设置代理", "env.proxy.set"),
+            ("取消代理", "env.proxy.unset"),
+            ("unset环境变量", "env.export.unset"),
+        ]
+        for q, expect in cases:
+            hits = self.engine.query(q).hits
+            got = hits[0].intent_id if hits else None
+            self.assertEqual(got, expect, msg=q)
+
+    def test_path_export_not_generic(self) -> None:
+        hits = self.engine.query("设置环境变量").hits
+        self.assertEqual(hits[0].intent_id, "env.export.set")
+        hits = self.engine.query("列出环境变量").hits
+        self.assertEqual(hits[0].intent_id, "echo.env.list")
+
+
+class OllamaIntentTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        from pathlib import Path
+
+        from lch.engine import Engine
+
+        cls.engine = Engine(Path(__file__).resolve().parents[1])
+
+    def test_ollama_phrases_top1(self) -> None:
+        cases = [
+            ("ollama列表", "ollama.list"),
+            ("ollama show", "ollama.show"),
+            ("跑ollama模型", "ollama.run"),
+            ("ollama自建模型", "ollama.create"),
+            ("ollama打包模型", "ollama.create"),
+            ("打包成ollama模型", "ollama.create"),
+            ("清理ollama缓存", "ollama.blobs.clean"),
+            ("下载gguf", "ollama.gguf.download"),
+            ("测试ollama接口", "ollama.api"),
+        ]
+        for q, expect in cases:
+            hits = self.engine.query(q).hits
+            got = hits[0].intent_id if hits else None
+            self.assertEqual(got, expect, msg=q)
+
+
 if __name__ == "__main__":
     unittest.main()

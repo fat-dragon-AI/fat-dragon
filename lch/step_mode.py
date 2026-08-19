@@ -10,10 +10,24 @@ from .loader import Runnable
 from .session import get_cwd
 
 EXIT_WORDS = {"/quit", "/exit", "quit", "exit"}
+SKIP_WORDS = {"s", "skip", "跳过", "略过"}
+HELP_LINE = (
+    "命令: y=执行本条 | 手输=改本条后确认 | s/跳过=跳过本条 | "
+    "all=确认后跑剩余 | n=退出逐步模式"
+)
 
 
 def _is_exit(line: str) -> bool:
     return line.strip().lower() in EXIT_WORDS
+
+
+def _is_skip(line: str) -> bool:
+    raw = line.strip()
+    if not raw:
+        return False
+    if raw in SKIP_WORDS:
+        return True
+    return raw.lower() in SKIP_WORDS
 
 
 def run_step_mode(
@@ -35,7 +49,7 @@ def run_step_mode(
 
     label = runnable.label or "复合命令"
     print(f"已进入多条命令模式 [{label}]，共 {len(steps)} 步。请按条确认执行。")
-    print("命令: y=执行本条 | 手输=改本条后确认 | s=跳过 | all=确认后跑剩余 | n=退出逐步模式")
+    print(HELP_LINE)
 
     idx = 0
     stop_on_error = runnable.stop_on_error
@@ -55,17 +69,18 @@ def run_step_mode(
         if not raw or raw.lower() in ("n", "/cancel"):
             print("已退出逐步模式。")
             return "continue"
-        if raw.lower() in ("/help", "help"):
-            print("y 执行本条；手输替换本条；s 跳过；all 执行剩余；n 返回 agent>")
+        if raw.lower() in ("/help", "help", "帮助"):
+            print(HELP_LINE)
+            print("失败停在本步时可改命令重试，或 s/跳过 进入下一步。")
             continue
-        if raw.lower() in ("b", "back"):
+        if raw.lower() in ("b", "back", "回退"):
             if idx > 0:
                 idx -= 1
                 print(f"回退到第 {idx + 1} 步（不撤销已执行操作）。")
             else:
                 print("已在第一步。")
             continue
-        if raw.lower() in ("s", "skip"):
+        if _is_skip(raw):
             append_audit(
                 engine.home,
                 {
@@ -81,6 +96,7 @@ def run_step_mode(
                     "skipped": True,
                 },
             )
+            print(f"已跳过第 {idx + 1}/{len(steps)} 步: {current}")
             idx += 1
             continue
         if raw.lower() == "all":
@@ -176,7 +192,10 @@ def run_step_mode(
             },
         )
         if result.exit_code != 0 and stop_on_error:
-            print("本步失败，已停止（stop_on_error）。可 n 退出或继续处理（已停在本步）。")
+            print(
+                "本步失败，已停止（stop_on_error）。"
+                "可手改重试、s/跳过 进入下一步，或 n 退出逐步模式。"
+            )
             # 停留本步，允许用户改命令重试或 skip
             continue
         idx += 1

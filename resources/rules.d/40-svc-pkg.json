@@ -120,16 +120,18 @@
         "服务列表",
         "运行的服务",
         "列出服务",
-        "services",
-        "systemd"
+        "现在跑着哪些服务",
+        "services"
       ],
-      "weight": 8,
+      "weight": 9,
       "risk_level": "low",
       "cmd_template": [
         "systemctl list-units --type=service --state=running",
         "systemctl list-unit-files --type=service | head -n 50"
       ],
-      "tips": []
+      "tips": [
+        "失败单元见「查看异常服务」；全部 unit / unit 文件见 systemd 扩展规则"
+      ]
     },
     {
       "intent_id": "pkg.install",

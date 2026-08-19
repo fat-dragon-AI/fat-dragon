@@ -5,7 +5,7 @@
 | 日期 | 2026-08-10 |
 | 规则文件 | `resources/rules.json` + `resources/rules.d/*.json` |
 | 对应设计 | `.docs/Linux中文离线指令助手-落地总体详细设计-v2.md`（schema v1.0） |
-| 规则条数 | 约 150（含 git/压缩/curl/用户/swap/SELinux 等） |
+| 规则条数 | 约 180（含 ollama/git/压缩/scp/systemd/export 等） |
 
 ## 1. 覆盖范围
 
@@ -16,13 +16,15 @@
 | 进程 | `sys.process.*` | 列表、查找、结束（high） |
 | 网络 | `net.*` / `nslookup.*` | 端口、ping、IP、网卡、路由、DNS、nslookup、连接 |
 | 文件/日志 | `file.*` / `log.journal` | 查找、内容搜、列目录、tail、软链、journalctl |
+| 远程拷贝 | `scp.upload.*` / `scp.download.*` | scp 传文件/目录、从远程拉文件/目录 |
 | Shell / echo | `echo.*` | 打印文字、环境变量、退出码、写入文件、转义 |
-| 环境变量 | `env.path.*` | 查看 / 会话 export / 持久化写入 / source |
-| 服务 | `svc.*` | status/start/stop/restart/list |
+| 环境变量 | `env.path.*` / `env.export.*` / `env.proxy.*` | PATH；当前终端 export；HTTP/SOCKS 代理 |
+| 服务 | `svc.*` | status/start/stop/restart/list；systemd 刷新/失败单元/unit 配置/自启/新建 service |
 | 软件包 | `pkg.install/list/remove/which/files/info` | 安装、列表、卸载、命令位置、本体路径、包详情 |
 | Nginx | `nginx.*` | 配置查看/校验、reload/restart、日志 |
 | JVM / Java | `jvm.*` / `java.*` / `jdk.install.17` / `mvn.*` | 版本、进程、jar 启停/nohup/systemd、编译运行、Maven |
 | Docker | `docker.*` | ps/logs/exec/启停删/镜像/compose |
+| Ollama | `ollama.*` | list/show/run/create/API/清理缓存/HF 镜像（手册摘录） |
 | 用户权限 | `user.*` / `perm.chmod` / `perm.chown` / `perm.owner.view` | whoami、chmod / chown / 查看属主 |
 | 防火墙/定时/时间 | `firewall.*` / `cron.*` / `sys.date.time` | 常用排查 |
 
@@ -71,6 +73,18 @@
 | 启动 firewalld | svc.start |
 | 停掉 redis | svc.stop |
 | 现在跑着哪些服务 | svc.list |
+| 刷新systemd | svc.daemon.reload |
+| 查看异常服务 | svc.list.failed |
+| 查看服务配置 | svc.unit.cat |
+| 服务配置路径 | svc.unit.show |
+| 开机自启 | svc.enable |
+| 取消自启 | svc.disable |
+| 是否开机自启 | svc.is-enabled |
+| 看服务日志 | svc.journal.unit |
+| 列出所有服务 | svc.list.units |
+| unit文件列表 | svc.list.unitfiles |
+| 新建systemd服务 | svc.unit.create |
+| systemd服务示例 | svc.unit.create |
 | 用包管理器装个 htop | pkg.install |
 | 软件列表 | pkg.list |
 | 已装软件 | pkg.list |
@@ -157,6 +171,11 @@
 | 看软链指向 | file.symlink.view |
 | 查看PATH | env.path.view |
 | 临时加PATH | env.path.export |
+| 设置环境变量 | env.export.set |
+| export环境变量 | env.export.set |
+| 设置代理 | env.proxy.set |
+| 取消代理 | env.proxy.unset |
+| unset环境变量 | env.export.unset |
 | 写入PATH | env.path.write |
 | 加入path | env.path.write |
 | path | env.path.view |
@@ -194,9 +213,21 @@
 | selinux开了没 | selinux.status |
 | 复制文件 | file.copy |
 | 移动文件 | file.move |
+| 传到服务器 | scp.upload.file |
+| scp传文件夹 | scp.upload.dir |
+| 从远程拉文件 | scp.download.file |
+| 拉文件夹回来 | scp.download.dir |
 | k8s服务 | k8s.svc |
 | pod详情 | k8s.desc |
 | 开机日志 | log.journal |
+| ollama列表 | ollama.list |
+| ollama show | ollama.show |
+| 跑ollama模型 | ollama.run |
+| ollama自建模型 | ollama.create |
+| ollama打包模型 | ollama.create |
+| 清理ollama缓存 | ollama.blobs.clean |
+| 下载gguf | ollama.gguf.download |
+| 测试ollama接口 | ollama.api |
 
 ## 3. 使用说明
 

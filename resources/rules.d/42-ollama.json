@@ -1,0 +1,420 @@
+{
+  "set": "42-ollama",
+  "desc": "Ollama 本地大模型：列表/运行/自建/API/清理（摘自 Ubuntu 使用手册）",
+  "rules": [
+    {
+      "intent_id": "ollama.version",
+      "desc": "查看 ollama 版本",
+      "keywords": [
+        "ollama版本",
+        "ollama -v",
+        "ollama version",
+        "看ollama版本"
+      ],
+      "weight": 11,
+      "risk_level": "low",
+      "cmd_template": [
+        "ollama -v",
+        "ollama --version"
+      ],
+      "tips": [
+        "确认 CLI 是否安装成功"
+      ]
+    },
+    {
+      "intent_id": "ollama.list",
+      "desc": "列出本地 ollama 模型",
+      "keywords": [
+        "ollama列表",
+        "ollama list",
+        "有哪些ollama模型",
+        "列出ollama模型",
+        "ollama模型列表"
+      ],
+      "weight": 12,
+      "risk_level": "low",
+      "cmd_template": [
+        "ollama list",
+        "curl -s http://127.0.0.1:11434/api/tags"
+      ],
+      "tips": [
+        "list 看不到量化比特；用「ollama show 模型名」看 Q4/Q8"
+      ]
+    },
+    {
+      "intent_id": "ollama.show",
+      "desc": "查看模型详情（量化/上下文）",
+      "keywords": [
+        "ollama show",
+        "看模型量化",
+        "模型量化等级",
+        "ollama模型详情",
+        "看模型上下文窗口"
+      ],
+      "weight": 13,
+      "keyword_weights": {
+        "ollama show": 16
+      },
+      "params": [
+        {
+          "name": "model",
+          "required": true,
+          "extract": "model"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "ollama show {model}",
+        "ollama show {model} --modelfile"
+      ],
+      "tips": [
+        "将 {model} 换成如 qwen2.5:3b；确认 Q4_K_M / Q8_0"
+      ]
+    },
+    {
+      "intent_id": "ollama.ps",
+      "desc": "查看正在运行/已加载的模型",
+      "keywords": [
+        "ollama ps",
+        "正在跑的模型",
+        "加载了哪些模型",
+        "ollama运行中的模型",
+        "当前加载模型"
+      ],
+      "weight": 12,
+      "keyword_weights": {
+        "ollama ps": 14
+      },
+      "risk_level": "low",
+      "cmd_template": [
+        "ollama ps"
+      ],
+      "tips": [
+        "看哪些模型已驻留内存/显存"
+      ]
+    },
+    {
+      "intent_id": "ollama.run",
+      "desc": "交互运行 ollama 模型",
+      "keywords": [
+        "ollama run",
+        "跑ollama模型",
+        "运行本地模型",
+        "ollama对话",
+        "启动本地大模型",
+        "ollama交互对话"
+      ],
+      "weight": 13,
+      "keyword_weights": {
+        "ollama run": 16,
+        "跑ollama模型": 14
+      },
+      "params": [
+        {
+          "name": "model",
+          "required": true,
+          "extract": "model"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "ollama run {model}",
+        "ollama run {model} --num-ctx 2048",
+        "OLLAMA_DEBUG=1 ollama run {model} --num-ctx 8192"
+      ],
+      "tips": [
+        "退出交互输入 /bye；显存紧张用 --num-ctx 2048",
+        "DEBUG 日志看 offloading XX layers to GPU，判断是否 GPU 加速"
+      ]
+    },
+    {
+      "intent_id": "ollama.pull",
+      "desc": "从官方拉取模型（国内易失败）",
+      "keywords": [
+        "ollama pull",
+        "拉取ollama模型",
+        "下载ollama模型",
+        "ollama官方pull"
+      ],
+      "weight": 11,
+      "keyword_weights": {
+        "ollama pull": 14
+      },
+      "params": [
+        {
+          "name": "model",
+          "required": true,
+          "extract": "model"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "ollama pull {model}",
+        "ollama pull qwen2.5:3b"
+      ],
+      "tips": [
+        "国内大文件 pull 易 EOF；优先 GGUF + ollama create，见「ollama自建模型」",
+        "失败后勿反复 pull，先「清理ollama缓存」"
+      ]
+    },
+    {
+      "intent_id": "ollama.rm",
+      "desc": "删除本地 ollama 模型",
+      "keywords": [
+        "ollama rm",
+        "删除ollama模型",
+        "卸掉本地模型",
+        "ollama删除模型"
+      ],
+      "weight": 11,
+      "keyword_weights": {
+        "ollama rm": 14
+      },
+      "params": [
+        {
+          "name": "model",
+          "required": true,
+          "extract": "model"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "ollama rm {model}",
+        "ollama list"
+      ],
+      "tips": [
+        "释放磁盘；删除前可用 ollama list / show 确认"
+      ]
+    },
+    {
+      "intent_id": "ollama.create",
+      "desc": "用 GGUF + Modelfile 自建模型（国内推荐）",
+      "keywords": [
+        "ollama create",
+        "ollama自建模型",
+        "ollama打包模型",
+        "打包ollama模型",
+        "gguf打包进ollama",
+        "打包成ollama模型",
+        "gguf导入ollama",
+        "本地gguf建模",
+        "写Modelfile",
+        "Modelfile示例",
+        "从gguf创建模型"
+      ],
+      "weight": 14,
+      "keyword_weights": {
+        "ollama create": 16,
+        "ollama自建模型": 16,
+        "ollama打包模型": 16,
+        "打包ollama模型": 16,
+        "打包成ollama模型": 14
+      },
+      "params": [
+        {
+          "name": "model",
+          "required": false,
+          "extract": "model"
+        },
+        {
+          "name": "path",
+          "required": false,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "single",
+          "label": "打印通用对话 Modelfile 模板",
+          "cmd": "cat \"{templates_root}/ollama/Modelfile.chat.tpl\""
+        },
+        {
+          "kind": "single",
+          "label": "打印代码模型 Modelfile 模板",
+          "cmd": "cat \"{templates_root}/ollama/Modelfile.coder.tpl\""
+        },
+        {
+          "kind": "sequence",
+          "label": "create → show 校验量化",
+          "stop_on_error": true,
+          "steps": [
+            "ollama create {model} -f Modelfile",
+            "ollama show {model}"
+          ]
+        },
+        {
+          "kind": "sequence",
+          "label": "指定 Modelfile 路径 create → show",
+          "stop_on_error": true,
+          "steps": [
+            "ollama create {model} -f {path}",
+            "ollama show {model}"
+          ]
+        }
+      ],
+      "tips": [
+        "文件名须为 Modelfile（无后缀）；FROM 指向本地 .gguf",
+        "官方库多为 Q4；Q5/Q8 需 GGUF 自建；先 wget hf-mirror 再 create"
+      ]
+    },
+    {
+      "intent_id": "ollama.api",
+      "desc": "HTTP API（11434）列表与生成测试",
+      "keywords": [
+        "ollama api",
+        "测试ollama接口",
+        "api/tags",
+        "api/generate",
+        "curl ollama",
+        "ollama的11434"
+      ],
+      "weight": 12,
+      "keyword_weights": {
+        "测试ollama接口": 16,
+        "api/generate": 12
+      },
+      "params": [
+        {
+          "name": "model",
+          "required": false,
+          "extract": "model"
+        },
+        {
+          "name": "text",
+          "required": false,
+          "extract": "text"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "curl -s http://127.0.0.1:11434/api/tags",
+        "curl http://127.0.0.1:11434/api/generate -d '{\"model\":\"{model}\",\"prompt\":\"{text}\",\"stream\":false}'",
+        "curl http://127.0.0.1:11434/api/generate -d '{\"model\":\"qwen2.5:3b\",\"prompt\":\"解释transformer\",\"stream\":false}'"
+      ],
+      "tips": [
+        "默认端口 11434；局域网访问需 OLLAMA_HOST=0.0.0.0"
+      ]
+    },
+    {
+      "intent_id": "ollama.blobs.clean",
+      "desc": "清理 pull 失败留下的 partial 缓存",
+      "keywords": [
+        "清理ollama缓存",
+        "ollama partial",
+        "下载损坏清理",
+        "ollama EOF",
+        "清理blobs",
+        "ollama缓存损坏"
+      ],
+      "weight": 13,
+      "keyword_weights": {
+        "清理ollama缓存": 16
+      },
+      "risk_level": "medium",
+      "cmd_template": [
+        "find ~/.ollama/models/blobs -name '*-partial-*' -delete",
+        "sudo find /usr/share/ollama/.ollama/models/blobs -name '*-partial-*' -delete 2>/dev/null; true"
+      ],
+      "tips": [
+        "EOF 中断后勿反复 pull；清缓存后改用 GGUF 自建",
+        "systemd 服务用户可能是 ollama，缓存也可能在 /usr/share/ollama/.ollama"
+      ]
+    },
+    {
+      "intent_id": "ollama.serve",
+      "desc": "启动 / 查看 ollama 服务",
+      "keywords": [
+        "启动ollama服务",
+        "ollama服务状态",
+        "手动ollama serve",
+        "systemctl start ollama",
+        "开ollama服务"
+      ],
+      "weight": 12,
+      "risk_level": "medium",
+      "cmd_template": [
+        "ollama serve",
+        "systemctl status ollama --no-pager",
+        "sudo systemctl start ollama",
+        "curl -s http://127.0.0.1:11434/api/tags"
+      ],
+      "tips": [
+        "多数发行版用 systemd 托管；手动 serve 前确认未重复占用 11434"
+      ]
+    },
+    {
+      "intent_id": "ollama.env",
+      "desc": "Ollama / HF 镜像相关环境变量",
+      "keywords": [
+        "OLLAMA_HOST",
+        "OLLAMA_MODELS",
+        "HF_ENDPOINT",
+        "ollama环境变量",
+        "hf-mirror环境变量",
+        "ollama局域网访问",
+        "ollama模型存储路径"
+      ],
+      "weight": 12,
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "临时启用 HF 国内镜像",
+          "stop_on_error": true,
+          "steps": [
+            "export HF_ENDPOINT=https://hf-mirror.com",
+            "echo \"$HF_ENDPOINT\""
+          ]
+        },
+        {
+          "kind": "sequence",
+          "label": "永久写入 HF_ENDPOINT 到 bashrc",
+          "stop_on_error": true,
+          "steps": [
+            "echo 'export HF_ENDPOINT=https://hf-mirror.com' >> ~/.bashrc",
+            "tail -n 3 ~/.bashrc"
+          ]
+        },
+        {
+          "kind": "single",
+          "label": "自定义模型存储目录（当前终端）",
+          "cmd": "export OLLAMA_MODELS={path}; echo \"$OLLAMA_MODELS\""
+        },
+        {
+          "kind": "single",
+          "label": "监听全网卡（局域网可访问）",
+          "cmd": "export OLLAMA_HOST=0.0.0.0:11434; echo \"$OLLAMA_HOST\""
+        }
+      ],
+      "tips": [
+        "服务若由 systemd 启动，应在 unit 的 Environment= 中配置 OLLAMA_HOST/MODELS，仅 export 当前终端不够",
+        "用户态下载的模型与 ollama 服务用户目录可能不一致"
+      ]
+    },
+    {
+      "intent_id": "ollama.gguf.download",
+      "desc": "从 hf-mirror 断点续传下载 GGUF",
+      "keywords": [
+        "下载gguf",
+        "hf-mirror下载",
+        "wget gguf",
+        "国内下载模型",
+        "下载qwen gguf"
+      ],
+      "weight": 12,
+      "keyword_weights": {
+        "下载gguf": 14
+      },
+      "risk_level": "medium",
+      "cmd_template": [
+        "wget -c https://hf-mirror.com/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct.Q8_0.gguf",
+        "export HF_ENDPOINT=https://hf-mirror.com; echo \"镜像 $HF_ENDPOINT；也可用 modelscope.cn\""
+      ],
+      "tips": [
+        "wget -c 断点续传；下完改 Modelfile 的 FROM 再 ollama create",
+        "魔搭：https://modelscope.cn ；官方标签页仅便于查名，大文件勿依赖 ollama pull"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,202 @@
+{
+  "set": "33-scp",
+  "desc": "scp 远程传输文件/目录",
+  "rules": [
+    {
+      "intent_id": "scp.upload.file",
+      "desc": "scp 上传文件到远程",
+      "keywords": [
+        "scp传文件",
+        "传到服务器",
+        "传到远程",
+        "scp上传",
+        "上传到服务器",
+        "传文件到远程",
+        "scp"
+      ],
+      "weight": 11,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        },
+        {
+          "name": "link",
+          "required": false,
+          "extract": "link"
+        },
+        {
+          "name": "user",
+          "required": false,
+          "extract": "user"
+        },
+        {
+          "name": "host",
+          "required": true,
+          "extract": "host"
+        },
+        {
+          "name": "port",
+          "required": false,
+          "extract": "port"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "scp {path} {user}@{host}:{link}",
+        "scp -P {port} {path} {user}@{host}:{link}"
+      ],
+      "tips": [
+        "{path} 本地文件，{user}@{host}:{link} 远端；非 22 端口用 -P {port}"
+      ]
+    },
+    {
+      "intent_id": "scp.upload.dir",
+      "desc": "scp 递归上传目录到远程",
+      "keywords": [
+        "scp传文件夹",
+        "scp传目录",
+        "传目录到服务器",
+        "传文件夹到远程",
+        "scp -r 上传",
+        "上传文件夹到远程",
+        "scp"
+      ],
+      "weight": 11,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        },
+        {
+          "name": "link",
+          "required": false,
+          "extract": "link"
+        },
+        {
+          "name": "user",
+          "required": false,
+          "extract": "user"
+        },
+        {
+          "name": "host",
+          "required": true,
+          "extract": "host"
+        },
+        {
+          "name": "port",
+          "required": false,
+          "extract": "port"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "scp -r {path} {user}@{host}:{link}",
+        "scp -r -P {port} {path} {user}@{host}:{link}"
+      ],
+      "tips": [
+        "目录必须 -r；{path} 本地目录，{link} 远端路径"
+      ]
+    },
+    {
+      "intent_id": "scp.download.file",
+      "desc": "scp 从远程拉文件",
+      "keywords": [
+        "从远程拉文件",
+        "scp下载",
+        "从服务器拉文件",
+        "scp拉文件",
+        "远程拷回来",
+        "拉到本机",
+        "scp"
+      ],
+      "weight": 11,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        },
+        {
+          "name": "link",
+          "required": false,
+          "extract": "link"
+        },
+        {
+          "name": "user",
+          "required": false,
+          "extract": "user"
+        },
+        {
+          "name": "host",
+          "required": true,
+          "extract": "host"
+        },
+        {
+          "name": "port",
+          "required": false,
+          "extract": "port"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "scp {user}@{host}:{link} {path}",
+        "scp -P {port} {user}@{host}:{link} {path}"
+      ],
+      "tips": [
+        "{user}@{host}:{link} 远端文件，{path} 本地保存位置"
+      ]
+    },
+    {
+      "intent_id": "scp.download.dir",
+      "desc": "scp 递归从远程拉目录",
+      "keywords": [
+        "从远程拉目录",
+        "scp下载目录",
+        "从服务器拉目录",
+        "拉文件夹回来",
+        "scp -r 下载",
+        "从远程拉文件夹",
+        "scp"
+      ],
+      "weight": 11,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        },
+        {
+          "name": "link",
+          "required": false,
+          "extract": "link"
+        },
+        {
+          "name": "user",
+          "required": false,
+          "extract": "user"
+        },
+        {
+          "name": "host",
+          "required": true,
+          "extract": "host"
+        },
+        {
+          "name": "port",
+          "required": false,
+          "extract": "port"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "scp -r {user}@{host}:{link} {path}",
+        "scp -r -P {port} {user}@{host}:{link} {path}"
+      ],
+      "tips": [
+        "目录必须 -r；远端 {link}，本地 {path}"
+      ]
+    }
+  ]
+}

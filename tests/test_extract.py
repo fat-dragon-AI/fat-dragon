@@ -103,6 +103,64 @@ class ExtractModeWithPermContext(unittest.TestCase):
     def test_iface(self) -> None:
         self.assertEqual(extract_params("看一下网卡 eth0").get("iface"), "eth0")
 
+    def test_scp_user_host_remote_and_local(self) -> None:
+        p = extract_params("scp /tmp/a.log root@10.0.0.1:/var/tmp")
+        self.assertEqual(p.get("path"), "/tmp/a.log")
+        self.assertEqual(p.get("user"), "root")
+        self.assertEqual(p.get("host"), "10.0.0.1")
+        self.assertEqual(p.get("link"), "/var/tmp")
+
+    def test_scp_download_remote_then_local(self) -> None:
+        p = extract_params("从远程拉 root@10.0.0.1:/var/log/a.log 到 /tmp")
+        self.assertEqual(p.get("user"), "root")
+        self.assertEqual(p.get("host"), "10.0.0.1")
+        self.assertEqual(p.get("link"), "/var/log/a.log")
+        self.assertEqual(p.get("path"), "/tmp")
+
+    def test_scp_download_two_paths_swap(self) -> None:
+        p = extract_params("从远程拉文件 /var/log/a.log 到 /tmp")
+        self.assertEqual(p.get("link"), "/var/log/a.log")
+        self.assertEqual(p.get("path"), "/tmp")
+
+    def test_scp_user_host_port_chinese(self) -> None:
+        p = extract_params("传到服务器 10.0.0.1 用户 root /tmp/a -P 2222")
+        self.assertEqual(p.get("host"), "10.0.0.1")
+        self.assertEqual(p.get("user"), "root")
+        self.assertEqual(p.get("path"), "/tmp/a")
+        self.assertEqual(p.get("port"), "2222")
+
+    def test_email_not_treated_as_scp(self) -> None:
+        p = extract_params("联系 foo@example.com")
+        self.assertNotIn("user", p)
+        self.assertNotIn("host", p)
+
+    def test_service_name_for_new_unit(self) -> None:
+        p = extract_params("新建systemd服务 myapp /opt/myapp/bin/myapp")
+        self.assertEqual(p.get("service"), "myapp")
+        self.assertEqual(p.get("path"), "/opt/myapp/bin/myapp")
+        p = extract_params("服务名 ollama")
+        self.assertEqual(p.get("service"), "ollama")
+        p = extract_params("查看服务配置")
+        self.assertNotIn("service", p)
+
+    def test_export_name_value_and_proxy_url(self) -> None:
+        p = extract_params("export FOO=bar")
+        self.assertEqual(p.get("name"), "FOO")
+        self.assertEqual(p.get("value"), "bar")
+        p = extract_params("设置环境变量 LANG=en_US.UTF-8")
+        self.assertEqual(p.get("name"), "LANG")
+        self.assertEqual(p.get("value"), "en_US.UTF-8")
+        p = extract_params("设置代理 http://127.0.0.1:7890")
+        self.assertEqual(p.get("value"), "http://127.0.0.1:7890")
+
+    def test_ollama_model_name(self) -> None:
+        p = extract_params("ollama show qwen2.5:3b")
+        self.assertEqual(p.get("model"), "qwen2.5:3b")
+        p = extract_params("ollama run qwen2.5-coder:1.5b")
+        self.assertEqual(p.get("model"), "qwen2.5-coder:1.5b")
+        p = extract_params("模型名 qwen2.5:3b-q8_0")
+        self.assertEqual(p.get("model"), "qwen2.5:3b-q8_0")
+
 
 if __name__ == "__main__":
     unittest.main()
