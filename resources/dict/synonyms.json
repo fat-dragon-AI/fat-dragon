@@ -23,6 +23,13 @@
     ["取消代理", "关掉代理", "unset代理", "清除代理"],
     ["ollama列表", "有哪些ollama模型", "列出ollama模型", "ollama list"],
     ["ollama自建模型", "ollama打包模型", "打包ollama模型", "gguf导入ollama", "写Modelfile", "从gguf创建模型"],
-    ["清理ollama缓存", "ollama EOF", "下载损坏清理", "清理blobs"]
+    ["清理ollama缓存", "ollama EOF", "下载损坏清理", "清理blobs"],
+    ["安装软件", "apt安装", "apt-get安装", "用apt装", "apt install", "yum安装"],
+    ["卸载软件", "apt卸载", "apt remove", "用apt卸", "apt-get remove", "yum remove"],
+    ["安装deb", "装deb包", "dpkg安装", "dpkg -i", "安装本地deb"],
+    ["apt彻底卸载", "apt purge", "卸载并删配置"],
+    ["dpkg卸载", "dpkg -r", "用dpkg卸"],
+    ["更新软件源", "apt update", "刷新apt源"],
+    ["清理无用包", "apt autoremove", "清理依赖包"]
   ]
 }

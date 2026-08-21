@@ -19,6 +19,7 @@ from .render import (
     render_runnable,
     resolve_resource_dir,
 )
+from .session import merge_session_params
 
 
 @dataclass
@@ -131,7 +132,7 @@ class Engine:
                 ),
             )
 
-        all_params = extract_params(q)
+        all_params = merge_session_params(extract_params(q))
         hits: list[HitView] = []
         for m in matches:
             hits.append(self._to_hit(q, m, all_params))
@@ -139,7 +140,10 @@ class Engine:
 
     def _to_hit(self, text: str, m: MatchResult, all_params: dict | None = None) -> HitView:
         rule = m.rule
-        params = filter_params(all_params or extract_params(text), rule.params)
+        params = filter_params(
+            all_params if all_params is not None else merge_session_params(extract_params(text)),
+            rule.params,
+        )
         resource_dir, exists = resolve_resource_dir(rule, self.soft_res, self.arch)
         mapping = build_mapping(
             params,

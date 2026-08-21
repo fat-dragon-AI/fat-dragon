@@ -16,6 +16,7 @@
     "rules.d/40-svc-pkg.json",
     "rules.d/41-systemd.json",
     "rules.d/42-ollama.json",
+    "rules.d/43-apt-dpkg.json",
     "rules.d/50-nginx.json",
     "rules.d/60-java.json",
     "rules.d/70-docker.json",

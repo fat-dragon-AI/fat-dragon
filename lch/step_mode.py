@@ -7,13 +7,14 @@ from .audit import append_audit
 from .confirm import confirm_execute
 from .executor import print_exec_result, run_shell, step_timeout
 from .loader import Runnable
+from .prefill import read_with_prefill
 from .session import get_cwd
 
 EXIT_WORDS = {"/quit", "/exit", "quit", "exit"}
 SKIP_WORDS = {"s", "skip", "跳过", "略过"}
 HELP_LINE = (
-    "命令: y=执行本条 | 手输=改本条后确认 | s/跳过=跳过本条 | "
-    "all=确认后跑剩余 | n=退出逐步模式"
+    "命令: 回车/y=执行本条（已预填）| 改字后回车=改本条 | s/跳过 | "
+    "all=确认后跑剩余 | 清空后回车或 n=退出"
 )
 
 
@@ -58,7 +59,7 @@ def run_step_mode(
         current = steps[idx]
         print(f"step> 当前 {idx + 1}/{len(steps)}: {current}")
         try:
-            line = read("step> ").rstrip("\n")
+            line = read_with_prefill("step> ", current, input_fn=read)
         except (EOFError, KeyboardInterrupt):
             print("\n会话结束。")
             return "quit"
@@ -72,6 +73,7 @@ def run_step_mode(
         if raw.lower() in ("/help", "help", "帮助"):
             print(HELP_LINE)
             print("失败停在本步时可改命令重试，或 s/跳过 进入下一步。")
+            print("跳过/退出：先清空预填（如 Ctrl+U）再输入 s 或 n。")
             continue
         if raw.lower() in ("b", "back", "回退"):
             if idx > 0:
@@ -147,8 +149,8 @@ def run_step_mode(
             print("逐步模式结束。")
             return "continue"
 
-        # y 或手改命令
-        if raw.lower() == "y":
+        # y、回车保留预填、或手改命令
+        if raw.lower() == "y" or raw == current:
             cmd = current
         else:
             cmd = raw

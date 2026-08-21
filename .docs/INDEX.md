@@ -13,6 +13,11 @@
 
 | 文档 | 要点 |
 |------|------|
+| [变更记录-README构建解释器选择.md](./变更记录-README构建解释器选择.md) | 本机构建：LCH_PYTHON / .venv 两种方式 |
+| [变更记录-会话参数set.md](./变更记录-会话参数set.md) | /set path=… 会话参数填模板；口语优先 |
+| [变更记录-选命令预填输入.md](./变更记录-选命令预填输入.md) | 选号后 cmd>/step> 自动带入命令可改参 |
+| [变更记录-apt安装卸载并回泛化.md](./变更记录-apt安装卸载并回泛化.md) | apt 源装/卸并回 pkg.install/remove；专用只留 deb/purge/源 |
+| [变更记录-apt与dpkg安装卸载.md](./变更记录-apt与dpkg安装卸载.md) | Debian/Ubuntu 显式 apt/dpkg 安装卸载 |
 | [变更记录-逐步跳过当前步骤.md](./变更记录-逐步跳过当前步骤.md) | step> 支持 s/跳过；反馈与中文别名 |
 | [变更记录-Ollama本地大模型.md](./变更记录-Ollama本地大模型.md) | 从使用手册摘录 list/run/create/API/清理等 |
 | [变更记录-export环境变量与代理.md](./变更记录-export环境变量与代理.md) | 当前终端 export；HTTP/SOCKS 代理示例 |

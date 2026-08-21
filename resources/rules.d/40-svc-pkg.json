@@ -146,9 +146,15 @@
         "装个",
         "包管理器",
         "apt install",
+        "apt-get install",
         "yum install",
         "dnf install"
       ],
+      "keyword_weights": {
+        "apt安装": 10,
+        "apt install": 10,
+        "安装软件": 8
+      },
       "weight": 9,
       "params": [
         {
@@ -162,7 +168,7 @@
         "{pkg_install} {pkg}"
       ],
       "tips": [
-        "占位符由系统适配表替换；需相应权限"
+        "占位符由系统适配表替换（Debian 为 apt-get install）。本地 .deb 见「安装deb」"
       ]
     },
     {
@@ -211,7 +217,8 @@
         "删除软件包",
         "yum remove",
         "apt remove",
-        "apt purge",
+        "apt-get remove",
+        "apt卸载",
         "dnf remove",
         "卸载"
       ],
@@ -234,7 +241,7 @@
         "{pkg_purge} {pkg}"
       ],
       "tips": [
-        "将 {pkg} 换成包名；先 {pkg_list} | grep 确认。purge 会删配置（Debian）；需相应权限，可能影响业务"
+        "将 {pkg} 换成包名；先 {pkg_list} | grep 确认。Debian 第二条为 purge。连配置删除也可说「apt彻底卸载」。需相应权限，可能影响业务"
       ]
     },
     {

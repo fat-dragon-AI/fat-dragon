@@ -255,9 +255,12 @@ def extract_params(text: str, rule_params: list[dict[str, Any]] | None = None) -
         if len(paths) >= 2:
             params["link"] = paths[1]
     else:
-        m = re.search(rf"{_B}([\w./\-]+\.(?:java|jar|class)){_A}", text, re.I)
+        m = re.search(rf"{_B}([\w./\-]+\.(?:java|jar|class|deb)){_A}", text, re.I)
         if m:
             params["path"] = m.group(1)
+    m = re.search(r"((?:\./|\.\./)[A-Za-z0-9_./\-]+\.deb)", text, re.I)
+    if m:
+        params["path"] = m.group(1)
 
     # 属主 user 或 user:group —— 「改成」仅在属主语境，且排除权限位数字
     m = re.search(
@@ -385,6 +388,21 @@ def extract_params(text: str, rule_params: list[dict[str, Any]] | None = None) -
         m = re.search(r"(?:软件包|软件|包)\s*([A-Za-z0-9_.\-]+)", text)
         if m and m.group(1) not in ("管理器", "列表", "文件", "信息"):
             params["pkg"] = m.group(1)
+
+    m = re.search(
+        r"(?:apt(?:-get)?\s+(?:install|remove|purge)|"
+        r"dpkg\s+(?:-i|-r|-P|--install|--remove|--purge))\s+"
+        r"(?:-[yY]\s+)*"
+        r"((?:\.?/)?[A-Za-z0-9_./+\-]+\.deb|[A-Za-z0-9][A-Za-z0-9.+_-]*)",
+        text,
+        re.I,
+    )
+    if m:
+        token = m.group(1)
+        if token.lower().endswith(".deb") or "/" in token:
+            params["path"] = token
+        elif token.lower() not in ("apt", "dpkg", "install", "remove", "purge"):
+            params["pkg"] = token
 
     # 进程名
     m = re.search(r"(?:有没有|查一下)\s*([A-Za-z0-9_.\-]+)\s*进程", text)

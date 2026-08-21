@@ -208,5 +208,39 @@ class OllamaIntentTest(unittest.TestCase):
             self.assertEqual(got, expect, msg=q)
 
 
+class AptDpkgIntentTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        from pathlib import Path
+
+        from lch.engine import Engine
+
+        cls.engine = Engine(Path(__file__).resolve().parents[1])
+
+    def test_apt_dpkg_phrases_top1(self) -> None:
+        cases = [
+            ("apt安装", "pkg.install"),
+            ("用apt装", "pkg.install"),
+            ("安装deb", "pkg.dpkg.install"),
+            ("dpkg -i", "pkg.dpkg.install"),
+            ("apt卸载", "pkg.remove"),
+            ("apt彻底卸载", "pkg.apt.purge"),
+            ("dpkg卸载", "pkg.dpkg.remove"),
+            ("dpkg彻底删除", "pkg.dpkg.purge"),
+            ("更新软件源", "pkg.apt.update"),
+            ("清理无用包", "pkg.apt.autoremove"),
+        ]
+        for q, expect in cases:
+            hits = self.engine.query(q).hits
+            got = hits[0].intent_id if hits else None
+            self.assertEqual(got, expect, msg=q)
+
+    def test_generic_install_remove_untouched(self) -> None:
+        hits = self.engine.query("用包管理器装个 htop").hits
+        self.assertEqual(hits[0].intent_id, "pkg.install")
+        hits = self.engine.query("卸载软件").hits
+        self.assertEqual(hits[0].intent_id, "pkg.remove")
+
+
 if __name__ == "__main__":
     unittest.main()

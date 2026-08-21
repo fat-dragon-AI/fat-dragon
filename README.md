@@ -120,8 +120,8 @@ lch -agent
 
 | 类型 | 操作 |
 |------|------|
-| single | 选号 → 确认 `y` → 执行一条 |
-| sequence | 选号 → 进入 `step>` 逐条确认（可 `all` 跑剩余） |
+| single | 选号 → `cmd>` **已带入命令**（可改参）→ 确认 → 执行 |
+| sequence | 选号 → `step>` 每步**已带入**（回车执行 / 可改 / `s` 跳过） |
 | script | 进入 `script>`：`e` 导出 → 修改 → `x` 执行副本 |
 
 | 提示符 | 输入 | 作用 |
@@ -129,13 +129,16 @@ lch -agent
 | `lch>` | 中文意图 | 匹配规则 |
 | `lch>` | `!命令` / `！命令` | Agent：普通直接执行 / 高危确认；查询模式一律确认 |
 | `选>` | 数字 | 多命中时看意图详情 |
-| `agent>` | 数字 | 按类型执行（见上） |
+| `agent>` | 数字 | 选中后进入 `cmd>` / `step>` / `script>` |
+| `cmd>` | 回车或改参 | 选号后出现；已预填该条命令；空行取消 |
 | `agent>` | `i` | 返回意图列表 |
 | `agent>` | 再输中文 | 换意图（不当 shell） |
 | `agent>` | `!命令` / `！命令` | 强制 shell（策略同上） |
 | `agent>` | 英文命令（无前缀） | 手输当 shell；风险按命令估计，不继承意图 |
 | `agent>` | 空行 / `n` / `/cancel` | 回 `lch>` |
-| `step>` | `y` / 手改 / `s` 或 `跳过` / `all` / `n` | 执行本步 / 改命令 / 跳过本步 / 跑剩余 / 返回 |
+| `lch>` / `agent>` | `/set path=/opt/a.jar` | 设会话参数（口语未抽到时填 `{path}` 等） |
+| `lch>` / `agent>` | `/params` / `/unset` | 查看 / 清除会话参数 |
+| `step>` | 回车 / 改后回车 / `s` 或 `跳过` / `all` / `n` | 执行预填本步 / 改命令 / 跳过 / 跑剩余 / 返回 |
 | `script>` | `e` / `r` / `x` / `n` | 导出 / 跑源 / 跑副本 / 返回 |
 
 含 `--config`、`passwd`、`vim` 等交互命令：确认后终端直通。
@@ -154,6 +157,7 @@ lch -agent
 | 本机ip / 网关 / dns | `ip -br addr` / `ip route` / `cat /etc/resolv.conf` |
 | nslookup / 查MX / 反向解析 | `nslookup {host}` / `-type=MX` / `nslookup {ip}` |
 | 软件列表 / 卸载 / 命令在哪 / 本体位置 | `{pkg_list}` / `{pkg_remove}` / `which` / `{pkg_files}` |
+| apt安装 / 安装deb / apt彻底卸载 | `{pkg_install}` / `dpkg -i` / `apt-get purge` |
 | 看一下当前目录 | `ls -lah` |
 | 找文件 / 搜内容 | `find` / `grep`/`rg` |
 | nginx 服务状态 / 重启 sshd | `systemctl status/restart …` |
@@ -192,13 +196,13 @@ lch -agent
 
 ## 模板占位符
 
-命令里的 `{…}` 可由口语自动提取，或在 Agent 下手输补全：
+命令里的 `{…}` 可由口语自动提取、**会话参数** `/set`，或在 Agent 下手输补全：
 
 | 占位符 | 含义 | 示例说法 |
 |--------|------|----------|
-| `{port}` | 端口 | `8080端口` |
+| `{port}` | 端口 | `8080端口`；或 `/set port=8080` |
 | `{pid}` | 进程号 | `杀掉 12345` |
-| `{path}` | 路径 | 文中 `/var/log/...`；scp 时为**本地**路径 |
+| `{path}` | 路径 | 文中 `/var/log/...`；scp 时为**本地**路径；或 `/set path=/opt/app.jar` |
 | `{link}` | 第二路径 | 软链目标；scp 时为**远端**路径 |
 | `{user}` | 远程用户 | `root@10.0.0.1:/tmp` / `用户 root` |
 | `{owner}` | 属主 | `chown www-data:www-data` / `归还给 lilong` |
@@ -241,13 +245,22 @@ lch -agent
 
 ### 本机构建（x64 / 原生 arm64）
 
-本机是什么架构，就打什么包（`uname -m`）：
+本机是什么架构，就打什么包（`uname -m`）。
+
+脚本按 `LCH_PYTHON` → 仓库 `.venv` → PATH 中的 `python3` 选解释器；系统 `/usr/bin/python3` 常无 pip/PyInstaller，请用下面方式之一对齐依赖与构建：
 
 ```bash
-# 安装构建依赖（确认后）后：
-./scripts/build_release.sh
+# 方式 A：显式指定
+LCH_PYTHON="$HOME/.local/miniconda3/bin/python3" ./scripts/install_build_deps.sh
+LCH_PYTHON="$HOME/.local/miniconda3/bin/python3" ./scripts/build_release.sh
+
+# 方式 B：在仓库建 .venv，脚本会自动选
+# python3 -m venv .venv && .venv/bin/pip install -r requirements-build.txt
+# 然后直接 ./scripts/build_release.sh
 # => dist/linux-cmd-helper-x64.tar.gz 或 dist/linux-cmd-helper-arm64.tar.gz
 ```
+
+须在**仓库根目录**执行（不要在 `scripts/` 下再写 `./scripts/...`）。
 
 解压后：
 

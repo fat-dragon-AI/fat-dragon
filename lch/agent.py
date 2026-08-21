@@ -14,6 +14,7 @@ from .jieba_fallback import jieba_banner_line
 from .loader import Runnable
 from .paths import jieba_dict_path
 from .pick import select_hit
+from .prefill import read_with_prefill
 from .script_mode import run_script_mode
 from .shell_escape import (
     estimate_manual_risk,
@@ -21,7 +22,7 @@ from .shell_escape import (
     run_shell_escape,
     strip_shell_prefix,
 )
-from .session import get_cwd
+from .session import get_cwd, try_handle_param_command
 from .step_mode import run_step_mode
 
 EXIT_WORDS = {"/quit", "/exit", "quit", "exit"}
@@ -36,6 +37,7 @@ AGENT_BANNER = """[AGENT] 已启用持续会话与命令执行能力（MVP3）�
         匹配结果不会自动执行。
         多命中时先选意图看详情，再选命令编号执行。
         !命令 / ！命令：普通命令直接执行；高危仍确认。会话保留 cwd（!cd）。
+        /set path=/opt/a.jar 设会话参数；/params 查看；/unset 清除。
         /help 查看帮助；/quit 或 Ctrl+C 结束会话。
 """
 
@@ -57,18 +59,20 @@ def agent_help() -> None:
   lch>     输入中文意图
            !命令 / ！命令 → 普通 Linux 命令直接执行（高危需确认）；!cd 改会话目录
            多命中 → 选> 编号看详情 → agent> 执行
-  agent>   数字 n → 按类型进入执行：
-             single   确认后执行
-             sequence 进入 step> 逐条确认
-             script   进入 script> 导出/执行
+  agent>   数字 n → 把该条命令带入 cmd>，可改参后回车，再二次确认
+             sequence → step> 逐步（命令已带入，回车执行 / 可改）
+             script   → script> 导出/执行
            i → 返回意图列表重新选择
            再输中文 → 重新匹配新意图（不会当 shell 执行）
            !命令 / ！命令 → 强制 shell（普通免确认；高危确认）
            手输英文/符号命令 → 按命令启发式风险确认（不继承当前意图）
            空行 / n / /cancel → 跳过本轮回到 lch>
            含 --config / passwd 等交互命令：确认后终端直通，菜单实时显示
-  step>    y / 手改 / s或跳过 / all剩余 / n返回
+  step>    回车执行本条（已带入）/ 改后回车 / 清空后 s跳过 / all / n
   script>  e导出 | r执行源 | x执行导出副本 | n返回
+  /set     会话参数：/set path=/opt/app.jar（口语未抽到时填模板）
+  /params  查看会话参数
+  /unset   /unset path 或 /unset 清空
   /reload  重载规则
   /quit    结束会话
 """
@@ -160,6 +164,10 @@ def agent_command_loop(
             except Exception as e:  # noqa: BLE001
                 print(f"重载失败: {e}")
             continue
+        handled, msg = try_handle_param_command(raw)
+        if handled:
+            print(msg)
+            continue
 
         # 返回意图列表（多命中时）
         if raw.lower() in ("i", "/list", "list") and qresult and len(qresult.hits) > 1:
@@ -208,10 +216,21 @@ def agent_command_loop(
                 if not runnable.cmd:
                     print("该条命令为空。")
                     continue
-                if "{" in runnable.cmd and "}" in runnable.cmd:
-                    print(f"命令仍含占位符，请先手输补全参数：\n  {runnable.cmd}")
+                print("已选命令，回车沿用或改参；空行取消。")
+                try:
+                    edited = read_with_prefill(
+                        "cmd> ", runnable.cmd, input_fn=read
+                    ).strip()
+                except (EOFError, KeyboardInterrupt):
+                    print("\n已取消。")
                     continue
-                _try_execute(engine, runnable.cmd, risk, intent_id, "index", input_fn=read)
+                if not edited:
+                    print("已取消。")
+                    continue
+                if "{" in edited and "}" in edited:
+                    print(f"仍含占位符，请改全后再回车: {edited}")
+                    continue
+                _try_execute(engine, edited, risk, intent_id, "index", input_fn=read)
                 continue
 
             if runnable.kind == "sequence":
@@ -268,6 +287,10 @@ def agent_repl(engine: Engine) -> int:
                 print(f"已重载，规则 {engine.rules_summary()}；{engine.profile_note}")
             except Exception as e:  # noqa: BLE001
                 print(f"重载失败: {e}")
+            continue
+        handled, msg = try_handle_param_command(line)
+        if handled:
+            print(msg)
             continue
 
         escaped = strip_shell_prefix(line)

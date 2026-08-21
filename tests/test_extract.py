@@ -58,6 +58,14 @@ class ExtractParamsTest(unittest.TestCase):
         self.assertEqual(extract_params("卸载 nginx")["pkg"], "nginx")
         self.assertEqual(extract_params("which nginx")["pkg"], "nginx")
         self.assertEqual(extract_params("nginx装在哪")["pkg"], "nginx")
+        self.assertEqual(extract_params("apt install htop")["pkg"], "htop")
+        self.assertEqual(extract_params("apt-get install -y nginx")["pkg"], "nginx")
+        self.assertEqual(extract_params("apt卸载 curl")["pkg"], "curl")
+        self.assertEqual(extract_params("dpkg -r vim")["pkg"], "vim")
+        p = extract_params("dpkg -i /tmp/foo.deb")
+        self.assertEqual(p.get("path"), "/tmp/foo.deb")
+        p = extract_params("安装deb ./bar.deb")
+        self.assertEqual(p.get("path"), "./bar.deb")
 
     def test_path_and_filter(self) -> None:
         p = extract_params(

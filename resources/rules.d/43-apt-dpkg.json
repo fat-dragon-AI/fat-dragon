@@ -1,0 +1,208 @@
+{
+  "set": "43-apt-dpkg",
+  "desc": "Debian/Ubuntu 专用：本地 deb、purge、更新源、autoremove（源安装/普通卸载并入 pkg.install / pkg.remove）",
+  "rules": [
+    {
+      "intent_id": "pkg.apt.update",
+      "desc": "更新 apt 软件源（install 前常用）",
+      "keywords": [
+        "apt update",
+        "apt-get update",
+        "更新软件源",
+        "刷新apt源",
+        "更新apt源",
+        "apt更新源"
+      ],
+      "keyword_weights": {
+        "apt update": 10,
+        "更新软件源": 10
+      },
+      "weight": 12,
+      "risk_level": "medium",
+      "cmd_template": [
+        "sudo apt-get update",
+        "sudo apt update",
+        "apt-get update"
+      ],
+      "tips": [
+        "只刷新索引，不升级已装包；装包走「安装软件」/ pkg.install。需网络与相应权限"
+      ]
+    },
+    {
+      "intent_id": "pkg.dpkg.install",
+      "desc": "用 dpkg / apt 安装本地 .deb",
+      "keywords": [
+        "dpkg安装",
+        "安装deb",
+        "装deb包",
+        "安装本地deb",
+        "装本地deb",
+        "dpkg -i",
+        "安装deb包"
+      ],
+      "keyword_weights": {
+        "安装deb": 12,
+        "dpkg安装": 12,
+        "dpkg -i": 12,
+        "装deb包": 10
+      },
+      "weight": 13,
+      "risk_level": "medium",
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "dpkg -i → 修依赖",
+          "stop_on_error": false,
+          "steps": [
+            "sudo dpkg -i {path}",
+            "sudo apt-get install -f -y"
+          ]
+        },
+        {
+          "kind": "single",
+          "label": "apt 装本地 deb（会拉依赖）",
+          "cmd": "sudo apt install {path}"
+        },
+        {
+          "kind": "single",
+          "label": "仅 dpkg -i",
+          "cmd": "sudo dpkg -i {path}"
+        }
+      ],
+      "tips": [
+        "将 {path} 换成 .deb 路径。dpkg -i 缺依赖时用第二步 apt-get install -f；apt install ./xx.deb 可一次拉依赖。从源装包走「安装软件」"
+      ]
+    },
+    {
+      "intent_id": "pkg.apt.purge",
+      "desc": "用 apt purge 卸载并删除配置",
+      "keywords": [
+        "apt彻底卸载",
+        "apt purge",
+        "apt-get purge",
+        "卸载并删配置",
+        "purge卸载",
+        "apt删配置"
+      ],
+      "keyword_weights": {
+        "apt彻底卸载": 12,
+        "apt purge": 12,
+        "卸载并删配置": 10
+      },
+      "weight": 13,
+      "risk_level": "high",
+      "params": [
+        {
+          "name": "pkg",
+          "required": true,
+          "extract": "pkg"
+        }
+      ],
+      "cmd_template": [
+        "sudo apt-get purge -y {pkg}",
+        "sudo apt purge {pkg}",
+        "apt-get purge -y {pkg}"
+      ],
+      "tips": [
+        "会删该包在 /etc 下的配置；先 dpkg -l | grep 确认包名。残留依赖可用「清理无用包」"
+      ]
+    },
+    {
+      "intent_id": "pkg.dpkg.remove",
+      "desc": "用 dpkg 卸载软件包（保留配置）",
+      "keywords": [
+        "dpkg卸载",
+        "dpkg -r",
+        "dpkg --remove",
+        "用dpkg卸"
+      ],
+      "keyword_weights": {
+        "dpkg卸载": 12,
+        "dpkg -r": 12
+      },
+      "weight": 13,
+      "risk_level": "high",
+      "params": [
+        {
+          "name": "pkg",
+          "required": true,
+          "extract": "pkg"
+        }
+      ],
+      "cmd_template": [
+        "sudo dpkg -r {pkg}",
+        "sudo dpkg --remove {pkg}",
+        "dpkg -r {pkg}"
+      ],
+      "tips": [
+        "不处理依赖；仓库包优先走「卸载软件」/ {pkg_remove}。连配置删除用 dpkg -P / 「dpkg彻底删除」"
+      ]
+    },
+    {
+      "intent_id": "pkg.dpkg.purge",
+      "desc": "用 dpkg --purge 卸载并删除配置",
+      "keywords": [
+        "dpkg彻底删除",
+        "dpkg -P",
+        "dpkg --purge",
+        "dpkg删配置",
+        "dpkg purge"
+      ],
+      "keyword_weights": {
+        "dpkg彻底删除": 12,
+        "dpkg -P": 12,
+        "dpkg --purge": 10
+      },
+      "weight": 13,
+      "risk_level": "high",
+      "params": [
+        {
+          "name": "pkg",
+          "required": true,
+          "extract": "pkg"
+        }
+      ],
+      "cmd_template": [
+        "sudo dpkg -P {pkg}",
+        "sudo dpkg --purge {pkg}",
+        "dpkg -P {pkg}"
+      ],
+      "tips": [
+        "比 -r 多删配置文件；不自动卸依赖。apt 包更常用 purge"
+      ]
+    },
+    {
+      "intent_id": "pkg.apt.autoremove",
+      "desc": "清理 apt 自动安装且不再需要的包",
+      "keywords": [
+        "apt autoremove",
+        "apt-get autoremove",
+        "清理无用包",
+        "清理依赖包",
+        "卸掉无用依赖",
+        "apt清理依赖"
+      ],
+      "keyword_weights": {
+        "清理无用包": 10,
+        "apt autoremove": 12
+      },
+      "weight": 12,
+      "risk_level": "medium",
+      "cmd_template": [
+        "sudo apt-get autoremove -y",
+        "sudo apt autoremove",
+        "apt-get autoremove -y"
+      ],
+      "tips": [
+        "卸掉为满足依赖自动装上、现已无包需要的软件；先看列表再确认"
+      ]
+    }
+  ]
+}

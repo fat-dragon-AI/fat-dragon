@@ -12,6 +12,7 @@ from .engine import Engine
 from .formatter import format_hit_detail, format_hit_list
 from .history import append_history
 from .pick import browse_hits
+from .session import try_handle_param_command
 from .shell_escape import run_shell_escape, strip_shell_prefix
 
 
@@ -53,6 +54,9 @@ def cmd_help() -> None:
         """命令:
   /help     显示帮助
   /reload   重新加载规则主文件+rules.d / system_adapt.json
+  /set      会话参数：/set path=/opt/app.jar（口语未抽到时填模板）
+  /params   查看会话参数
+  /unset    /unset path 或 /unset 清空
   /quit     退出（也可 exit / Ctrl+C）
   !命令     执行 Linux 命令（查询模式需确认；Agent 下普通免确认、高危确认）
   ！命令    同上（全角 ！）
@@ -144,6 +148,10 @@ def repl(engine: Engine) -> int:
                 print(f"已重载，规则 {engine.rules_summary()}；{engine.profile_note}")
             except Exception as e:  # noqa: BLE001
                 print(f"重载失败: {e}")
+            continue
+        handled, msg = try_handle_param_command(line)
+        if handled:
+            print(msg)
             continue
         escaped = strip_shell_prefix(line)
         if escaped is not None:

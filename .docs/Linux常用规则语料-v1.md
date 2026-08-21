@@ -5,7 +5,7 @@
 | 日期 | 2026-08-10 |
 | 规则文件 | `resources/rules.json` + `resources/rules.d/*.json` |
 | 对应设计 | `.docs/Linux中文离线指令助手-落地总体详细设计-v2.md`（schema v1.0） |
-| 规则条数 | 约 180（含 ollama/git/压缩/scp/systemd/export 等） |
+| 规则条数 | 约 190（含 apt/dpkg、ollama/git/压缩/scp/systemd/export 等） |
 
 ## 1. 覆盖范围
 
@@ -20,7 +20,7 @@
 | Shell / echo | `echo.*` | 打印文字、环境变量、退出码、写入文件、转义 |
 | 环境变量 | `env.path.*` / `env.export.*` / `env.proxy.*` | PATH；当前终端 export；HTTP/SOCKS 代理 |
 | 服务 | `svc.*` | status/start/stop/restart/list；systemd 刷新/失败单元/unit 配置/自启/新建 service |
-| 软件包 | `pkg.install/list/remove/which/files/info` | 安装、列表、卸载、命令位置、本体路径、包详情 |
+| 软件包 | `pkg.install/list/remove/which/files/info`；`pkg.apt.*` / `pkg.dpkg.*` | 适配安装卸载；Debian apt/dpkg 显式安装卸载 |
 | Nginx | `nginx.*` | 配置查看/校验、reload/restart、日志 |
 | JVM / Java | `jvm.*` / `java.*` / `jdk.install.17` / `mvn.*` | 版本、进程、jar 启停/nohup/systemd、编译运行、Maven |
 | Docker | `docker.*` | ps/logs/exec/启停删/镜像/compose |
@@ -95,6 +95,15 @@
 | 软件本体位置 | pkg.files |
 | nginx装在哪 | pkg.files |
 | 软件包信息 | pkg.info |
+| apt安装 | pkg.install |
+| 用apt装 | pkg.install |
+| 更新软件源 | pkg.apt.update |
+| 安装deb | pkg.dpkg.install |
+| apt卸载 | pkg.remove |
+| apt彻底卸载 | pkg.apt.purge |
+| dpkg卸载 | pkg.dpkg.remove |
+| dpkg彻底删除 | pkg.dpkg.purge |
+| 清理无用包 | pkg.apt.autoremove |
 | nginx 配置校验一下 | nginx.config.test |
 | 看 nginx 配置 | nginx.config.view |
 | 重载 nginx | nginx.reload |
