@@ -53,6 +53,24 @@ class ShortKeywordTest(unittest.TestCase):
             score_rule_keywords("java版本", r), score_rule_keywords("javascript", r)
         )
 
+    def test_synonym_expand_respects_mixed_boundary(self) -> None:
+        from lch.matcher import expand_query_with_synonyms
+
+        expanded = expand_query_with_synonyms("cargo镜像")
+        self.assertNotIn("goproxy", expanded)
+        self.assertNotIn("go镜像", expanded.split())  # 勿把 go 组灌进 cargo
+
+    def test_mixed_ascii_cjk_prefix_boundary(self) -> None:
+        r_go = _rule("mirror.go", ["go镜像"], weight=12)
+        r_cargo = _rule("mirror.cargo", ["cargo镜像"], weight=11)
+        self.assertGreater(
+            score_rule_keywords("go镜像", r_go), score_rule_keywords("go镜像", r_cargo)
+        )
+        self.assertGreater(
+            score_rule_keywords("cargo镜像", r_cargo),
+            score_rule_keywords("cargo镜像", r_go),
+        )
+
     def test_ngram_fills_inserted_char(self) -> None:
         r = _rule("sys.mem.free", ["内存占用", "内存"], weight=10)
         s = score_rule_keywords("看下内存的占用情况", r)
@@ -240,6 +258,141 @@ class AptDpkgIntentTest(unittest.TestCase):
         self.assertEqual(hits[0].intent_id, "pkg.install")
         hits = self.engine.query("卸载软件").hits
         self.assertEqual(hits[0].intent_id, "pkg.remove")
+
+
+class TextEditIntentTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        from pathlib import Path
+
+        from lch.engine import Engine
+
+        cls.engine = Engine(Path(__file__).resolve().parents[1])
+
+    def test_text_edit_phrases_top1(self) -> None:
+        cases = [
+            ("替换文本", "text.replace"),
+            ("文本替换", "text.replace"),
+            ("删掉文本", "text.delete.substr"),
+            ("删除字符串", "text.delete.substr"),
+            ("删除包含的行", "text.delete.line"),
+            ("删除空行", "text.delete.blank"),
+            ("追加文本", "text.append.line"),
+            ("插入一行", "text.insert.after"),
+        ]
+        for q, expect in cases:
+            hits = self.engine.query(q).hits
+            got = hits[0].intent_id if hits else None
+            self.assertEqual(got, expect, msg=q)
+
+    def test_grep_content_not_text_replace(self) -> None:
+        hits = self.engine.query("在文件里搜 error").hits
+        self.assertEqual(hits[0].intent_id, "file.find.content")
+
+
+class RegexIntentTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        from pathlib import Path
+
+        from lch.engine import Engine
+
+        cls.engine = Engine(Path(__file__).resolve().parents[1])
+
+    def test_regex_phrases_top1(self) -> None:
+        cases = [
+            ("5个数字", "regex.len.digit"),
+            ("5个汉字", "regex.len.han"),
+            ("n个字符", "regex.len.any"),
+            ("必须包含", "regex.must.contain"),
+            ("不能包含", "regex.must.not.contain"),
+            ("不能包换", "regex.must.not.contain"),
+            ("正则语法", "regex.cheat"),
+            ("正则", "regex.cheat"),
+            ("正则表达式", "regex.cheat"),
+            ("写个正则", "regex.cheat"),
+            ("正则搜文件", "regex.grep.test"),
+        ]
+        for q, expect in cases:
+            hits = self.engine.query(q).hits
+            got = hits[0].intent_id if hits else None
+            self.assertEqual(got, expect, msg=q)
+
+    def test_bare_regex_not_empty(self) -> None:
+        hits = self.engine.query("正则").hits
+        self.assertTrue(hits)
+        self.assertEqual(hits[0].intent_id, "regex.cheat")
+
+
+class MirrorIntentTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        from pathlib import Path
+
+        from lch.engine import Engine
+
+        cls.engine = Engine(Path(__file__).resolve().parents[1])
+
+    def test_mirror_phrases_top1(self) -> None:
+        cases = [
+            ("国内镜像", "mirror.overview"),
+            ("npm镜像", "mirror.npm"),
+            ("淘宝镜像", "mirror.npm"),
+            ("maven镜像", "mirror.maven"),
+            ("maven阿里云", "mirror.maven"),
+            ("gradle镜像", "mirror.gradle"),
+            ("pip镜像", "mirror.pip"),
+            ("docker镜像加速", "mirror.docker"),
+            ("go镜像", "mirror.go"),
+            ("golang镜像", "mirror.go"),
+            ("goproxy", "mirror.go"),
+            ("apt换源", "mirror.apt"),
+            ("composer镜像", "mirror.composer"),
+            ("cargo镜像", "mirror.cargo"),
+        ]
+        for q, expect in cases:
+            hits = self.engine.query(q).hits
+            got = hits[0].intent_id if hits else None
+            self.assertEqual(got, expect, msg=q)
+
+    def test_docker_images_not_mirror(self) -> None:
+        hits = self.engine.query("有哪些镜像").hits
+        self.assertEqual(hits[0].intent_id, "docker.images")
+        hits = self.engine.query("镜像列表").hits
+        self.assertEqual(hits[0].intent_id, "docker.images")
+
+
+class DockerIntentTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        from pathlib import Path
+
+        from lch.engine import Engine
+
+        cls.engine = Engine(Path(__file__).resolve().parents[1])
+
+    def test_docker_build_run_pull_top1(self) -> None:
+        cases = [
+            ("构建镜像", "docker.build"),
+            ("docker build", "docker.build"),
+            ("docker构建镜像", "docker.build"),
+            ("创建容器", "docker.run"),
+            ("docker run", "docker.run"),
+            ("运行容器", "docker.run"),
+            ("拉取镜像", "docker.pull"),
+            ("docker pull nginx", "docker.pull"),
+            ("启动容器", "docker.start"),
+            ("docker start myapp", "docker.start"),
+            ("重启容器", "docker.restart"),
+        ]
+        for q, expect in cases:
+            hits = self.engine.query(q).hits
+            got = hits[0].intent_id if hits else None
+            self.assertEqual(got, expect, msg=q)
+
+    def test_build_not_mirror_accel(self) -> None:
+        hits = self.engine.query("docker构建").hits
+        self.assertEqual(hits[0].intent_id, "docker.build")
 
 
 if __name__ == "__main__":

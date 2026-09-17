@@ -1,0 +1,337 @@
+{
+  "set": "34-text",
+  "desc": "文件内文本替换/删除/追加",
+  "rules": [
+    {
+      "intent_id": "text.replace",
+      "desc": "替换文件中的文本",
+      "keywords": [
+        "替换文本",
+        "替换字符串",
+        "文本替换",
+        "把文字换成",
+        "字符串替换",
+        "sed替换",
+        "文件里替换",
+        "替换文件内容",
+        "改文件里的字"
+      ],
+      "weight": 12,
+      "keyword_weights": {
+        "替换文本": 14,
+        "文本替换": 14,
+        "sed替换": 12
+      },
+      "params": [
+        {
+          "name": "text",
+          "required": true,
+          "extract": "text"
+        },
+        {
+          "name": "value",
+          "required": true,
+          "extract": "value"
+        },
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "先预览再 sed 原地替换（| 分隔）",
+          "stop_on_error": true,
+          "steps": [
+            "grep -nF -- {text} {path} | head -n 40",
+            "sed -i s|{text}|{value}|g {path}",
+            "grep -nF -- {value} {path} | head -n 20"
+          ]
+        },
+        {
+          "kind": "sequence",
+          "label": "带 .bak 备份再替换",
+          "stop_on_error": true,
+          "steps": [
+            "grep -nF -- {text} {path} | head -n 40",
+            "sed -i.bak s|{text}|{value}|g {path}",
+            "ls -lah {path} {path}.bak"
+          ]
+        },
+        {
+          "kind": "single",
+          "label": "仅预览匹配行（不改文件）",
+          "cmd": "grep -nF -- {text} {path}"
+        }
+      ],
+      "tips": [
+        "{text}=旧串，{value}=新串，{path}=文件；可用 /set text=… value=… path=…",
+        "模板用 | 作 sed 分隔符；若串内含 | 或正则元字符，请在 cmd> 手改",
+        "优先选「仅预览」或带 .bak；系统配置文件勿盲目 -i"
+      ]
+    },
+    {
+      "intent_id": "text.delete.substr",
+      "desc": "删除文件中的某段文本（替换为空）",
+      "keywords": [
+        "删掉文本",
+        "删除文本",
+        "删除字符串",
+        "去掉文字",
+        "抹掉文本",
+        "文件里删字",
+        "删掉字符串",
+        "去掉这段字"
+      ],
+      "weight": 11,
+      "keyword_weights": {
+        "删掉文本": 14,
+        "删除文本": 14,
+        "删除字符串": 12
+      },
+      "params": [
+        {
+          "name": "text",
+          "required": true,
+          "extract": "text"
+        },
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "预览 → sed 删子串 → 再确认无匹配",
+          "stop_on_error": true,
+          "steps": [
+            "grep -nF -- {text} {path} | head -n 40",
+            "sed -i s|{text}||g {path}",
+            "grep -nF -- {text} {path} || echo 'no more matches'"
+          ]
+        },
+        {
+          "kind": "sequence",
+          "label": "带 .bak 备份再删子串",
+          "stop_on_error": true,
+          "steps": [
+            "grep -nF -- {text} {path} | head -n 40",
+            "sed -i.bak s|{text}||g {path}",
+            "ls -lah {path} {path}.bak"
+          ]
+        }
+      ],
+      "tips": [
+        "只删出现的子串，不删整行；删整行请用「删除包含…的行」",
+        "{text} 为要删的字面量；复杂模式请手改 sed"
+      ]
+    },
+    {
+      "intent_id": "text.delete.line",
+      "desc": "删除包含某文本的整行",
+      "keywords": [
+        "删除包含的行",
+        "删掉包含的行",
+        "删除匹配行",
+        "去掉包含某字的行",
+        "sed删行",
+        "按内容删行",
+        "删除含某文本的行"
+      ],
+      "weight": 12,
+      "keyword_weights": {
+        "删除包含的行": 14,
+        "删掉包含的行": 14,
+        "sed删行": 11
+      },
+      "params": [
+        {
+          "name": "text",
+          "required": true,
+          "extract": "text"
+        },
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "预览 → sed 删匹配行",
+          "stop_on_error": true,
+          "steps": [
+            "grep -nF -- {text} {path} | head -n 40",
+            "sed -i /{text}/d {path}",
+            "grep -nF -- {text} {path} || echo 'no more matches'"
+          ]
+        },
+        {
+          "kind": "sequence",
+          "label": "带 .bak 备份再删行",
+          "stop_on_error": true,
+          "steps": [
+            "grep -nF -- {text} {path} | head -n 40",
+            "sed -i.bak /{text}/d {path}",
+            "ls -lah {path} {path}.bak"
+          ]
+        }
+      ],
+      "tips": [
+        "整行删除；仅去子串用「删掉文本」",
+        "含 / 的关键词请改用 grep -v 重定向或手改分隔符"
+      ]
+    },
+    {
+      "intent_id": "text.delete.blank",
+      "desc": "删除文件中的空行",
+      "keywords": [
+        "删除空行",
+        "去掉空行",
+        "删空行",
+        "清除空行",
+        "压缩空行"
+      ],
+      "weight": 10,
+      "params": [
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "预览空行数 → sed 删空行",
+          "stop_on_error": true,
+          "steps": [
+            "grep -c '^$' {path} || true",
+            "sed -i '/^$/d' {path}"
+          ]
+        },
+        {
+          "kind": "single",
+          "label": "带 .bak 删空行",
+          "cmd": "sed -i.bak '/^$/d' {path}"
+        }
+      ],
+      "tips": [
+        "只删完全空白行；含空格的「空行」可用 sed '/^[[:space:]]*$/d'"
+      ]
+    },
+    {
+      "intent_id": "text.append.line",
+      "desc": "向文件末尾追加一行文本",
+      "keywords": [
+        "追加文本",
+        "追加一行",
+        "文件末尾加",
+        "往文件里追加",
+        "append文本",
+        "尾部加一行",
+        "追加到文件"
+      ],
+      "weight": 10,
+      "params": [
+        {
+          "name": "text",
+          "required": true,
+          "extract": "text"
+        },
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "printf 追加 → tail 确认",
+          "stop_on_error": true,
+          "steps": [
+            "printf '%s\\n' {text} >> {path}",
+            "tail -n 5 {path}"
+          ]
+        },
+        {
+          "kind": "single",
+          "label": "tee -a 追加（可看输出）",
+          "cmd": "printf '%s\\n' {text} | tee -a {path}"
+        }
+      ],
+      "tips": [
+        "覆盖写入请用 echo 的「写入文件」；本意图为 >> 追加",
+        "{text} 为整行内容；可用 /set text=… path=…"
+      ]
+    },
+    {
+      "intent_id": "text.insert.after",
+      "desc": "在匹配行后插入一行",
+      "keywords": [
+        "插入一行",
+        "在某行后面加",
+        "匹配后插入",
+        "sed插入",
+        "行后追加文本",
+        "在匹配行后插入"
+      ],
+      "weight": 10,
+      "params": [
+        {
+          "name": "text",
+          "required": true,
+          "extract": "text"
+        },
+        {
+          "name": "value",
+          "required": true,
+          "extract": "value"
+        },
+        {
+          "name": "path",
+          "required": true,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "sequence",
+          "label": "预览匹配 → sed 在匹配行后插入",
+          "stop_on_error": true,
+          "steps": [
+            "grep -nF -- {text} {path} | head -n 20",
+            "sed -i /{text}/a\\{value} {path}",
+            "grep -nF -- {value} {path} | head -n 20"
+          ]
+        },
+        {
+          "kind": "sequence",
+          "label": "带 .bak 再插入",
+          "stop_on_error": true,
+          "steps": [
+            "grep -nF -- {text} {path} | head -n 20",
+            "sed -i.bak /{text}/a\\{value} {path}",
+            "ls -lah {path} {path}.bak"
+          ]
+        }
+      ],
+      "tips": [
+        "{text}=定位行关键词，{value}=要插入的新行内容",
+        "GNU sed 语法；BSD sed（macOS）写法不同，Linux 服务器一般可用"
+      ]
+    }
+  ]
+}

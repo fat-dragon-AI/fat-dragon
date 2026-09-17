@@ -5,7 +5,7 @@
 | 日期 | 2026-08-10 |
 | 规则文件 | `resources/rules.json` + `resources/rules.d/*.json` |
 | 对应设计 | `.docs/Linux中文离线指令助手-落地总体详细设计-v2.md`（schema v1.0） |
-| 规则条数 | 约 190（含 apt/dpkg、ollama/git/压缩/scp/systemd/export 等） |
+| 规则条数 | 约 213（含国内镜像、正则口语、文本编辑、apt/dpkg、ollama 等） |
 
 ## 1. 覆盖范围
 
@@ -16,6 +16,9 @@
 | 进程 | `sys.process.*` | 列表、查找、结束（high） |
 | 网络 | `net.*` / `nslookup.*` | 端口、ping、IP、网卡、路由、DNS、nslookup、连接 |
 | 文件/日志 | `file.*` / `log.journal` | 查找、内容搜、列目录、tail、软链、journalctl |
+| 文本编辑 | `text.*` | 替换/删子串/删匹配行/删空行/追加/匹配后插入（sed） |
+| 正则 | `regex.*` | 口语→模式：n 个数字/汉字、必须包含/不能包含、速查、试跑 |
+| 国内镜像 | `mirror.*` | npm/淘宝、Maven/Gradle 阿里云、pip、Docker 加速、apt、Go、Cargo、Composer |
 | 远程拷贝 | `scp.upload.*` / `scp.download.*` | scp 传文件/目录、从远程拉文件/目录 |
 | Shell / echo | `echo.*` | 打印文字、环境变量、退出码、写入文件、转义 |
 | 环境变量 | `env.path.*` / `env.export.*` / `env.proxy.*` | PATH；当前终端 export；HTTP/SOCKS 代理 |
@@ -23,7 +26,7 @@
 | 软件包 | `pkg.install/list/remove/which/files/info`；`pkg.apt.*` / `pkg.dpkg.*` | 适配安装卸载；Debian apt/dpkg 显式安装卸载 |
 | Nginx | `nginx.*` | 配置查看/校验、reload/restart、日志 |
 | JVM / Java | `jvm.*` / `java.*` / `jdk.install.17` / `mvn.*` | 版本、进程、jar 启停/nohup/systemd、编译运行、Maven |
-| Docker | `docker.*` | ps/logs/exec/启停删/镜像/compose |
+| Docker | `docker.*` | ps/logs/exec/启停删/镜像/build/run/pull/compose |
 | Ollama | `ollama.*` | list/show/run/create/API/清理缓存/HF 镜像（手册摘录） |
 | 用户权限 | `user.*` / `perm.chmod` / `perm.chown` / `perm.owner.view` | whoami、chmod / chown / 查看属主 |
 | 防火墙/定时/时间 | `firewall.*` / `cron.*` / `sys.date.time` | 常用排查 |
@@ -154,6 +157,11 @@
 | 停止容器 | docker.stop |
 | 删除容器 | docker.rm |
 | 镜像列表 | docker.images |
+| 构建镜像 | docker.build |
+| docker build | docker.build |
+| 创建容器 | docker.run |
+| docker run | docker.run |
+| 拉取镜像 | docker.pull |
 | compose 状态 | docker.compose.ps |
 | 我是谁 | user.whoami |
 | 改一下文件权限 | perm.chmod |
@@ -222,6 +230,31 @@
 | selinux开了没 | selinux.status |
 | 复制文件 | file.copy |
 | 移动文件 | file.move |
+| 替换文本 | text.replace |
+| 删掉文本 | text.delete.substr |
+| 删除包含的行 | text.delete.line |
+| 删除空行 | text.delete.blank |
+| 追加文本 | text.append.line |
+| 插入一行 | text.insert.after |
+| 5个数字 | regex.len.digit |
+| 5个汉字 | regex.len.han |
+| 必须包含 | regex.must.contain |
+| 不能包含 | regex.must.not.contain |
+| 不能包换 | regex.must.not.contain |
+| 正则语法 | regex.cheat |
+| 正则 | regex.cheat |
+| 正则表达式 | regex.cheat |
+| 写个正则 | regex.cheat |
+| 国内镜像 | mirror.overview |
+| npm镜像 | mirror.npm |
+| 淘宝镜像 | mirror.npm |
+| maven镜像 | mirror.maven |
+| pip镜像 | mirror.pip |
+| docker镜像加速 | mirror.docker |
+| apt换源 | mirror.apt |
+| go镜像 | mirror.go |
+| golang镜像 | mirror.go |
+| goproxy | mirror.go |
 | 传到服务器 | scp.upload.file |
 | scp传文件夹 | scp.upload.dir |
 | 从远程拉文件 | scp.download.file |

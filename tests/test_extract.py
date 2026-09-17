@@ -67,6 +67,24 @@ class ExtractParamsTest(unittest.TestCase):
         p = extract_params("安装deb ./bar.deb")
         self.assertEqual(p.get("path"), "./bar.deb")
 
+    def test_docker_image_and_container(self) -> None:
+        self.assertEqual(
+            extract_params("docker pull nginx:latest").get("image"), "nginx:latest"
+        )
+        self.assertEqual(
+            extract_params("docker run -d nginx").get("image"), "nginx"
+        )
+        self.assertEqual(
+            extract_params("docker build -t myapp:1.0 .").get("image"), "myapp:1.0"
+        )
+        self.assertEqual(extract_params("docker build .").get("path"), ".")
+        self.assertEqual(
+            extract_params("docker start mycontainer").get("container"), "mycontainer"
+        )
+        self.assertEqual(
+            extract_params("docker run --name web nginx").get("container"), "web"
+        )
+
     def test_path_and_filter(self) -> None:
         p = extract_params(
             "改权限 /tmp/a",
@@ -168,6 +186,28 @@ class ExtractModeWithPermContext(unittest.TestCase):
         self.assertEqual(p.get("model"), "qwen2.5-coder:1.5b")
         p = extract_params("模型名 qwen2.5:3b-q8_0")
         self.assertEqual(p.get("model"), "qwen2.5:3b-q8_0")
+
+    def test_text_replace_and_delete(self) -> None:
+        p = extract_params("把 'foo' 换成 'bar' /tmp/a.conf")
+        self.assertEqual(p.get("text"), "foo")
+        self.assertEqual(p.get("value"), "bar")
+        self.assertEqual(p.get("path"), "/tmp/a.conf")
+        p = extract_params("替换 old 为 new")
+        self.assertEqual(p.get("text"), "old")
+        self.assertEqual(p.get("value"), "new")
+        p = extract_params("删掉文本 'DEBUG' /var/log/app.log")
+        self.assertEqual(p.get("text"), "DEBUG")
+        self.assertEqual(p.get("path"), "/var/log/app.log")
+        p = extract_params("删除包含 'TODO' 的行 /tmp/a.txt")
+        self.assertEqual(p.get("text"), "TODO")
+        self.assertEqual(p.get("path"), "/tmp/a.txt")
+
+    def test_regex_n_and_contain(self) -> None:
+        self.assertEqual(extract_params("5个数字")["n"], "5")
+        self.assertEqual(extract_params("3个汉字")["n"], "3")
+        self.assertEqual(extract_params("必须包含 'abc'")["text"], "abc")
+        self.assertEqual(extract_params("不能包含 xyz")["text"], "xyz")
+        self.assertEqual(extract_params("不能包换 '<>'")["text"], "<>")
 
 
 if __name__ == "__main__":

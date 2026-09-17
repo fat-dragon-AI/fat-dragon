@@ -89,7 +89,11 @@
         "容器启动",
         "docker"
       ],
-      "weight": 9,
+      "keyword_weights": {
+        "启动容器": 12,
+        "docker start": 12
+      },
+      "weight": 10,
       "params": [
         {
           "name": "container",
@@ -174,6 +178,7 @@
         "镜像列表",
         "docker images",
         "有哪些镜像",
+        "本地镜像",
         "docker"
       ],
       "weight": 9,
@@ -181,6 +186,223 @@
       "cmd_template": [
         "docker images",
         "docker image ls"
+      ],
+      "tips": [
+        "拉取镜像见「docker pull」；构建见「docker build」；配置加速见「docker镜像加速」"
+      ]
+    },
+    {
+      "intent_id": "docker.pull",
+      "desc": "拉取镜像（docker pull）",
+      "keywords": [
+        "拉取镜像",
+        "docker pull",
+        "下载镜像",
+        "pull镜像",
+        "拉镜像",
+        "docker下载镜像"
+      ],
+      "keyword_weights": {
+        "docker pull": 14,
+        "拉取镜像": 12,
+        "下载镜像": 10
+      },
+      "weight": 12,
+      "params": [
+        {
+          "name": "image",
+          "required": true,
+          "extract": "image"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "docker pull {image}"
+      ],
+      "tips": [
+        "将 {image} 换成 nginx:latest 等；加速见「docker镜像加速」"
+      ]
+    },
+    {
+      "intent_id": "docker.build",
+      "desc": "构建镜像（docker build）",
+      "keywords": [
+        "构建镜像",
+        "docker build",
+        "docker构建",
+        "构建docker镜像",
+        "打镜像",
+        "编译镜像",
+        "dockerfile构建",
+        "构建容器镜像"
+      ],
+      "keyword_weights": {
+        "docker build": 14,
+        "构建镜像": 13,
+        "docker构建": 12,
+        "构建docker镜像": 12
+      },
+      "weight": 13,
+      "params": [
+        {
+          "name": "image",
+          "required": false,
+          "extract": "image"
+        },
+        {
+          "name": "path",
+          "required": false,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "single",
+          "label": "build -t 镜像名（当前目录 Dockerfile）",
+          "cmd": "docker build -t {image} ."
+        },
+        {
+          "kind": "single",
+          "label": "build -t 指定上下文目录",
+          "cmd": "docker build -t {image} {path}"
+        },
+        {
+          "kind": "single",
+          "label": "build 当前目录（不指定 tag）",
+          "cmd": "docker build ."
+        },
+        {
+          "kind": "single",
+          "label": "build 指定目录",
+          "cmd": "docker build {path}"
+        }
+      ],
+      "tips": [
+        "需在含 Dockerfile 的目录；{image} 如 myapp:1.0；{path} 为构建上下文，默认 .",
+        "与「docker镜像加速」不同：那是配置 daemon 拉取加速"
+      ]
+    },
+    {
+      "intent_id": "docker.run",
+      "desc": "创建并运行容器（docker run）",
+      "keywords": [
+        "创建容器",
+        "docker run",
+        "运行容器",
+        "跑容器",
+        "新建容器",
+        "起一个容器",
+        "docker创建容器",
+        "启动新容器"
+      ],
+      "keyword_weights": {
+        "docker run": 14,
+        "创建容器": 13,
+        "运行容器": 12,
+        "新建容器": 12
+      },
+      "weight": 13,
+      "params": [
+        {
+          "name": "image",
+          "required": true,
+          "extract": "image"
+        },
+        {
+          "name": "container",
+          "required": false,
+          "extract": "container"
+        },
+        {
+          "name": "port",
+          "required": false,
+          "extract": "port"
+        }
+      ],
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "single",
+          "label": "后台运行 -d --name",
+          "cmd": "docker run -d --name {container} {image}"
+        },
+        {
+          "kind": "single",
+          "label": "映射端口后台运行",
+          "cmd": "docker run -d -p {port}:{port} --name {container} {image}"
+        },
+        {
+          "kind": "single",
+          "label": "交互 bash",
+          "cmd": "docker run -it --name {container} {image} bash"
+        },
+        {
+          "kind": "single",
+          "label": "交互 sh（无 bash 时）",
+          "cmd": "docker run -it --name {container} {image} sh"
+        }
+      ],
+      "tips": [
+        "创建并启动新容器；已有容器「启动」用 docker start。{image} 必填；{container} 为 --name",
+        "端口映射示例：8080端口 → -p 8080:8080"
+      ]
+    },
+    {
+      "intent_id": "docker.create",
+      "desc": "只创建容器不启动（docker create）",
+      "keywords": [
+        "docker create",
+        "只创建容器",
+        "创建不启动",
+        "先创建容器",
+        "create容器"
+      ],
+      "keyword_weights": {
+        "docker create": 14,
+        "只创建容器": 12
+      },
+      "weight": 11,
+      "params": [
+        {
+          "name": "image",
+          "required": true,
+          "extract": "image"
+        },
+        {
+          "name": "container",
+          "required": false,
+          "extract": "container"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "docker create --name {container} {image}",
+        "docker create {image}"
+      ],
+      "tips": [
+        "创建后需 docker start {container} 才运行"
+      ]
+    },
+    {
+      "intent_id": "docker.restart",
+      "desc": "重启容器",
+      "keywords": [
+        "重启容器",
+        "docker restart",
+        "容器重启"
+      ],
+      "weight": 9,
+      "params": [
+        {
+          "name": "container",
+          "required": true,
+          "extract": "container"
+        }
+      ],
+      "risk_level": "medium",
+      "cmd_template": [
+        "docker restart {container}"
       ],
       "tips": []
     },

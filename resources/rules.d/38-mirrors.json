@@ -1,0 +1,338 @@
+{
+  "set": "38-mirrors",
+  "desc": "国内常用包管理 / 构建镜像速查与配置示例",
+  "rules": [
+    {
+      "intent_id": "mirror.overview",
+      "desc": "国内常用镜像地址一览",
+      "keywords": [
+        "国内镜像",
+        "常用镜像",
+        "镜像地址",
+        "换国内源",
+        "国内源",
+        "加速镜像",
+        "有哪些国内镜像"
+      ],
+      "weight": 14,
+      "keyword_weights": {
+        "国内镜像": 18,
+        "常用镜像": 16,
+        "换国内源": 16,
+        "镜像地址": 14
+      },
+      "risk_level": "low",
+      "cmd_template": [
+        "echo 'npm/pnpm/yarn : https://registry.npmmirror.com  (原淘宝)'",
+        "echo 'Maven/Gradle  : https://maven.aliyun.com/repository/public'",
+        "echo 'pip           : https://pypi.tuna.tsinghua.edu.cn/simple  (阿里: mirrors.aliyun.com/pypi/simple)'",
+        "echo 'Go            : https://goproxy.cn,direct'",
+        "echo 'Docker Hub    : 见「docker镜像加速」配置 daemon.json'",
+        "echo 'apt           : mirrors.aliyun.com / mirrors.tuna.tsinghua.edu.cn'",
+        "echo 'Composer      : https://mirrors.aliyun.com/composer/'",
+        "echo 'Cargo         : ustc/tuna sparse 索引；HF: https://hf-mirror.com'"
+      ],
+      "tips": [
+        "再说「npm镜像」「maven镜像」「pip镜像」「docker镜像加速」「apt换源」可看具体配置命令",
+        "与 docker 的「镜像列表」(本地已下载镜像) 不同，本意图是国内下载源"
+      ]
+    },
+    {
+      "intent_id": "mirror.npm",
+      "desc": "npm / pnpm / yarn 国内镜像（npmmirror）",
+      "keywords": [
+        "npm镜像",
+        "淘宝镜像",
+        "npmmirror",
+        "pnpm镜像",
+        "yarn镜像",
+        "前端镜像",
+        "node镜像源",
+        "npm换源",
+        "设置npm镜像",
+        "淘宝npm"
+      ],
+      "weight": 14,
+      "keyword_weights": {
+        "npm镜像": 18,
+        "淘宝镜像": 18,
+        "npmmirror": 16,
+        "前端镜像": 14,
+        "pnpm镜像": 14,
+        "yarn镜像": 14
+      },
+      "risk_level": "low",
+      "cmd_template": [
+        "echo 'registry: https://registry.npmmirror.com'",
+        "npm config set registry https://registry.npmmirror.com",
+        "npm config get registry",
+        "pnpm config set registry https://registry.npmmirror.com",
+        "yarn config set registry https://registry.npmmirror.com",
+        "npm install --registry=https://registry.npmmirror.com",
+        "echo '临时单次: npm i xxx --registry=https://registry.npmmirror.com'"
+      ],
+      "tips": [
+        "淘宝旧域名 registry.npm.taobao.org 已停用，请用 registry.npmmirror.com",
+        "恢复官方: npm config set registry https://registry.npmjs.org",
+        "也可项目级写 .npmrc: registry=https://registry.npmmirror.com"
+      ]
+    },
+    {
+      "intent_id": "mirror.maven",
+      "desc": "Maven 阿里云镜像",
+      "keywords": [
+        "maven镜像",
+        "maven阿里云",
+        "阿里云maven",
+        "java镜像",
+        "maven换源",
+        "settings.xml镜像",
+        "mvn镜像"
+      ],
+      "weight": 14,
+      "keyword_weights": {
+        "maven镜像": 18,
+        "maven阿里云": 16,
+        "阿里云maven": 16,
+        "java镜像": 12,
+        "mvn镜像": 14
+      },
+      "risk_level": "low",
+      "cmd_template": [
+        "echo '阿里云 public: https://maven.aliyun.com/repository/public'",
+        "echo '中央仓库镜像: https://maven.aliyun.com/repository/central'",
+        "echo '配置文件: ~/.m2/settings.xml  (或 $M2_HOME/conf/settings.xml)'",
+        "mkdir -p ~/.m2 && ls -lah ~/.m2/settings.xml 2>/dev/null || echo '尚无 settings.xml'",
+        "python3 -c \"print('''建议 mirrors 片段:\\n<mirror>\\n  <id>aliyun-public</id>\\n  <mirrorOf>*</mirrorOf>\\n  <name>Aliyun Maven</name>\\n  <url>https://maven.aliyun.com/repository/public</url>\\n</mirror>''')\""
+      ],
+      "tips": [
+        "不要在命令行乱拼 -Dmirror；优先改 settings.xml",
+        "仅代理中央仓可将 mirrorOf 设为 central；* 会镜像全部仓库（含部分私服场景需慎用）",
+        "Gradle 见「gradle镜像」"
+      ]
+    },
+    {
+      "intent_id": "mirror.gradle",
+      "desc": "Gradle 使用阿里云 Maven 仓库",
+      "keywords": [
+        "gradle镜像",
+        "gradle阿里云",
+        "gradle换源",
+        "android镜像源"
+      ],
+      "weight": 12,
+      "keyword_weights": {
+        "gradle镜像": 16,
+        "gradle阿里云": 14
+      },
+      "risk_level": "low",
+      "cmd_template": [
+        "echo 'repositories { maven { url \"https://maven.aliyun.com/repository/public\" } }'",
+        "echo '也可: maven { url \"https://maven.aliyun.com/repository/google\" }  (Android)'",
+        "echo '插件门户可试: https://maven.aliyun.com/repository/gradle-plugin'",
+        "ls -lah ~/.gradle/init.gradle settings.gradle build.gradle 2>/dev/null | head -n 20"
+      ],
+      "tips": [
+        "写在 settings.gradle / build.gradle 的 repositories，或 ~/.gradle/init.gradle 全局注入",
+        "与 Maven settings.xml 相互独立"
+      ]
+    },
+    {
+      "intent_id": "mirror.pip",
+      "desc": "pip / Python 国内镜像",
+      "keywords": [
+        "pip镜像",
+        "pip换源",
+        "pypi镜像",
+        "清华pip",
+        "阿里云pip",
+        "python镜像源",
+        "pip国内源"
+      ],
+      "weight": 14,
+      "keyword_weights": {
+        "pip镜像": 18,
+        "pip换源": 16,
+        "清华pip": 14,
+        "阿里云pip": 14,
+        "pypi镜像": 14
+      },
+      "risk_level": "low",
+      "cmd_template": [
+        "echo '清华: https://pypi.tuna.tsinghua.edu.cn/simple'",
+        "echo '阿里: https://mirrors.aliyun.com/pypi/simple/'",
+        "echo '豆瓣: https://pypi.douban.com/simple/  (备选)'",
+        "pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --extra-index-url https://pypi.org/simple pip -U",
+        "pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple",
+        "pip config list"
+      ],
+      "tips": [
+        "持久化也可写 ~/.pip/pip.conf 或 ~/.config/pip/pip.conf",
+        "建议保留 --extra-index-url https://pypi.org/simple 作兜底",
+        "conda 另说：可配清华/中科大 anaconda 镜像"
+      ]
+    },
+    {
+      "intent_id": "mirror.docker",
+      "desc": "Docker Hub 国内加速（daemon.json）",
+      "keywords": [
+        "docker镜像加速",
+        "docker换源",
+        "docker国内镜像",
+        "registry-mirrors",
+        "docker加速器",
+        "配置docker镜像"
+      ],
+      "weight": 13,
+      "keyword_weights": {
+        "docker镜像加速": 18,
+        "docker加速器": 16,
+        "registry-mirrors": 16,
+        "docker换源": 14
+      },
+      "risk_level": "medium",
+      "candidates": [
+        {
+          "kind": "single",
+          "label": "查看当前 daemon 镜像配置",
+          "cmd": "cat /etc/docker/daemon.json 2>/dev/null || echo '无 /etc/docker/daemon.json'"
+        },
+        {
+          "kind": "sequence",
+          "label": "写入示例 registry-mirrors 并提示重启",
+          "stop_on_error": true,
+          "steps": [
+            "sudo mkdir -p /etc/docker",
+            "python3 -c \"import json,pathlib; p=pathlib.Path('/tmp/daemon.json.lch'); p.write_text(json.dumps({'registry-mirrors':['https://docker.m.daocloud.io','https://mirror.ccs.tencentyun.com']},indent=2,ensure_ascii=False)+'\\n'); print(p)\"",
+            "echo '请核对后: sudo cp /tmp/daemon.json.lch /etc/docker/daemon.json && sudo systemctl daemon-reload && sudo systemctl restart docker'",
+            "cat /tmp/daemon.json.lch"
+          ]
+        }
+      ],
+      "tips": [
+        "与「docker镜像/有哪些镜像」(docker images) 不同：本意图配置拉取加速",
+        "公共加速地址常变更，若失效请换阿里云容器镜像服务控制台个人加速器",
+        "改 daemon.json 后必须 restart docker；有业务容器时谨慎"
+      ]
+    },
+    {
+      "intent_id": "mirror.go",
+      "desc": "Go 模块代理国内镜像",
+      "keywords": [
+        "go镜像",
+        "golang镜像",
+        "go模块镜像",
+        "go代理镜像",
+        "goproxy",
+        "go换源",
+        "goproxy.cn",
+        "gomod镜像",
+        "设置goproxy"
+      ],
+      "weight": 12,
+      "keyword_weights": {
+        "go镜像": 18,
+        "goproxy": 16,
+        "golang镜像": 16,
+        "go模块镜像": 16,
+        "goproxy.cn": 14,
+        "gomod镜像": 14
+      },
+      "risk_level": "low",
+      "cmd_template": [
+        "echo '推荐: GOPROXY=https://goproxy.cn,direct'",
+        "go env -w GOPROXY=https://goproxy.cn,direct",
+        "go env -w GOSUMDB=sum.golang.google.cn",
+        "go env | grep -E 'PROXY|SUMDB|PRIVATE'"
+      ],
+      "tips": [
+        "也可临时: export GOPROXY=https://goproxy.cn,direct",
+        "备选: https://proxy.golang.com.cn,direct"
+      ]
+    },
+    {
+      "intent_id": "mirror.apt",
+      "desc": "apt / Ubuntu 国内软件源",
+      "keywords": [
+        "apt换源",
+        "apt镜像",
+        "ubuntu换源",
+        "debian换源",
+        "阿里云apt",
+        "清华源",
+        "sources.list镜像"
+      ],
+      "weight": 13,
+      "keyword_weights": {
+        "apt换源": 18,
+        "ubuntu换源": 16,
+        "阿里云apt": 14,
+        "清华源": 14,
+        "apt镜像": 14
+      },
+      "risk_level": "medium",
+      "cmd_template": [
+        "echo '阿里云: https://mirrors.aliyun.com/ubuntu/  (Debian: .../debian/)'",
+        "echo '清华:   https://mirrors.tuna.tsinghua.edu.cn/ubuntu/'",
+        "echo '中科大: https://mirrors.ustc.edu.cn/ubuntu/'",
+        "lsb_release -a 2>/dev/null; cat /etc/os-release | head -n 8",
+        "grep -RIn --include='*.list' -E 'deb |aliyun|tuna|ustc' /etc/apt/sources.list /etc/apt/sources.list.d 2>/dev/null | head -n 40"
+      ],
+      "tips": [
+        "换源后执行「更新软件源」/ apt update；codename 须与本机一致 (focal/jammy 等)",
+        "Ubuntu 24.04+ 可能用 deb822 的 ubuntu.sources，勿只改旧 sources.list",
+        "只刷新索引见 pkg.apt.update；本意图侧重国内镜像地址与现状查看"
+      ]
+    },
+    {
+      "intent_id": "mirror.composer",
+      "desc": "Composer / PHP 阿里云镜像",
+      "keywords": [
+        "composer镜像",
+        "php镜像源",
+        "composer换源",
+        "阿里云composer"
+      ],
+      "weight": 11,
+      "keyword_weights": {
+        "composer镜像": 16,
+        "composer换源": 14
+      },
+      "risk_level": "low",
+      "cmd_template": [
+        "echo 'https://mirrors.aliyun.com/composer/'",
+        "composer config -g repos.packagist composer https://mirrors.aliyun.com/composer/",
+        "composer config -g --list | grep -i repos || true"
+      ],
+      "tips": [
+        "恢复: composer config -g --unset repos.packagist"
+      ]
+    },
+    {
+      "intent_id": "mirror.cargo",
+      "desc": "Rust Cargo 国内镜像",
+      "keywords": [
+        "cargo镜像",
+        "rust镜像",
+        "crates镜像",
+        "cargo换源"
+      ],
+      "weight": 11,
+      "keyword_weights": {
+        "cargo镜像": 16,
+        "rust镜像": 14,
+        "cargo换源": 14
+      },
+      "risk_level": "low",
+      "cmd_template": [
+        "echo 'USTC sparse: https://mirrors.ustc.edu.cn/crates.io-index/'",
+        "mkdir -p ~/.cargo && ls -lah ~/.cargo/config.toml ~/.cargo/config 2>/dev/null || echo '尚无 cargo config'",
+        "python3 -c \"print('''~/.cargo/config.toml 示例:\\n[source.crates-io]\\nreplace-with = \\\"ustc\\\"\\n\\n[source.ustc]\\nregistry = \\\"sparse+https://mirrors.ustc.edu.cn/crates.io-index/\\\"''')\""
+      ],
+      "tips": [
+        "也可用清华 rsproxy / tuna 文档中的 crates 配置",
+        "改完后 cargo search / cargo build 验证"
+      ]
+    }
+  ]
+}

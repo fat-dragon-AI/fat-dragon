@@ -1,0 +1,268 @@
+{
+  "set": "37-regex",
+  "desc": "口语描述 → 正则表达式速查与试跑",
+  "rules": [
+    {
+      "intent_id": "regex.cheat",
+      "desc": "正则语法速查",
+      "keywords": [
+        "正则",
+        "正则表达式",
+        "写个正则",
+        "写正则",
+        "正则语法",
+        "正则速查",
+        "正则表达式语法",
+        "regex",
+        "regex语法",
+        "正则元字符",
+        "正则怎么写",
+        "怎么写正则"
+      ],
+      "weight": 12,
+      "keyword_weights": {
+        "正则": 10,
+        "正则表达式": 14,
+        "写个正则": 14,
+        "写正则": 12,
+        "regex": 12
+      },
+      "risk_level": "low",
+      "cmd_template": [
+        "echo '元字符: . 任意1字  | 或  ()分组  []字符类  ^行首  $行尾  \\转义'",
+        "echo '量词: ?0或1  *0或多  +1或多  花括号n恰好n次  n,至少n  n,m为n到m次'",
+        "echo '常用: \\d数字 \\w单词字符 \\s空白；汉字 grep -P 用 \\p{Han}；Python 用 [\\u4e00-\\u9fff]'",
+        "echo '工具: grep -E 扩展正则；grep -P PCRE；sed -E；python3 re'"
+      ],
+      "tips": [
+        "可直接说「5个数字」「n个汉字」「必须包含 xx」「不能包含 xx」生成对应正则",
+        "Linux 优先 grep -P / Python；纯 POSIX 的 grep -E 能力较弱"
+      ]
+    },
+    {
+      "intent_id": "regex.len.digit",
+      "desc": "生成「恰好 n 个数字」的正则",
+      "keywords": [
+        "个数字",
+        "n个数字",
+        "几个数字",
+        "位数字",
+        "匹配数字",
+        "数字正则",
+        "5个数字",
+        "恰好几个数字",
+        "连续数字"
+      ],
+      "weight": 13,
+      "keyword_weights": {
+        "个数字": 16,
+        "5个数字": 14,
+        "n个数字": 14,
+        "数字正则": 12
+      },
+      "params": [
+        {
+          "name": "n",
+          "required": true,
+          "extract": "n"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "python3 -c \"n=int({n}); print('恰好%d位数字(整串): ^[0-9]{%d}$'%(n,n)); print('恰好%d位(PCRE): ^\\\\d{%d}$'%(n,n)); print('含连续%d位(子串): [0-9]{%d}'%(n,n)); print('至少%d位: ^[0-9]{%d,}$'%(n,n)); print('至多%d位: ^[0-9]{0,%d}$'%(n,n))\"",
+        "python3 -c \"import re; n=int({n}); print(re.fullmatch(r'^[0-9]{%d}$'%n, '0'*n))\""
+      ],
+      "tips": [
+        "「5个数字」会抽出 n=5；也可用 /set n=5",
+        "整串校验用 ^…$；只要出现连续 n 位用子串写法",
+        "试文件：grep -oP '\\\\d{n}' 文件（把 n 换成数字）"
+      ]
+    },
+    {
+      "intent_id": "regex.len.han",
+      "desc": "生成「恰好 n 个汉字」的正则",
+      "keywords": [
+        "个汉字",
+        "n个汉字",
+        "几个汉字",
+        "匹配汉字",
+        "汉字正则",
+        "5个汉字",
+        "中文个数",
+        "恰好几个汉字"
+      ],
+      "weight": 13,
+      "keyword_weights": {
+        "个汉字": 16,
+        "5个汉字": 14,
+        "n个汉字": 14,
+        "汉字正则": 12
+      },
+      "params": [
+        {
+          "name": "n",
+          "required": true,
+          "extract": "n"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "python3 -c \"n=int({n}); print('恰好%d个汉字(Python): ^[\\\\u4e00-\\\\u9fff]{%d}$'%(n,n)); print('恰好%d个汉字(PCRE): ^\\\\p{Han}{%d}$'%(n,n)); print('含连续%d个汉字: \\\\p{Han}{%d}'%(n,n))\"",
+        "python3 -c \"import re; n=int({n}); s='汉'*n; print('test', s, '->', bool(re.fullmatch(r'^[\\u4e00-\\u9fff]{%d}$'%n, s)))\""
+      ],
+      "tips": [
+        "「5个汉字」抽出 n=5；grep：grep -oP '\\\\p{Han}{5}' 文件",
+        "\\\\u4e00-\\\\u9fff 为常用汉字区，生僻字可能漏匹配"
+      ]
+    },
+    {
+      "intent_id": "regex.len.any",
+      "desc": "生成「恰好 n 个任意字符」的正则",
+      "keywords": [
+        "个字符",
+        "n个字符",
+        "几个字符",
+        "恰好几个字符",
+        "固定长度正则",
+        "长度n正则"
+      ],
+      "weight": 11,
+      "keyword_weights": {
+        "个字符": 14,
+        "n个字符": 12
+      },
+      "params": [
+        {
+          "name": "n",
+          "required": true,
+          "extract": "n"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "python3 -c \"n=int({n}); print('恰好%d个任意字符(单行): ^.{%d}$'%(n,n)); print('至少%d个: ^.{%d,}$'%(n,n)); print('非换行%d个: ^[^\\\\n]{%d}$'%(n,n))\""
+      ],
+      "tips": [
+        ". 默认不匹配换行；跨行需 (?s) 或 [\\s\\S]"
+      ]
+    },
+    {
+      "intent_id": "regex.must.contain",
+      "desc": "生成「必须包含某串」的正则",
+      "keywords": [
+        "必须包含",
+        "一定包含",
+        "需要包含",
+        "要包含字符",
+        "正则必须包含",
+        "包含某字符",
+        "必须有某某"
+      ],
+      "weight": 13,
+      "keyword_weights": {
+        "必须包含": 16,
+        "一定包含": 12,
+        "需要包含": 12
+      },
+      "params": [
+        {
+          "name": "text",
+          "required": true,
+          "extract": "text"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "python3 -c \"t='{text}'; import re; e=re.escape(t); print('子串匹配:', '.*'+e+'.*'); print('整串且必须含(前窥): ^(?=.*%s).*$'%e); print('多条件AND示例: ^(?=.*甲)(?=.*乙).*$')\"",
+        "grep -F -- {text} {path}"
+      ],
+      "tips": [
+        "说「必须包含 'abc'」可抽出 text；元字符已用 re.escape 转义",
+        "与长度组合例：^(?=.*xx)[0-9]{5}$ → 5 位数字且含 xx",
+        "第二条 grep 需补 {path}；只要模式可忽略"
+      ]
+    },
+    {
+      "intent_id": "regex.must.not.contain",
+      "desc": "生成「不能包含某串」的正则",
+      "keywords": [
+        "不能包含",
+        "不能包换",
+        "不得包含",
+        "禁止包含",
+        "不能有某某",
+        "正则不能包含",
+        "排除某字符",
+        "不要包含"
+      ],
+      "weight": 13,
+      "keyword_weights": {
+        "不能包含": 16,
+        "不能包换": 14,
+        "不得包含": 12,
+        "禁止包含": 12
+      },
+      "params": [
+        {
+          "name": "text",
+          "required": true,
+          "extract": "text"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "python3 -c \"t='{text}'; import re; e=re.escape(t); print('整串不含(负向前窥): ^(?:(?!%s).)*$'%e); print('字符类排除单字符用 [^xyz]'); print('过滤行可用: grep -vF')\"",
+        "grep -vF -- {text} {path}"
+      ],
+      "tips": [
+        "「不能包含 'xx'」抽出 text；「不能包换」同义也会命中",
+        "过滤文件行优先 grep -vF；写校验规则用负向前窥",
+        "与长度组合例：^(?!.*xx)[0-9]{5}$ → 5 位数字且不含 xx"
+      ]
+    },
+    {
+      "intent_id": "regex.grep.test",
+      "desc": "用正则在文件中试跑匹配",
+      "keywords": [
+        "正则搜文件",
+        "试一下正则",
+        "用正则匹配文件",
+        "grep正则",
+        "regex试跑",
+        "验证正则"
+      ],
+      "weight": 12,
+      "keyword_weights": {
+        "正则搜文件": 20,
+        "试一下正则": 18,
+        "用正则匹配文件": 18,
+        "grep正则": 18,
+        "regex试跑": 16,
+        "验证正则": 16
+      },
+      "params": [
+        {
+          "name": "text",
+          "required": true,
+          "extract": "text"
+        },
+        {
+          "name": "path",
+          "required": false,
+          "extract": "path"
+        }
+      ],
+      "risk_level": "low",
+      "cmd_template": [
+        "grep -nE -- {text} {path}",
+        "grep -nP -- {text} {path}",
+        "grep -oE -- {text} {path} | head -n 50",
+        "rg -n -- {text} {path}"
+      ],
+      "tips": [
+        "{text}=正则；-E 扩展正则，-P 支持前窥/Unicode；字面量搜用「搜内容」或 grep -F",
+        "未给路径时补文件，或 /set path=…"
+      ]
+    }
+  ]
+}

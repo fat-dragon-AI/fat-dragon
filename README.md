@@ -160,6 +160,13 @@ lch -agent
 | apt安装 / 安装deb / apt彻底卸载 | `{pkg_install}` / `dpkg -i` / `apt-get purge` |
 | 看一下当前目录 | `ls -lah` |
 | 找文件 / 搜内容 | `find` / `grep`/`rg` |
+| 替换文本 / 删掉文本 / 删匹配行 | `sed` 预览后原地改（可 .bak） |
+| 追加一行 / 匹配后插入 | `printf >>` / `sed a\\` |
+| 删除空行 | `sed '/^$/d'` |
+| 5个数字 / n个汉字 / 必须包含 / 不能包含 | 口语 → 正则（python 打印模式） |
+| 正则语法 / 正则搜文件 | 速查 / `grep -E|-P` 试跑 |
+| 国内镜像 / npm淘宝 / maven阿里云 / pip清华 | 常用国内源地址与配置命令 |
+| docker镜像加速 / apt换源 / goproxy | daemon.json / Ubuntu 源 / Go 代理 |
 | nginx 服务状态 / 重启 sshd | `systemctl status/restart …` |
 | 刷新systemd / 查看异常服务 | `systemctl daemon-reload` / `systemctl --failed` |
 | 新建systemd服务 / service示例 | 模板写出 unit → `daemon-reload` / `enable --now` |
@@ -175,9 +182,11 @@ lch -agent
 | spring-boot:run | `mvn spring-boot:run` |
 | 切换java版本 | `update-alternatives --config java`（逐步） |
 | docker 有哪些容器 / 看容器日志 | `docker ps` / `docker logs` |
+| 构建镜像 / 创建容器 / 拉镜像 | `docker build` / `docker run` / `docker pull` |
+| 启动容器 / 停止删除 | `docker start` / `docker stop` → `rm` |
+| 进入容器 / 删除容器 | `docker exec -it` / `docker stop`→`rm` |
 | ollama列表 / 跑模型 / 自建GGUF | `ollama list` / `run` / `create -f Modelfile` |
 | 清理ollama缓存 / 下载gguf | 清 partial blobs / `wget -c` hf-mirror |
-| 进入容器 / 删除容器 | `docker exec -it` / `docker stop`→`rm` |
 | 传到服务器 / scp传文件夹 | `scp` / `scp -r` 本地→远程 |
 | 从远程拉文件 / 拉文件夹回来 | `scp` / `scp -r` 远程→本地 |
 | 改一下文件权限 / 改属主 | `ls`→`chmod` / `ls`→`chown` |
@@ -207,8 +216,9 @@ lch -agent
 | `{user}` | 远程用户 | `root@10.0.0.1:/tmp` / `用户 root` |
 | `{owner}` | 属主 | `chown www-data:www-data` / `归还给 lilong` |
 | `{name}` / `{varname}` | 环境变量名 | `echo $HOME` / `export FOO=…`（varname 导出时不加引号） |
-| `{value}` | 环境变量值 / 代理 URL | `export FOO=bar` / `http://127.0.0.1:7890` |
-| `{text}` | 打印/写入内容 | `打印 'hello'` |
+| `{value}` | 环境变量值 / 代理 URL / 新串 / 插入行 | `export FOO=bar`；替换成新文本；匹配后插入的新行 |
+| `{text}` | 打印/写入/旧串/删串/包含串 | `打印 'hello'`；`必须包含 'xx'`；或 `/set text=…` |
+| `{n}` | 个数（正则长度） | `5个数字` / `3个汉字`；或 `/set n=5` |
 | `{mode}` | 权限位 | 常留占位，手补 `755`/`644` |
 | `{host}` | 主机 | `ping 8.8.8.8` / `nslookup baidu.com` |
 | `{dns}` | DNS 服务器 | `用8.8.8.8解析` / `nslookup 域名 8.8.8.8` |

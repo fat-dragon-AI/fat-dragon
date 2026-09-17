@@ -101,8 +101,15 @@ def _hit(text: str, text_ns: str, kw: str) -> bool:
         return False
     kw_l = kw.lower()
     text_l = text.lower()
+    # 短纯 ASCII：单词边界，避免 go⊂cargo、git⊂digital 等
     if kw_l.isascii() and kw_l.replace("-", "").replace("_", "").isalnum() and len(kw_l) <= 4:
         return bool(re.search(rf"(?<![a-z0-9_]){re.escape(kw_l)}(?![a-z0-9_])", text_l))
+    # 英文前缀 + 中文后缀（如 go镜像）：禁止英文前缀被更长单词吞掉（cargo镜像）
+    mixed = re.match(r"^([a-z][a-z0-9_+-]*)([\u4e00-\u9fff].*)$", kw_l)
+    if mixed:
+        return bool(
+            re.search(rf"(?<![a-z0-9_]){re.escape(kw_l)}", text_l)
+        )
     if kw_l in text_l:
         return True
     kw_ns = "".join(kw.split()).lower()
@@ -275,7 +282,7 @@ def expand_query_with_synonyms(text: str) -> str:
     tl = text.lower()
     tns = "".join(text.split()).lower()
     for group in _synonym_groups:
-        if any(g.lower() in tl or "".join(g.split()).lower() in tns for g in group):
+        if any(_hit(tl, tns, g) for g in group):
             extra.extend(group)
     if not extra:
         return text

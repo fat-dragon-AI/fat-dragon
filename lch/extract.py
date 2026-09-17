@@ -104,6 +104,55 @@ def extract_params(text: str, rule_params: list[dict[str, Any]] | None = None) -
     m = re.search(r"容器\s*([A-Za-z0-9_.\-]+)", text)
     if m:
         params["container"] = m.group(1)
+    if "container" not in params:
+        m = re.search(
+            r"docker\s+(?:start|stop|restart|rm|exec|logs|attach)\s+"
+            r"(?:-(?:it|[\w-]+)\s+)*([A-Za-z0-9_.\-]+)",
+            text,
+            re.I,
+        )
+        if m and m.group(1).lower() not in ("bash", "sh"):
+            params["container"] = m.group(1)
+    if "container" not in params:
+        m = re.search(r"(?:--name|-n)\s+([A-Za-z0-9_.\-]+)", text, re.I)
+        if m:
+            params["container"] = m.group(1)
+
+    # Docker 镜像名
+    m = re.search(r"(?:-t|--tag)\s+([A-Za-z0-9_.:/\-]+)", text, re.I)
+    if m:
+        params["image"] = m.group(1)
+    if "image" not in params:
+        m = re.search(
+            r"(?:镜像|image)\s*([A-Za-z0-9_.:/\-]+)",
+            text,
+            re.I,
+        )
+        if m and m.group(1).lower() not in (
+            "列表",
+            "加速",
+            "换源",
+            "下载",
+            "构建",
+        ):
+            params["image"] = m.group(1)
+    if "image" not in params:
+        m = re.search(
+            r"docker\s+(?:pull|run|create)\s+(?:-(?:it|d|[\w-]+)\s+)*"
+            r"([A-Za-z0-9_.:/\-]+)",
+            text,
+            re.I,
+        )
+        if m and m.group(1).lower() not in ("bash", "sh", "-it"):
+            params["image"] = m.group(1)
+    if re.search(r"docker\s+build", text, re.I) and "path" not in params:
+        m = re.search(
+            r"docker\s+build(?:\s+-t\s+\S+)*\s+(\.|(?:\./|\.\./)[^\s]+)",
+            text,
+            re.I,
+        )
+        if m:
+            params["path"] = m.group(1)
 
     # ollama 模型名：qwen2.5:3b / 模型名 xxx
     m = re.search(
@@ -465,6 +514,118 @@ def extract_params(text: str, rule_params: list[dict[str, Any]] | None = None) -
                 params["value"] = f"http://{m.group(1)}"
                 params.setdefault("port", m.group(2))
 
+    # 个数：5个数字 / 3个汉字 / n 个字符
+    m = re.search(
+        r"(\d{1,3})\s*个\s*(?:汉字|中文|数字|字符|字母|位)",
+        text,
+    )
+    if not m:
+        m = re.search(
+            r"(?:恰好|正好|连续)\s*(\d{1,3})\s*个",
+            text,
+        )
+    if m:
+        params["n"] = m.group(1)
+
+    # 必须包含 / 不能包含（含口语别字「包换」）
+    if "text" not in params:
+        m = re.search(
+            r"(?:必须包含|一定包含|需要包含|必须有|一定要有)\s*"
+            r"[「『\"']([^\"'」』]+)[」』\"']",
+            text,
+        )
+        if not m:
+            m = re.search(
+                r"(?:必须包含|一定包含|需要包含|必须有)\s+(\S+)",
+                text,
+            )
+        if m:
+            cand = m.group(1).strip()
+            if cand and cand not in ("字符", "文字", "字符串", "文本"):
+                params["text"] = cand
+    if "text" not in params:
+        m = re.search(
+            r"(?:不能包含|不能包换|不得包含|禁止包含|不要包含|不能有)\s*"
+            r"[「『\"']([^\"'」』]+)[」』\"']",
+            text,
+        )
+        if not m:
+            m = re.search(
+                r"(?:不能包含|不能包换|不得包含|禁止包含|不要包含|不能有)\s+(\S+)",
+                text,
+            )
+        if m:
+            cand = m.group(1).strip()
+            if cand and cand not in ("字符", "文字", "字符串", "文本"):
+                params["text"] = cand
+
+    # 文本替换：把 A 换成 B / 替换 A 为 B
+    m = re.search(
+        r"(?:把|将)\s*[「『\"']([^\"'」』]+)[」』\"']\s*"
+        r"(?:替换成|换成|改成|替换为|变为)\s*[「『\"']([^\"'」』]+)[」』\"']",
+        text,
+    )
+    if not m:
+        m = re.search(
+            r"(?:把|将)\s+(\S+)\s+(?:替换成|换成|改成|替换为|变为)\s+(\S+)",
+            text,
+        )
+    if not m:
+        m = re.search(
+            r"替换\s*[「『\"']([^\"'」』]+)[」』\"']\s*(?:为|成)\s*"
+            r"[「『\"']([^\"'」』]+)[」』\"']",
+            text,
+        )
+    if not m:
+        m = re.search(
+            r"替换\s+(\S+)\s+(?:为|成)\s+(\S+)",
+            text,
+        )
+    if m:
+        old, new = m.group(1).strip(), m.group(2).strip()
+        if old and new and old not in ("文本", "字符串", "内容", "文件"):
+            params["text"] = old
+            params["value"] = new
+
+    # 删掉/删除 文本|字符串 'xxx'；删除包含 xxx 的行
+    if "text" not in params:
+        m = re.search(
+            r"删除?\s*包含\s*[「『\"']([^\"'」』]+)[」』\"']\s*的行",
+            text,
+        )
+        if not m:
+            m = re.search(
+                r"删除?\s*包含\s+(\S+)\s*的行",
+                text,
+            )
+        if m:
+            params["text"] = m.group(1).strip()
+    if "text" not in params:
+        m = re.search(
+            r"(?:删掉|删除|去掉|抹掉)\s*(?:文本|字符串|内容|文字)?\s*"
+            r"[「『\"']([^\"'」』]+)[」』\"']",
+            text,
+        )
+        if not m:
+            m = re.search(
+                r"(?:删掉|删除|去掉)\s*(?:文本|字符串)\s+(\S+)",
+                text,
+            )
+        if m:
+            cand = m.group(1).strip()
+            if cand and cand not in ("空行", "软件包", "容器", "文件"):
+                params["text"] = cand
+
+    # 追加/插入 文本
+    if "text" not in params:
+        m = re.search(
+            r"(?:追加|插入)\s*(?:一行|文本|字符串)?\s*"
+            r"[「『\"']([^\"'」』]+)[」』\"']",
+            text,
+        )
+        if m:
+            params["text"] = m.group(1).strip()
+
     # echo / 打印 的文本内容（引号优先）
     m = re.search(
         r"(?:打印|echo)\s*[「『\"']([^\"'」』]+)[」』\"']",
@@ -487,7 +648,7 @@ def extract_params(text: str, rule_params: list[dict[str, Any]] | None = None) -
             elif re.fullmatch(r"[A-Z][A-Z0-9_]{1,}", cand):
                 m = None
             else:
-                params["text"] = cand
+                params.setdefault("text", cand)
     if m and "text" not in params:
         params["text"] = m.group(1).strip()
 

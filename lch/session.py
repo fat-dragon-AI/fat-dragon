@@ -44,6 +44,7 @@ SESSION_PARAM_KEYS = frozenset(
         "user",
         "file_keyword",
         "proc_name",
+        "n",
     }
 )
 
