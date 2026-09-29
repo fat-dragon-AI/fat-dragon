@@ -32,6 +32,8 @@ def select_hit(
         return hit
 
     if show_list:
+        if result.hits and all(h.confidence == "fallback" for h in result.hits):
+            print("未找到确切匹配，以下是可能相关的意图")
         print(format_hit_list(result))
 
     while True:
@@ -83,6 +85,8 @@ def browse_hits(
         )
         return
 
+    if result.hits and all(h.confidence == "fallback" for h in result.hits):
+        print("未找到确切匹配，以下是可能相关的意图")
     print(format_hit_list(result))
     read = input_fn or input
     while True:

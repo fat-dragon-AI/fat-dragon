@@ -239,7 +239,15 @@ lch -agent
 | `LCH_SOFT_RES` | 大资源外挂目录（如离线 JDK） |
 | `LCH_PYTHON` | 指定 Python（开发入口 / 构建脚本） |
 | `LCH_TOP_K` | 命中条数上限（默认 `10`） |
-| `LCH_T_EXACT` / `LCH_T_WEAK` | 匹配置信阈值（默认约 `8` / `4`） |
+| `LCH_T_EXACT` / `LCH_T_WEAK` | v1 匹配置信阈值（默认约 `8` / `4`）。v2 不用这两项 |
+| `LCH_MATCH_V2` | 匹配引擎：`1` 走四段流水线，`0` 走旧引擎。S8 后默认开，回滚设 `0` |
+| `LCH_MATCH_V2_RECALL=0` | 只退召回（全量规则打分） |
+| `LCH_MATCH_V2_RERANK=0` | 只退打分（仍用关键词长度求和） |
+| `LCH_MATCH_V2_VERDICT=0` | 只退判决（保留 `has_full` 放行） |
+| `LCH_MATCH_V2_FALLBACK=0` | 关掉低置信兜底 |
+| `LCH_V2_T_EXACT` / `LCH_V2_T_WEAK` / `LCH_V2_MARGIN` | v2 判决门槛（默认 `0.32` / `0.12` / `0.08`） |
+| `LCH_MATCH_V2_NGRAM=2` | 召回/打分只用 2-gram（默认 2+3gram） |
+| `LCH_RULES_STRICT=0` | 非法 `risk_level` / 孤儿 `keyword_weights` 改回告警而不失败 |
 | `LCH_NO_JIEBA=1` | 关闭 jieba，走关键词兜底 |
 | `LCH_AGENT_TIMEOUT` | 单条命令超时秒（默认 `60`） |
 | `LCH_AGENT_STEP_TIMEOUT` | `step>` 单步超时 |

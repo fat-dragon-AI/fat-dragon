@@ -81,8 +81,6 @@ class CorpusRegressionTest(unittest.TestCase):
         os.environ["LCH_TOP_K"] = "10"
         cls.engine = Engine(ROOT)
         cls.rows = load_corpus_rows()
-        marked = {(q, i) for q, i, core in cls.rows if core}
-        cls.core = marked or set(CORE_TOP1)
 
     @classmethod
     def tearDownClass(cls) -> None:

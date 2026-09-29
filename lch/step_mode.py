@@ -37,6 +37,7 @@ def run_step_mode(
     risk_level: str,
     intent_id: str,
     input_fn: Callable[[str], str] | None = None,
+    hit=None,
 ) -> str:
     """
     进入多条命令逐步模式。
@@ -97,6 +98,7 @@ def run_step_mode(
                     "confirmed": False,
                     "skipped": True,
                 },
+                hit=hit,
             )
             print(f"已跳过第 {idx + 1}/{len(steps)} 步: {current}")
             idx += 1
@@ -120,6 +122,7 @@ def run_step_mode(
                         "steps": remaining,
                         "confirmed": False,
                     },
+                    hit=hit,
                 )
                 continue
             failed = None
@@ -141,6 +144,7 @@ def run_step_mode(
                         "timed_out": result.timed_out,
                         "confirmed": True,
                     },
+                    hit=hit,
                 )
                 if result.exit_code != 0 and stop_on_error:
                     failed = idx + i + 1
@@ -173,6 +177,7 @@ def run_step_mode(
                     "step_index": idx + 1,
                     "confirmed": False,
                 },
+                hit=hit,
             )
             continue
 
@@ -192,6 +197,7 @@ def run_step_mode(
                 "timed_out": result.timed_out,
                 "confirmed": True,
             },
+            hit=hit,
         )
         if result.exit_code != 0 and stop_on_error:
             print(

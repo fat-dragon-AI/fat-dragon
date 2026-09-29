@@ -5,6 +5,13 @@ from .engine import HitView, QueryResult
 from .loader import Runnable
 
 
+def format_score(score: float, match_engine: str = "v1") -> str:
+    """v1 保持 :.1f；v2 用 :.3f（核验 W-2，按 match_engine 选格式）。"""
+    if match_engine == "v2":
+        return "{:.3f}".format(score)
+    return "{:.1f}".format(score)
+
+
 def _format_runnable(idx: int, r: Runnable) -> list[str]:
     lines: list[str] = []
     label = f" ({r.label})" if r.label else ""
@@ -30,10 +37,15 @@ def format_hit_list(result: QueryResult) -> str:
     ]
     for i, hit in enumerate(result.hits, 1):
         ncmd = len(hit.runnables)
+        engine = getattr(hit, "match_engine", "v1")
+        if hit.confidence == "fallback":
+            mark = "[推测 %s]" % format_score(hit.score, engine)
+        else:
+            mark = "[%s %s]" % (hit.confidence, format_score(hit.score, engine))
         lines.append(
             f"  {i}. {hit.desc}"
             f"  ({hit.intent_id})"
-            f"  [{hit.confidence} {hit.score:.1f}]"
+            f"  {mark}"
             f"  风险:{hit.risk_level}"
             f"  命令:{ncmd}条"
         )
@@ -54,7 +66,13 @@ def format_hit_detail(
     if list_index is not None and multi_total > 1:
         lines.append(f"【详情】第 {list_index}/{multi_total} 条")
     lines.append(f"【意图】{hit.desc}（{hit.intent_id}）")
-    lines.append(f"【置信】{hit.confidence}  score={hit.score:.1f}")
+    engine = getattr(hit, "match_engine", "v1")
+    if hit.confidence == "fallback":
+        lines.append("【置信】推测  score=%s" % format_score(hit.score, engine))
+    else:
+        lines.append(
+            f"【置信】{hit.confidence}  score={format_score(hit.score, engine)}"
+        )
     lines.append(f"【适配】{result.profile_note}")
     lines.append("【命令】")
     for i, r in enumerate(hit.runnables, 1):

@@ -1,0 +1,49 @@
+# bench S1-heldout-dev-py38-nojieba
+
+- set: `heldout-dev`
+- path_key: `py38-nojieba`  python=3.8.10  jieba=unavailable:No module named 'jieba'
+- n=66  @1=5 (0.075758)  @3=5 (0.075758)  @10=5 (0.075758)  空=54 (0.818182)
+- query p50=13.801 ms  p95=26.694 ms
+- 主指标（剔除 noisy_input）n=60 @1=5 @10=5 空=49
+
+## @1 未命中（最多 40 条）
+- '这台机子为啥转得这么吃力' -> sys.cpu.usage  got []  rank=None
+- '这台机子开了多久没关过' -> sys.uptime  got []  rank=None
+- '插了几块盘啊这台机子' -> sys.block.devices  got []  rank=None
+- '把那个占着不放的后台程序干掉' -> sys.process.kill  got []  rank=None
+- '盘读写是不是堵住了' -> sys.io.stat  got []  rank=None
+- '把那个后台拉起来让它跑' -> svc.start  got []  rank=None
+- '开机后让那个后台自己起来' -> svc.enable  got []  rank=None
+- '写一个开机就能拉起的后台单元' -> svc.unit.create  got []  rank=None
+- '刷新守护者让它重新读单元' -> svc.daemon.reload  got []  rank=None
+- '编译器家目录指到哪' -> java.home.env  got []  rank=None
+- '源码编成字节码' -> java.compile  got []  rank=None
+- '挂到后台慢慢跑那份归档' -> java.jar.nohup  got []  rank=None
+- '把那个沙箱里跑着的东西列出来' -> docker.ps  got []  rank=None
+- '把沙箱里那个东西歇掉别再跑了' -> docker.stop  got []  rank=None
+- '沙箱里打印出来的话翻一翻' -> docker.logs  got []  rank=None
+- '把这个沙箱从机子上抹掉' -> docker.rm  got []  rank=None
+- '把本地大模型服务拉起来' -> ollama.serve  got [['ollama.run', 5.9667, 'weak'], ['svc.start', 5.7, 'weak']]  rank=None
+- '查找firefox的安装位置' -> pkg.files  got []  rank=None
+- '这个程序不想留在机子上了拿掉' -> pkg.remove  got []  rank=None
+- '这个包的介绍和版本号翻一翻' -> pkg.info  got []  rank=None
+- '线程卡住了把调用栈倒出来' -> jvm.jstack  got []  rank=None
+- '回收器跑得勤不勤' -> jvm.jstat.gc  got []  rank=None
+- '虚拟机参数和属性翻一翻' -> jvm.jinfo  got []  rank=None
+- '前端装依赖老是去国外，换成国内站' -> mirror.npm  got []  rank=None
+- '系统软件仓库改成国内站' -> mirror.apt  got []  rank=None
+- '探一下隔壁那台还在不在线上' -> net.ping  got []  rank=None
+- '域名怎么指到数字地址的' -> net.dns  got [['regex.len.digit', 10.8, 'exact']]  rank=None
+- '用抓网页的方式探一下这个站点' -> net.curl  got []  rank=None
+- '数据包走了哪些跳' -> net.traceroute  got []  rank=None
+- '屏幕上打出一行你好' -> echo.print  got []  rank=None
+- '当前文件夹里头有些啥' -> file.list  got []  rank=None
+- '盯着这份记录的末尾往下刷' -> file.tail.log  got []  rank=None
+- '当前会话里临时声明一个键值' -> env.export.set  got []  rank=None
+- '把可执行搜索路径写进开机脚本里长期有效' -> env.path.write  got []  rank=None
+- '让刚才改的搜索路径马上生效' -> env.path.source  got []  rank=None
+- '打不了汉字了帮我看看' -> im.notwork  got [['regex.len.han', 9.3, 'exact']]  rank=None
+- '通配符写法我忘了提醒我' -> regex.cheat  got []  rank=None
+- '必须出现某段字才算数的模式' -> regex.must.contain  got []  rank=None
+- '这套构建工具的依赖长啥样' -> mvn.deps  got []  rank=None
+- '查这个名字负责收信的那条记录' -> nslookup.type  got []  rank=None

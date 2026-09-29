@@ -1,0 +1,333 @@
+{
+  "meta": {
+    "tag": "S8-corpus-py38",
+    "set": "corpus",
+    "ts": "2026-09-29T14:50:44.832895+00:00",
+    "python": "3.8.10",
+    "path_key": "py38-nojieba",
+    "jieba_status": "unavailable:No module named 'jieba'",
+    "lch_env": {
+      "LCH_TOP_K": "10"
+    },
+    "code_fingerprint": "96b8ac2f45319b37ea8e4f08a63db63ac9dced6847401453b867998894c5a347",
+    "rules_fingerprint": "3996566024e373f79f9e670ab84de2db26bc33c3f596e10194105e4ef9a43d29",
+    "freeze_sha256": null,
+    "n_rules": 213
+  },
+  "metrics": {
+    "n": 232,
+    "at1": 224,
+    "at3": 229,
+    "at10": 232,
+    "empty": 0,
+    "at1_rate": 0.965517,
+    "at3_rate": 0.987069,
+    "at10_rate": 1.0,
+    "empty_rate": 0.0,
+    "query_ms_p50": 3.425,
+    "query_ms_p95": 5.218,
+    "confidence_top1": {
+      "exact": 221,
+      "weak": 11
+    },
+    "confidence_all": {
+      "exact": 221,
+      "weak": 988
+    },
+    "risk_top1": {
+      "low": 143,
+      "high": 26,
+      "medium": 63
+    },
+    "risk_all": {
+      "low": 753,
+      "high": 101,
+      "medium": 355
+    },
+    "scored": {
+      "n": 232,
+      "at1": 224,
+      "at3": 229,
+      "at10": 232,
+      "empty": 0,
+      "at1_rate": 0.965517,
+      "at10_rate": 1.0,
+      "empty_rate": 0.0
+    },
+    "noisy_n": 0,
+    "strict_all_kw": {
+      "n": 0,
+      "at1": 0,
+      "at10": 0,
+      "empty": 0,
+      "at1_rate": null,
+      "at10_rate": null,
+      "empty_rate": null
+    },
+    "recall@30": 1.0,
+    "recall@30_n": 232,
+    "recall_containment": 1.0,
+    "core": {
+      "n": 20,
+      "top1": 20
+    }
+  },
+  "misses": [
+    {
+      "q": "查一下有没有 nginx 进程",
+      "expect": "sys.process.find",
+      "top5": [
+        [
+          "nginx.config.view",
+          0.3905,
+          "exact"
+        ],
+        [
+          "nginx.log",
+          0.2777,
+          "weak"
+        ],
+        [
+          "nginx.restart",
+          0.2754,
+          "weak"
+        ],
+        [
+          "nginx.config.test",
+          0.2648,
+          "weak"
+        ],
+        [
+          "nginx.reload",
+          0.2633,
+          "weak"
+        ]
+      ],
+      "rank": 5
+    },
+    {
+      "q": "nginx 服务状态",
+      "expect": "svc.status",
+      "top5": [
+        [
+          "nginx.config.view",
+          0.5516,
+          "weak"
+        ],
+        [
+          "svc.status",
+          0.5025,
+          "weak"
+        ],
+        [
+          "nginx.log",
+          0.3923,
+          "weak"
+        ],
+        [
+          "nginx.restart",
+          0.389,
+          "weak"
+        ],
+        [
+          "nginx.config.test",
+          0.3741,
+          "weak"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "启动 firewalld",
+      "expect": "svc.start",
+      "top5": [
+        [
+          "firewall.status",
+          0.8359,
+          "exact"
+        ],
+        [
+          "firewall.open.port",
+          0.5793,
+          "weak"
+        ],
+        [
+          "im.fcitx.restart",
+          0.2556,
+          "weak"
+        ],
+        [
+          "svc.start",
+          0.1346,
+          "weak"
+        ],
+        [
+          "pkg.install",
+          0.1318,
+          "weak"
+        ]
+      ],
+      "rank": 3
+    },
+    {
+      "q": "停掉 redis",
+      "expect": "svc.stop",
+      "top5": [
+        [
+          "redis.info",
+          0.6305,
+          "exact"
+        ],
+        [
+          "redis.keys.sample",
+          0.5004,
+          "weak"
+        ],
+        [
+          "svc.stop",
+          0.2833,
+          "weak"
+        ],
+        [
+          "svc.disable",
+          0.1504,
+          "weak"
+        ],
+        [
+          "docker.stop",
+          0.1227,
+          "weak"
+        ]
+      ],
+      "rank": 2
+    },
+    {
+      "q": "卸载 nginx",
+      "expect": "pkg.remove",
+      "top5": [
+        [
+          "nginx.reload",
+          0.7286,
+          "weak"
+        ],
+        [
+          "nginx.config.view",
+          0.6546,
+          "weak"
+        ],
+        [
+          "nginx.log",
+          0.4655,
+          "weak"
+        ],
+        [
+          "nginx.restart",
+          0.4617,
+          "weak"
+        ],
+        [
+          "nginx.config.test",
+          0.4439,
+          "weak"
+        ]
+      ],
+      "rank": 5
+    },
+    {
+      "q": "nginx装在哪",
+      "expect": "pkg.files",
+      "top5": [
+        [
+          "nginx.config.view",
+          0.5501,
+          "weak"
+        ],
+        [
+          "pkg.files",
+          0.5066,
+          "weak"
+        ],
+        [
+          "nginx.log",
+          0.3912,
+          "weak"
+        ],
+        [
+          "nginx.restart",
+          0.388,
+          "weak"
+        ],
+        [
+          "nginx.config.test",
+          0.373,
+          "weak"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "看 nginx 错误日志",
+      "expect": "nginx.log",
+      "top5": [
+        [
+          "nginx.config.view",
+          0.5493,
+          "exact"
+        ],
+        [
+          "nginx.log",
+          0.4648,
+          "weak"
+        ],
+        [
+          "nginx.restart",
+          0.3138,
+          "weak"
+        ],
+        [
+          "nginx.config.test",
+          0.3018,
+          "weak"
+        ],
+        [
+          "nginx.reload",
+          0.3,
+          "weak"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "默认java是哪个",
+      "expect": "java.default.vm",
+      "top5": [
+        [
+          "java.version",
+          0.6709,
+          "weak"
+        ],
+        [
+          "java.default.vm",
+          0.647,
+          "weak"
+        ],
+        [
+          "java.switch.version",
+          0.3105,
+          "weak"
+        ],
+        [
+          "java.compile",
+          0.2191,
+          "weak"
+        ],
+        [
+          "java.ps",
+          0.1666,
+          "weak"
+        ]
+      ],
+      "rank": 1
+    }
+  ]
+}

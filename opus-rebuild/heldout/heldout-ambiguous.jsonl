@@ -1,0 +1,3 @@
+{"q": "dir", "source": "history", "why": "Windows 习惯缩写，可能是列目录、也可能是随便敲的；无法定唯一 intent", "candidates": ["file.list"]}
+{"q": "文件用户", "source": "history", "why": "过短且含糊：属主、权限、还是用户列表都说得通", "candidates": ["perm.owner.view", "perm.chmod", "user.list"]}
+{"q": "安装位置", "source": "history", "why": "未指定装的是哪样东西，pkg.files / pkg.which / java.home.env 都可能", "candidates": ["pkg.files", "pkg.which", "java.home.env"]}

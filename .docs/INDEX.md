@@ -9,6 +9,8 @@
 | [Linux中文离线指令助手-落地总体详细设计-v2.md](./Linux中文离线指令助手-落地总体详细设计-v2.md) | 总体设计 v2 |
 | [Linux常用规则语料-v1.md](./Linux常用规则语料-v1.md) | 匹配语料回归表 |
 
+匹配重建方案（单独目录）：[../opus-rebuild/INDEX.md](../opus-rebuild/INDEX.md) · [匹配重建方案.md](../opus-rebuild/匹配重建方案.md)
+
 ## 近期变更
 
 | 文档 | 要点 |
@@ -30,7 +32,7 @@
 | [变更记录-systemd常用指令.md](./变更记录-systemd常用指令.md) | daemon-reload、失败单元、cat/show、自启等 |
 | [变更记录-scp传输.md](./变更记录-scp传输.md) | scp 上传/下载文件与目录 |
 | [变更记录-重构优化方案.md](./变更记录-重构优化方案.md) | 匹配改造、提取修复、语料补缺、安全与工程护栏 |
-| [命中率对照-重构后.md](./命中率对照-重构后.md) | accuracy@1/@5/@10（生产阈值） |
+| [命中率对照-重构后.md](./命中率对照-重构后.md) | in-corpus accuracy@1/@5/@10（勿单独当产品识别率） |
 | [变更记录-软件管理常用指令.md](./变更记录-软件管理常用指令.md) | 软件列表/卸载/命令位置/本体路径 |
 | [变更记录-nslookup常用指令.md](./变更记录-nslookup常用指令.md) | nslookup 正向/反向/指定服务器/记录类型 |
 | [变更记录-docs归档与cursorignore.md](./变更记录-docs归档与cursorignore.md) | `.docs` 精简、`.ignore` 归档、Agent 不读配置 |

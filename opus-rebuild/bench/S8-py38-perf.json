@@ -1,0 +1,18 @@
+{
+  "tag": "S8-py38",
+  "ts": "2026-09-29T14:50:48.953121+00:00",
+  "python": "3.8.10",
+  "path_key": "py38-nojieba",
+  "jieba_status": "unavailable:No module named 'jieba'",
+  "engine_cold_ms": 39.767,
+  "engine_ms_p50": 35.652,
+  "engine_ms_p95": 43.035,
+  "engine_ms_mean": 38.022,
+  "query_ms_p50": 3.414,
+  "query_ms_p95": 5.461,
+  "query_n": 696,
+  "cli_ms_p50": 132.722,
+  "cli_ms_p95": 135.708,
+  "cli_n": 5,
+  "cli_query": "查看内存"
+}

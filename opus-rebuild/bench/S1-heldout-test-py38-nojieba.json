@@ -1,0 +1,522 @@
+{
+  "meta": {
+    "tag": "S1-heldout-test-py38-nojieba",
+    "set": "heldout-test",
+    "ts": "2026-09-29T14:08:28.672825+00:00",
+    "python": "3.8.10",
+    "path_key": "py38-nojieba",
+    "jieba_status": "unavailable:No module named 'jieba'",
+    "lch_env": {
+      "LCH_TOP_K": "10"
+    },
+    "code_fingerprint": "af801d7cc0d89b33ead0bf0186a9bada5f1d73af64e0bfb22d2580a4bee0f858",
+    "rules_fingerprint": "73bb7b127b3b10933cfa82befe412d6541d430a6bbbfe38c7ee09a8bf88d2f35",
+    "freeze_sha256": "12449166beec2dbddada00756e423586619a0f21f4120769ac0408d10ca47e1d",
+    "n_rules": 213
+  },
+  "metrics": {
+    "n": 66,
+    "at1": 7,
+    "at3": 10,
+    "at10": 10,
+    "empty": 49,
+    "at1_rate": 0.106061,
+    "at3_rate": 0.151515,
+    "at10_rate": 0.151515,
+    "empty_rate": 0.742424,
+    "query_ms_p50": 13.81,
+    "query_ms_p95": 16.286,
+    "confidence_top1": {
+      "exact": 11,
+      "weak": 6
+    },
+    "confidence_all": {
+      "exact": 13,
+      "weak": 18
+    },
+    "risk_top1": {
+      "low": 11,
+      "medium": 5,
+      "high": 1
+    },
+    "risk_all": {
+      "low": 15,
+      "medium": 13,
+      "high": 3
+    },
+    "scored": {
+      "n": 60,
+      "at1": 7,
+      "at3": 10,
+      "at10": 10,
+      "empty": 44,
+      "at1_rate": 0.116667,
+      "at10_rate": 0.166667,
+      "empty_rate": 0.733333
+    },
+    "noisy_n": 6,
+    "strict_all_kw": {
+      "n": 66,
+      "at1": 7,
+      "at10": 10,
+      "empty": 49,
+      "at1_rate": 0.106061,
+      "at10_rate": 0.151515,
+      "empty_rate": 0.742424
+    },
+    "recall@30": null,
+    "recall@30_n": null,
+    "recall_containment": null
+  },
+  "misses": [
+    {
+      "q": "查看硬盘",
+      "expect": "sys.disk.usage",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "硬盘占用",
+      "expect": "sys.disk.usage",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "硬盘大小",
+      "expect": "sys.disk.usage",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "后台还挂着哪些程序",
+      "expect": "sys.process.list",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "这个后台现在还活着吗",
+      "expect": "svc.status",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "让那个后台整段再来一次",
+      "expect": "svc.restart",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "让那个后台歇着别再跑了",
+      "expect": "svc.stop",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "哪些单元自己挂掉了",
+      "expect": "svc.list.failed",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "这台机子上那套虚拟机是哪个发行号",
+      "expect": "java.version",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "把那份归档对应的程序停下来",
+      "expect": "java.app.stop",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "把默认的那套虚拟机换成另一号",
+      "expect": "java.switch.version",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "钻进沙箱里面去敲命令",
+      "expect": "docker.exec",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "本地已经拉下来的模板有哪些",
+      "expect": "docker.images",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "让沙箱重新过一遍生命周期",
+      "expect": "docker.restart",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "本地那套大模型还装了哪些",
+      "expect": "ollama.list",
+      "top5": [
+        [
+          "pkg.list",
+          8.55,
+          "exact"
+        ],
+        [
+          "ollama.run",
+          4.8,
+          "weak"
+        ],
+        [
+          "ollama.ps",
+          4.7,
+          "weak"
+        ]
+      ],
+      "rank": null
+    },
+    {
+      "q": "把不要的本地模型清掉",
+      "expect": "ollama.rm",
+      "top5": [
+        [
+          "ollama.run",
+          4.9,
+          "weak"
+        ],
+        [
+          "ollama.rm",
+          4.7,
+          "weak"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "apt列表",
+      "expect": "pkg.list",
+      "top5": [
+        [
+          "mirror.apt",
+          17.3,
+          "exact"
+        ],
+        [
+          "pkg.install",
+          5.9,
+          "weak"
+        ]
+      ],
+      "rank": null
+    },
+    {
+      "q": "把一个监测小工具放到机子上",
+      "expect": "pkg.install",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "先把软件仓库目录刷新一遍",
+      "expect": "pkg.apt.update",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "堆上占用把快照导出来",
+      "expect": "jvm.jmap.heap",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "虚拟机这边还挂着几份",
+      "expect": "jvm.jps",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "国内下载依赖太慢了换个近的站",
+      "expect": "mirror.overview",
+      "top5": [
+        [
+          "ollama.gguf.download",
+          4.8,
+          "weak"
+        ]
+      ],
+      "rank": null
+    },
+    {
+      "q": "拉模板总超时，给引擎换个近的源",
+      "expect": "mirror.docker",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "查询ip",
+      "expect": "net.ip.addr",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "这块联网的板子叫啥名字、链路亮不亮",
+      "expect": "net.nic.info",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "此刻谁已经跟我握手连上了",
+      "expect": "net.ss.established",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "会话里导出的那些键值都有啥",
+      "expect": "echo.env.list",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "添加软连",
+      "expect": "file.symlink.create",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "找名叫 app.toml 的那份东西",
+      "expect": "file.find.name",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "把这份拷到另一处",
+      "expect": "file.copy",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "把这份挪个地方并改个称呼",
+      "expect": "file.move",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "可执行搜索路径现在是哪几段",
+      "expect": "env.path.view",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "中文输入这一套现在正不正常",
+      "expect": "im.status",
+      "top5": [
+        [
+          "im.switch",
+          8.3,
+          "exact"
+        ],
+        [
+          "im.status",
+          4.7,
+          "weak"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "切到拼音输入那一栏",
+      "expect": "im.switch",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "把输入这一套关掉再打开",
+      "expect": "im.fcitx.restart",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "恰好五位阿拉伯号的模式",
+      "expect": "regex.len.digit",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "这套构建工具把工程编一遍",
+      "expect": "mvn.compile",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "这套构建工具出可发布的归档",
+      "expect": "mvn.package",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "帮我把这个域名问成数字地址",
+      "expect": "nslookup.lookup",
+      "top5": [
+        [
+          "regex.len.digit",
+          10.8,
+          "exact"
+        ]
+      ],
+      "rank": null
+    },
+    {
+      "q": "拿数字地址反查它登记的名字",
+      "expect": "nslookup.reverse",
+      "top5": [
+        [
+          "regex.len.digit",
+          10.8,
+          "exact"
+        ]
+      ],
+      "rank": null
+    },
+    {
+      "q": "网页服务器歇一下再起来",
+      "expect": "nginx.restart",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "网页服务器的访问记录翻一下",
+      "expect": "nginx.log",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "从另一台机子把那份东西取回来",
+      "expect": "scp.download.file",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "把这个账号的口令换掉",
+      "expect": "user.passwd",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "把那份小任务的事件和细节展开",
+      "expect": "k8s.desc",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "修改文件用户权限",
+      "expect": "perm.chmod",
+      "top5": [
+        [
+          "perm.chown",
+          14.0,
+          "exact"
+        ],
+        [
+          "perm.chmod",
+          7.5333,
+          "weak"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "这份东西现在归谁名下",
+      "expect": "perm.owner.view",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "把一堆零散东西收成一份压缩件",
+      "expect": "archive.tar.pack",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "墙那边把这个号放过去",
+      "expect": "firewall.open.port",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "那套关系库还活着吗",
+      "expect": "mysql.status",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "抽样看缓存库的钥匙，别全扫",
+      "expect": "redis.keys.sample",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "开机以来系统记下来的那些话",
+      "expect": "log.journal",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "这台机子还剩多少能用来周转的备用容量",
+      "expect": "swap.status",
+      "top5": [
+        [
+          "sys.mem.free",
+          4.6,
+          "weak"
+        ]
+      ],
+      "rank": null
+    },
+    {
+      "q": "列出本级所有ja版本",
+      "expect": "java.default.vm",
+      "top5": [
+        [
+          "java.version",
+          8.4,
+          "exact"
+        ],
+        [
+          "java.switch.version",
+          4.8,
+          "weak"
+        ]
+      ],
+      "rank": null
+    },
+    {
+      "q": "国内下依赖换站",
+      "expect": "mirror.overview",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "gti工作区动了哪些还没提交",
+      "expect": "git.status",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "网页服务器歇一下在起来",
+      "expect": "nginx.restart",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "chakanbanben",
+      "expect": "java.version",
+      "top5": [],
+      "rank": null
+    },
+    {
+      "q": "jiaohuanqu",
+      "expect": "swap.status",
+      "top5": [],
+      "rank": null
+    }
+  ]
+}

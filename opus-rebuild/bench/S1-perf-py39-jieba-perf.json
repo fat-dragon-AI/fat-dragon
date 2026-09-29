@@ -1,0 +1,18 @@
+{
+  "tag": "S1-perf-py39-jieba",
+  "ts": "2026-09-29T13:59:02.928016+00:00",
+  "python": "3.9.18",
+  "path_key": "py39-jieba",
+  "jieba_status": "ready",
+  "engine_cold_ms": 738.376,
+  "engine_ms_p50": 37.426,
+  "engine_ms_p95": 40.367,
+  "engine_ms_mean": 37.899,
+  "query_ms_p50": 18.368,
+  "query_ms_p95": 35.971,
+  "query_n": 696,
+  "cli_ms_p50": 967.114,
+  "cli_ms_p95": 1124.044,
+  "cli_n": 5,
+  "cli_query": "查看内存"
+}

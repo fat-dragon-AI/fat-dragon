@@ -1,0 +1,619 @@
+{
+  "meta": {
+    "tag": "S8-v1-rollback-corpus",
+    "set": "corpus",
+    "ts": "2026-09-29T14:49:33.580052+00:00",
+    "python": "3.8.10",
+    "path_key": "py38-nojieba",
+    "jieba_status": "unavailable:No module named 'jieba'",
+    "lch_env": {
+      "LCH_MATCH_V2": "0",
+      "LCH_TOP_K": "10"
+    },
+    "code_fingerprint": "96b8ac2f45319b37ea8e4f08a63db63ac9dced6847401453b867998894c5a347",
+    "rules_fingerprint": "3996566024e373f79f9e670ab84de2db26bc33c3f596e10194105e4ef9a43d29",
+    "freeze_sha256": null,
+    "n_rules": 213
+  },
+  "metrics": {
+    "n": 232,
+    "at1": 214,
+    "at3": 230,
+    "at10": 232,
+    "empty": 0,
+    "at1_rate": 0.922414,
+    "at3_rate": 0.991379,
+    "at10_rate": 1.0,
+    "empty_rate": 0.0,
+    "query_ms_p50": 13.231,
+    "query_ms_p95": 23.069,
+    "confidence_top1": {
+      "exact": 217,
+      "weak": 15
+    },
+    "confidence_all": {
+      "exact": 811,
+      "weak": 183
+    },
+    "risk_top1": {
+      "low": 147,
+      "high": 26,
+      "medium": 59
+    },
+    "risk_all": {
+      "low": 582,
+      "medium": 319,
+      "high": 93
+    },
+    "scored": {
+      "n": 232,
+      "at1": 214,
+      "at3": 230,
+      "at10": 232,
+      "empty": 0,
+      "at1_rate": 0.922414,
+      "at10_rate": 1.0,
+      "empty_rate": 0.0
+    },
+    "noisy_n": 0,
+    "strict_all_kw": {
+      "n": 0,
+      "at1": 0,
+      "at10": 0,
+      "empty": 0,
+      "at1_rate": null,
+      "at10_rate": null,
+      "empty_rate": null
+    },
+    "recall@30": 1.0,
+    "recall@30_n": 232,
+    "recall_containment": 0.978448,
+    "core": {
+      "n": 20,
+      "top1": 20
+    }
+  },
+  "misses": [
+    {
+      "q": "查一下有没有 nginx 进程",
+      "expect": "sys.process.find",
+      "top5": [
+        [
+          "nginx.config.view",
+          24.5381,
+          "exact"
+        ],
+        [
+          "sys.process.list",
+          3.8,
+          "weak"
+        ],
+        [
+          "nginx.config.test",
+          24.6,
+          "exact"
+        ],
+        [
+          "nginx.reload",
+          14.6667,
+          "exact"
+        ],
+        [
+          "nginx.log",
+          10.2381,
+          "exact"
+        ]
+      ],
+      "rank": 6
+    },
+    {
+      "q": "nslookup交互",
+      "expect": "nslookup.interactive",
+      "top5": [
+        [
+          "nslookup.lookup",
+          48.0889,
+          "exact"
+        ],
+        [
+          "nslookup.interactive",
+          45.396,
+          "exact"
+        ],
+        [
+          "nslookup.debug",
+          40.5769,
+          "exact"
+        ],
+        [
+          "nslookup.server",
+          20.0833,
+          "exact"
+        ],
+        [
+          "nslookup.reverse",
+          8.9778,
+          "exact"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "nginx 服务状态",
+      "expect": "svc.status",
+      "top5": [
+        [
+          "nginx.config.view",
+          24.5381,
+          "exact"
+        ],
+        [
+          "svc.status",
+          6.5,
+          "weak"
+        ],
+        [
+          "nginx.config.test",
+          24.6,
+          "exact"
+        ],
+        [
+          "nginx.reload",
+          14.6667,
+          "exact"
+        ],
+        [
+          "nginx.log",
+          10.2381,
+          "exact"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "启动 firewalld",
+      "expect": "svc.start",
+      "top5": [
+        [
+          "firewall.status",
+          9.8,
+          "exact"
+        ],
+        [
+          "svc.start",
+          2.4,
+          "weak"
+        ],
+        [
+          "firewall.open.port",
+          8.5,
+          "exact"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "停掉 redis",
+      "expect": "svc.stop",
+      "top5": [
+        [
+          "redis.info",
+          29.5333,
+          "exact"
+        ],
+        [
+          "svc.stop",
+          2.4,
+          "weak"
+        ],
+        [
+          "redis.keys.sample",
+          20.1429,
+          "exact"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "卸载 nginx",
+      "expect": "pkg.remove",
+      "top5": [
+        [
+          "nginx.config.view",
+          24.5381,
+          "exact"
+        ],
+        [
+          "pkg.remove",
+          12.8,
+          "exact"
+        ],
+        [
+          "nginx.config.test",
+          24.6,
+          "exact"
+        ],
+        [
+          "nginx.reload",
+          15.8333,
+          "exact"
+        ],
+        [
+          "nginx.log",
+          10.2381,
+          "exact"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "which nginx",
+      "expect": "pkg.which",
+      "top5": [
+        [
+          "nginx.config.view",
+          24.5381,
+          "exact"
+        ],
+        [
+          "pkg.which",
+          13.8667,
+          "exact"
+        ],
+        [
+          "nginx.config.test",
+          24.6,
+          "exact"
+        ],
+        [
+          "nginx.reload",
+          14.6667,
+          "exact"
+        ],
+        [
+          "nginx.log",
+          10.2381,
+          "exact"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "nginx装在哪",
+      "expect": "pkg.files",
+      "top5": [
+        [
+          "nginx.config.view",
+          24.5381,
+          "exact"
+        ],
+        [
+          "pkg.files",
+          13.3,
+          "exact"
+        ],
+        [
+          "nginx.config.test",
+          24.6,
+          "exact"
+        ],
+        [
+          "nginx.reload",
+          14.6667,
+          "exact"
+        ],
+        [
+          "nginx.log",
+          10.2381,
+          "exact"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "nginx 配置校验一下",
+      "expect": "nginx.config.test",
+      "top5": [
+        [
+          "nginx.config.view",
+          31.4071,
+          "exact"
+        ],
+        [
+          "nginx.config.test",
+          40.3083,
+          "exact"
+        ],
+        [
+          "nginx.reload",
+          16.9167,
+          "exact"
+        ],
+        [
+          "nginx.log",
+          10.2381,
+          "exact"
+        ],
+        [
+          "nginx.restart",
+          10.2333,
+          "exact"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "重启 nginx",
+      "expect": "nginx.restart",
+      "top5": [
+        [
+          "nginx.config.view",
+          24.5381,
+          "exact"
+        ],
+        [
+          "nginx.restart",
+          21.7333,
+          "exact"
+        ],
+        [
+          "nginx.config.test",
+          24.6,
+          "exact"
+        ],
+        [
+          "nginx.reload",
+          15.7917,
+          "exact"
+        ],
+        [
+          "nginx.log",
+          10.2381,
+          "exact"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "看 nginx 错误日志",
+      "expect": "nginx.log",
+      "top5": [
+        [
+          "nginx.config.view",
+          21.881,
+          "exact"
+        ],
+        [
+          "nginx.config.test",
+          24.6,
+          "exact"
+        ],
+        [
+          "nginx.reload",
+          14.6667,
+          "exact"
+        ],
+        [
+          "nginx.log",
+          13.6905,
+          "exact"
+        ],
+        [
+          "nginx.restart",
+          10.2333,
+          "exact"
+        ]
+      ],
+      "rank": 3
+    },
+    {
+      "q": "没有jps怎么查java进程",
+      "expect": "java.ps",
+      "top5": [
+        [
+          "jvm.jps",
+          51.0202,
+          "exact"
+        ],
+        [
+          "java.ps",
+          34.8143,
+          "exact"
+        ],
+        [
+          "java.version",
+          23.25,
+          "exact"
+        ],
+        [
+          "sys.process.list",
+          5.3,
+          "weak"
+        ],
+        [
+          "java.compile",
+          19.65,
+          "exact"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "默认java是哪个",
+      "expect": "java.default.vm",
+      "top5": [
+        [
+          "java.version",
+          30.0,
+          "exact"
+        ],
+        [
+          "java.default.vm",
+          17.6,
+          "exact"
+        ],
+        [
+          "jvm.jps",
+          26.4,
+          "exact"
+        ],
+        [
+          "java.compile",
+          19.65,
+          "exact"
+        ],
+        [
+          "java.ps",
+          15.7,
+          "exact"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "切换java版本",
+      "expect": "java.switch.version",
+      "top5": [
+        [
+          "java.version",
+          41.0786,
+          "exact"
+        ],
+        [
+          "java.switch.version",
+          38.2048,
+          "exact"
+        ],
+        [
+          "jvm.jps",
+          26.4,
+          "exact"
+        ],
+        [
+          "java.compile",
+          19.65,
+          "exact"
+        ],
+        [
+          "java.switch.home",
+          16.1286,
+          "exact"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "临时切换java",
+      "expect": "java.switch.home",
+      "top5": [
+        [
+          "java.switch.version",
+          29.3,
+          "exact"
+        ],
+        [
+          "java.switch.home",
+          27.6143,
+          "exact"
+        ],
+        [
+          "java.version",
+          23.25,
+          "exact"
+        ],
+        [
+          "jvm.jps",
+          26.4,
+          "exact"
+        ],
+        [
+          "java.compile",
+          19.65,
+          "exact"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "看容器日志",
+      "expect": "docker.logs",
+      "top5": [
+        [
+          "docker.ps",
+          29.0571,
+          "exact"
+        ],
+        [
+          "docker.logs",
+          25.0683,
+          "exact"
+        ],
+        [
+          "docker.exec",
+          20.7222,
+          "exact"
+        ],
+        [
+          "docker.images",
+          15.1143,
+          "exact"
+        ],
+        [
+          "docker.rm",
+          13.3286,
+          "exact"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "改文件归属",
+      "expect": "perm.chown",
+      "top5": [
+        [
+          "perm.owner.view",
+          78.15,
+          "exact"
+        ],
+        [
+          "perm.chown",
+          76.3167,
+          "exact"
+        ],
+        [
+          "echo.write.file",
+          4.1,
+          "weak"
+        ]
+      ],
+      "rank": 1
+    },
+    {
+      "q": "临时加PATH",
+      "expect": "env.path.export",
+      "top5": [
+        [
+          "env.path.write",
+          57.7167,
+          "exact"
+        ],
+        [
+          "env.path.export",
+          36.1714,
+          "exact"
+        ],
+        [
+          "env.path.view",
+          23.15,
+          "exact"
+        ],
+        [
+          "env.path.source",
+          11.7,
+          "exact"
+        ]
+      ],
+      "rank": 1
+    }
+  ]
+}

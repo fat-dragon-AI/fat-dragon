@@ -1,0 +1,49 @@
+# bench S1-heldout-test-py38-nojieba
+
+- set: `heldout-test`
+- path_key: `py38-nojieba`  python=3.8.10  jieba=unavailable:No module named 'jieba'
+- n=66  @1=7 (0.106061)  @3=10 (0.151515)  @10=10 (0.151515)  空=49 (0.742424)
+- query p50=13.81 ms  p95=16.286 ms
+- 主指标（剔除 noisy_input）n=60 @1=7 @10=10 空=44
+
+## @1 未命中（最多 40 条）
+- '查看硬盘' -> sys.disk.usage  got []  rank=None
+- '硬盘占用' -> sys.disk.usage  got []  rank=None
+- '硬盘大小' -> sys.disk.usage  got []  rank=None
+- '后台还挂着哪些程序' -> sys.process.list  got []  rank=None
+- '这个后台现在还活着吗' -> svc.status  got []  rank=None
+- '让那个后台整段再来一次' -> svc.restart  got []  rank=None
+- '让那个后台歇着别再跑了' -> svc.stop  got []  rank=None
+- '哪些单元自己挂掉了' -> svc.list.failed  got []  rank=None
+- '这台机子上那套虚拟机是哪个发行号' -> java.version  got []  rank=None
+- '把那份归档对应的程序停下来' -> java.app.stop  got []  rank=None
+- '把默认的那套虚拟机换成另一号' -> java.switch.version  got []  rank=None
+- '钻进沙箱里面去敲命令' -> docker.exec  got []  rank=None
+- '本地已经拉下来的模板有哪些' -> docker.images  got []  rank=None
+- '让沙箱重新过一遍生命周期' -> docker.restart  got []  rank=None
+- '本地那套大模型还装了哪些' -> ollama.list  got [['pkg.list', 8.55, 'exact'], ['ollama.run', 4.8, 'weak'], ['ollama.ps', 4.7, 'weak']]  rank=None
+- '把不要的本地模型清掉' -> ollama.rm  got [['ollama.run', 4.9, 'weak'], ['ollama.rm', 4.7, 'weak']]  rank=1
+- 'apt列表' -> pkg.list  got [['mirror.apt', 17.3, 'exact'], ['pkg.install', 5.9, 'weak']]  rank=None
+- '把一个监测小工具放到机子上' -> pkg.install  got []  rank=None
+- '先把软件仓库目录刷新一遍' -> pkg.apt.update  got []  rank=None
+- '堆上占用把快照导出来' -> jvm.jmap.heap  got []  rank=None
+- '虚拟机这边还挂着几份' -> jvm.jps  got []  rank=None
+- '国内下载依赖太慢了换个近的站' -> mirror.overview  got [['ollama.gguf.download', 4.8, 'weak']]  rank=None
+- '拉模板总超时，给引擎换个近的源' -> mirror.docker  got []  rank=None
+- '查询ip' -> net.ip.addr  got []  rank=None
+- '这块联网的板子叫啥名字、链路亮不亮' -> net.nic.info  got []  rank=None
+- '此刻谁已经跟我握手连上了' -> net.ss.established  got []  rank=None
+- '会话里导出的那些键值都有啥' -> echo.env.list  got []  rank=None
+- '添加软连' -> file.symlink.create  got []  rank=None
+- '找名叫 app.toml 的那份东西' -> file.find.name  got []  rank=None
+- '把这份拷到另一处' -> file.copy  got []  rank=None
+- '把这份挪个地方并改个称呼' -> file.move  got []  rank=None
+- '可执行搜索路径现在是哪几段' -> env.path.view  got []  rank=None
+- '中文输入这一套现在正不正常' -> im.status  got [['im.switch', 8.3, 'exact'], ['im.status', 4.7, 'weak']]  rank=1
+- '切到拼音输入那一栏' -> im.switch  got []  rank=None
+- '把输入这一套关掉再打开' -> im.fcitx.restart  got []  rank=None
+- '恰好五位阿拉伯号的模式' -> regex.len.digit  got []  rank=None
+- '这套构建工具把工程编一遍' -> mvn.compile  got []  rank=None
+- '这套构建工具出可发布的归档' -> mvn.package  got []  rank=None
+- '帮我把这个域名问成数字地址' -> nslookup.lookup  got [['regex.len.digit', 10.8, 'exact']]  rank=None
+- '拿数字地址反查它登记的名字' -> nslookup.reverse  got [['regex.len.digit', 10.8, 'exact']]  rank=None

@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import json
+import os
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -35,6 +37,8 @@ class Rule:
     enabled: bool = True
     raw: dict[str, Any] = field(default_factory=dict)
     source: str = ""  # 来源文件（相对或名）
+    action: str | None = None
+    object: str | None = None
 
 
 @dataclass
@@ -69,6 +73,26 @@ def _expand_runnables(raw: dict[str, Any]) -> list[Runnable]:
 
 
 VALID_RISKS = {"low", "medium", "high", "critical"}
+_warn_seen: set[tuple[str, str, str]] = set()
+
+
+def _rules_warn_enabled() -> bool:
+    return os.environ.get("LCH_RULES_WARN", "1") != "0"
+
+
+def _warn_rule(kind: str, intent_id: str, detail: str) -> None:
+    if not _rules_warn_enabled():
+        return
+    key = (kind, intent_id, detail)
+    if key in _warn_seen:
+        return
+    _warn_seen.add(key)
+    sys.stderr.write("lch: rules warn: intent=%s %s: %s\n" % (intent_id, kind, detail))
+    sys.stderr.flush()
+
+
+def _rules_strict() -> bool:
+    return os.environ.get("LCH_RULES_STRICT", "1") != "0"
 
 
 def _parse_rule(raw: dict[str, Any], source: str = "") -> Rule | None:
@@ -81,12 +105,49 @@ def _parse_rule(raw: dict[str, Any], source: str = "") -> Rule | None:
         weight = float(raw.get("weight", 1))
     except (TypeError, ValueError) as e:
         raise ValueError(f"规则 {iid} weight 非法（来源 {source}）: {e}") from e
-    risk = str(raw.get("risk_level") or "low").lower()
+    risk_raw = raw.get("risk_level")
+    risk = str(risk_raw or "low").lower()
     if risk not in VALID_RISKS:
+        detail = "value=%r" % (risk_raw,)
+        if _rules_strict():
+            raise ValueError(
+                f"规则 {iid} risk_level 非法（来源 {source}）: {detail}；合法值 {sorted(VALID_RISKS)}"
+            )
+        _warn_rule("invalid_risk_level", str(iid), "value=%r coerced to low" % (risk_raw,))
         risk = "low"
     keywords = list(raw.get("keywords") or [])
+    folded: dict[str, int] = {}
+    for kw in keywords:
+        key = str(kw).lower()
+        folded[key] = folded.get(key, 0) + 1
+    dups = sorted(k for k, n in folded.items() if n > 1)
+    if dups:
+        _warn_rule(
+            "duplicate_keyword_casefold",
+            str(iid),
+            ",".join("%s×%d" % (k, folded[k]) for k in dups),
+        )
     kw_weights = dict(raw.get("keyword_weights") or {})
-    kw_weights = {k: v for k, v in kw_weights.items() if k in set(keywords)}
+    kw_set = set(keywords)
+    orphans = sorted(str(k) for k in kw_weights if k not in kw_set)
+    if orphans:
+        detail = ",".join(orphans)
+        if _rules_strict():
+            raise ValueError(
+                f"规则 {iid} keyword_weights 含不在 keywords 中的键（来源 {source}）: {detail}"
+            )
+        _warn_rule("keyword_weights_orphan", str(iid), detail)
+    kw_weights = {k: v for k, v in kw_weights.items() if k in kw_set}
+    action = raw.get("action")
+    if action == "" or action is None:
+        action_v = None
+    else:
+        action_v = str(action)
+    obj = raw.get("object")
+    if obj is None or obj == "":
+        object_v = str(iid).split(".")[0] if iid else None
+    else:
+        object_v = str(obj)
     runnables = _expand_runnables(raw)
     resource = raw.get("resource")
     if resource and not raw.get("candidates"):
@@ -114,6 +175,8 @@ def _parse_rule(raw: dict[str, Any], source: str = "") -> Rule | None:
         enabled=True,
         raw=raw,
         source=source,
+        action=action_v,
+        object=object_v,
     )
 
 

@@ -1,0 +1,76 @@
+{
+  "stage": "S1",
+  "updated_at": "2026-09-29T14:08:31+00:00",
+  "freeze_sha256": "12449166beec2dbddada00756e423586619a0f21f4120769ac0408d10ca47e1d",
+  "paths": {
+    "py38-nojieba": {
+      "python": "3.8.10",
+      "jieba": "unavailable:No module named 'jieba'",
+      "corpus": {"n": 232, "at1": 214, "at3": 230, "at10": 232, "empty": 0},
+      "core": {"n": 20, "top1": 20},
+      "perf": {
+        "engine_cold_ms": 10.768,
+        "engine_ms_p50": 6.556,
+        "engine_ms_p95": 9.267,
+        "query_ms_p50": 13.516,
+        "query_ms_p95": 23.094,
+        "cli_ms_p50": 138.359
+      },
+      "heldout_dev": {
+        "n_scored": 60,
+        "at1": 5,
+        "at10": 5,
+        "empty": 49,
+        "noisy_n": 6,
+        "report": "S1-heldout-dev-py38-nojieba.json"
+      },
+      "heldout_test": {
+        "n_scored": 60,
+        "at1": 7,
+        "at10": 10,
+        "empty": 44,
+        "noisy_n": 6,
+        "report": "S1-heldout-test-py38-nojieba.json",
+        "ledger_run": 1
+      },
+      "reports": {
+        "corpus": "S1-corpus-py38-nojieba.json",
+        "core": "S1-core-py38-nojieba.json",
+        "perf": "S1-perf-py38-nojieba-perf.json"
+      }
+    },
+    "py39-jieba": {
+      "python": "3.9.18",
+      "jieba": "ready",
+      "corpus": {"n": 232, "at1": 213, "at3": 229, "at10": 232, "empty": 0},
+      "core": {"n": 20, "top1": 20},
+      "perf": {
+        "engine_cold_ms": 738.376,
+        "engine_ms_p50": 37.426,
+        "engine_ms_p95": 40.367,
+        "query_ms_p50": 18.368,
+        "query_ms_p95": 35.971,
+        "cli_ms_p50": 967.114
+      },
+      "heldout_dev": {
+        "n_scored": 60,
+        "at1": 5,
+        "at10": 5,
+        "empty": 44,
+        "noisy_n": 6,
+        "report": "S1-heldout-dev-py39-jieba.json"
+      },
+      "heldout_test": null,
+      "reports": {
+        "corpus": "S1-corpus-py39-jieba.json",
+        "core": "S1-core-py39-jieba.json",
+        "perf": "S1-perf-py39-jieba-perf.json"
+      }
+    }
+  },
+  "notes": {
+    "determinism": "py38-nojieba results.jsonl 两次运行字节相同；py39-jieba 分数有抖动（jieba 切词/token 加分不稳定），S3 全字段 diff 只用 nojieba 路径，jieba 路径用 --ids-only",
+    "t14_engine": "jieba 冷启动含词典加载约 0.7s，热构造 p50=37ms。★T-14 的 Engine()≤100ms 以热构造为准。",
+    "heldout": "主指标剔 noisy_input。test 半 py38 已用 1/4 次配额；jieba 的 test 半未跑。"
+  }
+}

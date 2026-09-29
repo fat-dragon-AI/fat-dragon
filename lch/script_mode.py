@@ -67,6 +67,7 @@ def run_script_mode(
     risk_level: str,
     intent_id: str,
     input_fn: Callable[[str], str] | None = None,
+    hit=None,
 ) -> str:
     """返回 continue 或 quit。"""
     read = input_fn or input
@@ -126,6 +127,7 @@ def run_script_mode(
                         "confirmed": True,
                         "exit_code": 0,
                     },
+                    hit=hit,
                 )
             else:
                 exported = export_script(source, runnable.export_name or source.name)
@@ -143,6 +145,7 @@ def run_script_mode(
                             "confirmed": True,
                             "exit_code": 0,
                         },
+                        hit=hit,
                     )
             continue
 
@@ -185,6 +188,7 @@ def run_script_mode(
                     "exported_to": str(exported) if exported else None,
                     "confirmed": False,
                 },
+                hit=hit,
             )
             continue
 
@@ -207,4 +211,5 @@ def run_script_mode(
                 "timed_out": result.timed_out,
                 "confirmed": True,
             },
+            hit=hit,
         )

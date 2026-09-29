@@ -13,7 +13,7 @@ from lch.loader import Runnable
 
 
 class LoaderSchemaTest(unittest.TestCase):
-    def test_invalid_risk_coerced_and_dup_raises(self) -> None:
+    def test_invalid_risk_raises(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             p = Path(td) / "rules.json"
             p.write_text(
@@ -31,9 +31,64 @@ class LoaderSchemaTest(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
-            bundle = load_rules_bundle(p)
-            self.assertEqual(bundle.rules[0].risk_level, "low")
+            with self.assertRaises(ValueError):
+                load_rules_bundle(p)
 
+    def test_invalid_risk_coerced_when_not_strict(self) -> None:
+        import os
+
+        old = os.environ.get("LCH_RULES_STRICT")
+        os.environ["LCH_RULES_STRICT"] = "0"
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                p = Path(td) / "rules.json"
+                p.write_text(
+                    json.dumps(
+                        {
+                            "rules": [
+                                {
+                                    "intent_id": "a.one",
+                                    "keywords": ["foo"],
+                                    "risk_level": "nope",
+                                    "cmd_template": ["echo 1"],
+                                }
+                            ]
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                bundle = load_rules_bundle(p)
+                self.assertEqual(bundle.rules[0].risk_level, "low")
+        finally:
+            if old is None:
+                os.environ.pop("LCH_RULES_STRICT", None)
+            else:
+                os.environ["LCH_RULES_STRICT"] = old
+
+    def test_orphan_keyword_weights_raise(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "rules.json"
+            p.write_text(
+                json.dumps(
+                    {
+                        "rules": [
+                            {
+                                "intent_id": "a.one",
+                                "keywords": ["foo"],
+                                "keyword_weights": {"bar": 8},
+                                "cmd_template": ["echo 1"],
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with self.assertRaises(ValueError):
+                load_rules_bundle(p)
+
+    def test_dup_intent_raises(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "rules.json"
             p.write_text(
                 json.dumps(
                     {

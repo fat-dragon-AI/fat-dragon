@@ -4,12 +4,15 @@ from __future__ import annotations
 import json
 import os
 import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
 from .jieba_fallback import add_user_words, tokenize
 from .loader import Rule
+from .rerank import score_v2
+from .retrieval import env_top_n, get_index, recall as bm25_recall
 
 RISK_ORDER = {"low": 0, "medium": 1, "high": 2, "critical": 3}
 _SHORT_CJK_MAX = 2
@@ -24,8 +27,9 @@ _NEGATE_INTENT = re.compile(
 class MatchResult:
     rule: Rule
     score: float
-    confidence: str  # exact | weak
+    confidence: str  # exact | weak | fallback
     negated: bool = False
+    match_engine: str = "v1"  # v1 | v2
 
 
 _synonym_groups: list[list[str]] = []
@@ -289,14 +293,41 @@ def expand_query_with_synonyms(text: str) -> str:
     return text + " " + " ".join(extra)
 
 
+def expand_for_recall(text: str) -> list[str]:
+    """召回侧同义变体：原句 + 命中组替换语，最多 4 条额外变体。不拼回原句。"""
+    _ensure_dicts()
+    out = [text]
+    seen = {text.strip().lower()}
+    tl = text.lower()
+    tns = "".join(text.split()).lower()
+    hit_groups: list[list[str]] = []
+    for group in _synonym_groups:
+        if any(_hit(tl, tns, g) for g in group):
+            hit_groups.append(group)
+    for group in hit_groups[:4]:
+        for alt in group:
+            key = alt.strip().lower()
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            out.append(alt)
+            if len(out) >= 5:
+                return out
+    return out
+
+
 def detect_negation(text: str) -> bool:
     _ensure_dicts()
     for neg in _negators:
         idx = text.find(neg)
         if idx < 0:
             continue
-        window = text[idx : idx + len(neg) + 8]
-        if any(v in window for v in _neg_verbs):
+        after = text[idx : idx + len(neg) + 12]
+        if any(v in after for v in _neg_verbs):
+            return True
+        start = max(0, idx - 12)
+        before = text[start : idx + len(neg)]
+        if any(v in before for v in _neg_verbs):
             return True
     return False
 
@@ -325,6 +356,7 @@ def prepare_rules(rules: list[Rule], jieba_dict: Path | None = None) -> None:
                 cache[kw] = tokenize(kw, jieba_dict, protected=set(rule.keywords))
             setattr(rule, "_kw_tokens", cache)
     _prepared = True
+    get_index(rules)
 
 
 def _rank(
@@ -355,6 +387,131 @@ def _rank(
     return results
 
 
+def _rule_has_full(text: str, rule: Rule) -> bool:
+    text_ns = "".join(text.split()).lower()
+    return any(_hit(text, text_ns, kw) for kw in rule.keywords)
+
+
+def _v2_layers() -> tuple[bool, bool, bool, bool]:
+    """细闸一层层叠：关打分则判决/兜底退回 v1 语义；关判决则不开兜底。"""
+    recall_on = _env_flag("LCH_MATCH_V2_RECALL", True)
+    rerank_on = _env_flag("LCH_MATCH_V2_RERANK", True)
+    verdict_on = _env_flag("LCH_MATCH_V2_VERDICT", True)
+    fallback_on = _env_flag("LCH_MATCH_V2_FALLBACK", True)
+    if not rerank_on:
+        verdict_on = False
+        fallback_on = False
+    if not verdict_on:
+        fallback_on = False
+    return recall_on, rerank_on, verdict_on, fallback_on
+
+
+_v1_thresh_warned = False
+_BLOCKED_FALLBACK_RISK = frozenset({"high", "critical"})
+
+
+def _warn_v1_threshold_on_v2() -> None:
+    global _v1_thresh_warned
+    if _v1_thresh_warned:
+        return
+    if os.environ.get("LCH_T_EXACT") or os.environ.get("LCH_T_WEAK"):
+        sys.stderr.write(
+            "lch: LCH_T_EXACT/LCH_T_WEAK 只作用于 v1；v2 请用 LCH_V2_T_EXACT / "
+            "LCH_V2_T_WEAK / LCH_V2_MARGIN\n"
+        )
+        sys.stderr.flush()
+        _v1_thresh_warned = True
+
+
+def _rank_v2(
+    scored: list[tuple[float, Rule, bool, bool]],
+    top_k: int,
+    *,
+    verdict_on: bool,
+    fallback_on: bool,
+) -> list[MatchResult]:
+    ranked = sorted(
+        scored,
+        key=lambda x: (
+            -x[0],
+            -x[1].weight,
+            RISK_ORDER.get(x[1].risk_level, 9),
+            x[1].intent_id,
+        ),
+    )
+    if not ranked:
+        return []
+    scores_only = [x[0] for x in ranked]
+    for i in range(len(scores_only) - 1):
+        if scores_only[i] + 1e-12 < scores_only[i + 1]:
+            ranked = sorted(
+                scored,
+                key=lambda x: (
+                    -x[0],
+                    -x[1].weight,
+                    RISK_ORDER.get(x[1].risk_level, 9),
+                    x[1].intent_id,
+                ),
+            )
+            break
+    margin = ranked[0][0] if len(ranked) == 1 else ranked[0][0] - ranked[1][0]
+    t_exact = _env_float("LCH_V2_T_EXACT", 0.32)
+    t_weak = _env_float("LCH_V2_T_WEAK", 0.12)
+    m_exact = _env_float("LCH_V2_MARGIN", 0.08)
+    if t_weak > t_exact:
+        t_weak, t_exact = t_exact, t_weak
+
+    labeled: list[tuple[float, Rule, bool, str]] = []
+    for i, (s, rule, negated, has_full) in enumerate(ranked):
+        if s <= 0:
+            continue
+        if verdict_on:
+            if i == 0 and s >= t_exact and margin >= m_exact:
+                conf = "exact"
+            elif s >= t_weak:
+                conf = "weak"
+            else:
+                conf = "low"
+        else:
+            if s >= t_exact:
+                conf = "exact"
+            elif s >= t_weak or has_full:
+                conf = "weak"
+            else:
+                conf = "low"
+        labeled.append((s, rule, negated, conf))
+
+    kept = [(s, rule, negated, conf) for s, rule, negated, conf in labeled if conf in ("exact", "weak")]
+    results: list[MatchResult] = []
+    if kept:
+        for s, rule, negated, conf in kept[:top_k]:
+            results.append(
+                MatchResult(rule=rule, score=s, confidence=conf, negated=negated, match_engine="v2")
+            )
+        return results
+
+    if not fallback_on:
+        return []
+    fb: list[MatchResult] = []
+    for s, rule, negated, conf in labeled:
+        if conf != "low" or s <= 0:
+            continue
+        if (rule.risk_level or "").lower() in _BLOCKED_FALLBACK_RISK:
+            continue
+        fb.append(
+            MatchResult(
+                rule=rule,
+                score=s,
+                confidence="fallback",
+                negated=negated,
+                match_engine="v2",
+            )
+        )
+        if len(fb) >= min(3, top_k):
+            break
+    return fb
+
+
 def _env_float(name: str, default: float) -> float:
     raw = os.environ.get(name)
     if raw is None or raw == "":
@@ -365,21 +522,38 @@ def _env_float(name: str, default: float) -> float:
         return default
 
 
-def match_rules(
+_TRUE_FLAG = frozenset({"1", "true", "yes", "on"})
+_V2_SECONDARY = (
+    ("RECALL", "LCH_MATCH_V2_RECALL"),
+    ("SLOTS", "LCH_MATCH_V2_SLOTS"),
+    ("RERANK", "LCH_MATCH_V2_RERANK"),
+    ("VERDICT", "LCH_MATCH_V2_VERDICT"),
+    ("FALLBACK", "LCH_MATCH_V2_FALLBACK"),
+)
+
+
+def _env_flag(name: str, default: bool = False) -> bool:
+    """调用期读取，禁止模块级缓存。{"1","true","yes","on"} 为真（大小写不敏感）。"""
+    raw = os.environ.get(name)
+    if raw is None or raw == "":
+        return default
+    return raw.strip().lower() in _TRUE_FLAG
+
+
+def match_flags_snapshot() -> str:
+    """审计用开关快照。二级开关未设置时默认开（仅在 LCH_MATCH_V2=1 时真正生效）。"""
+    parts = ["V2:%d" % int(_env_flag("LCH_MATCH_V2", True))]
+    for label, env_name in _V2_SECONDARY:
+        parts.append("%s:%d" % (label, int(_env_flag(env_name, True))))
+    return ",".join(parts)
+
+
+def _score_all_rules(
     text: str,
     rules: list[Rule],
-    top_k: int = 10,
-    t_exact: float | None = None,
-    t_weak: float | None = None,
-    use_jieba: bool = True,
-    jieba_dict: Path | None = None,
-) -> list[MatchResult]:
-    t_exact = _env_float("LCH_T_EXACT", t_exact if t_exact is not None else 8)
-    t_weak = _env_float("LCH_T_WEAK", t_weak if t_weak is not None else 4)
-    if t_weak > t_exact:
-        t_weak, t_exact = t_exact, t_weak
-    top_k = max(1, int(top_k))
-
+    use_jieba: bool,
+    jieba_dict: Path | None,
+) -> list[tuple[float, Rule, bool, bool]]:
     _ensure_dicts()
     search = expand_query_with_synonyms(text)
     negated = detect_negation(text)
@@ -404,5 +578,97 @@ def match_rules(
         has_full = n_full > 0
         if s > rule.weight * 0.1 or has_full:
             scored.append((s, rule, rule_neg, has_full))
+    return scored
 
+
+def _match_rules_v2(
+    text: str,
+    rules: list[Rule],
+    top_k: int,
+    t_exact: float,
+    t_weak: float,
+    use_jieba: bool,
+    jieba_dict: Path | None,
+) -> list[MatchResult]:
+    """S4 召回 + S6 余弦打分 + S7 判决 + S8 兜底。细闸默认开，一层层叠。"""
+    if not rules:
+        return []
+    recall_on, rerank_on, verdict_on, fallback_on = _v2_layers()
+    if rerank_on:
+        _warn_v1_threshold_on_v2()
+
+    index = get_index(rules)
+    if recall_on:
+        variants = expand_for_recall(text)
+        recalled = bm25_recall(variants, index, top_n=env_top_n(30))
+        cand_idx = [i for i, _s in recalled]
+    else:
+        cand_idx = list(range(len(rules)))
+
+    negated = detect_negation(text)
+    scored: list[tuple[float, Rule, bool, bool]] = []
+
+    if rerank_on:
+        for idx in cand_idx:
+            rule = rules[idx]
+            s = score_v2(text, rule, index, idx)
+            rule_neg = negated and _intent_is_mutating(rule.intent_id, rule.keywords)
+            if rule_neg:
+                s *= 0.25
+            has_full = _rule_has_full(text, rule)
+            if s > 0 or has_full:
+                scored.append((s, rule, rule_neg, has_full))
+        results = _rank_v2(
+            scored, top_k, verdict_on=verdict_on, fallback_on=fallback_on
+        )
+        for item in results:
+            item.match_engine = "v2"
+        return results
+
+    # 只换召回：v1 打分 + v1 判决。打分用原句，同义词不进打分文本。
+    _ensure_dicts()
+    score_text = text if recall_on else expand_query_with_synonyms(text)
+    protected: set[str] = set()
+    for rule in rules:
+        protected.update(rule.keywords)
+    tokens: list[str] = []
+    if use_jieba:
+        tokens = tokenize(score_text, jieba_dict, protected=protected)
+    subset = [rules[i] for i in cand_idx] if recall_on else rules
+    for rule in subset:
+        if tokens:
+            s, n_full = _score_rule_jieba_detail(score_text, rule, tokens)
+        else:
+            s, n_full = _score_rule_keywords_detail(score_text, rule)
+        rule_neg = negated and _intent_is_mutating(rule.intent_id, rule.keywords)
+        if rule_neg:
+            s *= 0.25
+        has_full = n_full > 0
+        if recall_on or s > rule.weight * 0.1 or has_full:
+            scored.append((s, rule, rule_neg, has_full))
+    results = _rank(scored, top_k, t_exact, t_weak)
+    for item in results:
+        item.match_engine = "v2"
+    return results
+
+
+def match_rules(
+    text: str,
+    rules: list[Rule],
+    top_k: int = 10,
+    t_exact: float | None = None,
+    t_weak: float | None = None,
+    use_jieba: bool = True,
+    jieba_dict: Path | None = None,
+) -> list[MatchResult]:
+    t_exact = _env_float("LCH_T_EXACT", t_exact if t_exact is not None else 8)
+    t_weak = _env_float("LCH_T_WEAK", t_weak if t_weak is not None else 4)
+    if t_weak > t_exact:
+        t_weak, t_exact = t_exact, t_weak
+    top_k = max(1, int(top_k))
+    # 开关必须在阈值解析之后（核验 W-1），否则 v2 拿不到已规范化的 t_*。
+    if _env_flag("LCH_MATCH_V2", True):
+        return _match_rules_v2(text, rules, top_k, t_exact, t_weak, use_jieba, jieba_dict)
+
+    scored = _score_all_rules(text, rules, use_jieba, jieba_dict)
     return _rank(scored, top_k, t_exact, t_weak)

@@ -127,8 +127,10 @@ for p in sorted(Path("resources").rglob("*")):
     rel = p.as_posix()
     if not (
         rel == "resources/rules.json"
+        or rel == "resources/system_adapt.json"
         or rel.startswith("resources/rules.d/")
         or rel.startswith("resources/templates/")
+        or rel.startswith("resources/dict/")
     ):
         continue
     if p.suffix.lower() not in {".json", ".tpl"}:

@@ -79,30 +79,52 @@ class ShortKeywordTest(unittest.TestCase):
 
 class MatchRankTest(unittest.TestCase):
     def test_exact_phrase_wins(self) -> None:
-        rules = [
-            _rule("a", ["权限"], weight=20),
-            _rule("b", ["改一下文件权限"], weight=8),
-        ]
-        hits = match_rules(
-            "改一下文件权限", rules, top_k=5, t_exact=1, t_weak=0.5, use_jieba=False
-        )
-        self.assertTrue(hits)
-        self.assertEqual(hits[0].rule.intent_id, "b")
+        import os
+
+        old = os.environ.get("LCH_MATCH_V2")
+        os.environ["LCH_MATCH_V2"] = "0"
+        try:
+            rules = [
+                _rule("a", ["权限"], weight=20),
+                _rule("b", ["改一下文件权限"], weight=8),
+            ]
+            hits = match_rules(
+                "改一下文件权限", rules, top_k=5, t_exact=1, t_weak=0.5, use_jieba=False
+            )
+            self.assertTrue(hits)
+            self.assertEqual(hits[0].rule.intent_id, "b")
+        finally:
+            if old is None:
+                os.environ.pop("LCH_MATCH_V2", None)
+            else:
+                os.environ["LCH_MATCH_V2"] = old
 
 
 class NegationTest(unittest.TestCase):
     def test_detect(self) -> None:
         self.assertTrue(detect_negation("不要重启nginx"))
         self.assertFalse(detect_negation("重启nginx"))
+        for q in ("别把服务停了", "别停服务", "千万别删了它", "不想重启", "服务别停"):
+            self.assertTrue(detect_negation(q), msg=q)
 
     def test_restart_downranked(self) -> None:
-        rules = [
-            _rule("nginx.restart", ["重启nginx", "重启"], weight=10),
-            _rule("nginx.config.view", ["nginx配置", "nginx"], weight=9),
-        ]
-        hits = match_rules("不要重启nginx", rules, top_k=5, t_exact=8, t_weak=1, use_jieba=False)
-        self.assertTrue(hits)
-        self.assertTrue(any(h.negated for h in hits if h.rule.intent_id == "nginx.restart"))
+        import os
+
+        old = os.environ.get("LCH_MATCH_V2")
+        os.environ["LCH_MATCH_V2"] = "0"
+        try:
+            rules = [
+                _rule("nginx.restart", ["重启nginx", "重启"], weight=10),
+                _rule("nginx.config.view", ["nginx配置", "nginx"], weight=9),
+            ]
+            hits = match_rules("不要重启nginx", rules, top_k=5, t_exact=8, t_weak=1, use_jieba=False)
+            self.assertTrue(hits)
+            self.assertTrue(any(h.negated for h in hits if h.rule.intent_id == "nginx.restart"))
+        finally:
+            if old is None:
+                os.environ.pop("LCH_MATCH_V2", None)
+            else:
+                os.environ["LCH_MATCH_V2"] = old
 
 
 class ScpIntentTest(unittest.TestCase):

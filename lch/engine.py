@@ -9,7 +9,7 @@ from typing import Any
 from .adapt import detect_profile
 from .extract import extract_params, filter_params, params_look_unsafe
 from .loader import Rule, Runnable, RulesBundle, load_adapt, load_rules_bundle
-from .matcher import MatchResult, match_rules, prepare_rules
+from .matcher import MatchResult, match_flags_snapshot, match_rules, prepare_rules
 from .paths import detect_home, jieba_dict_path, resolve_file, resolve_rules_main, soft_res_root
 from .preprocess import preprocess
 from .render import (
@@ -35,6 +35,8 @@ class HitView:
     resource_exists: bool = False
     missing: list[str] = field(default_factory=list)
     negated: bool = False
+    match_engine: str = "v1"
+    flags: str = ""
 
 
 @dataclass
@@ -170,6 +172,8 @@ class Engine:
             tips = [f"抽出参数含特殊字符，已升级风险: {', '.join(unsafe)}"] + tips
         if getattr(m, "negated", False):
             tips = ["输入含否定语气，请确认是否真要执行该操作"] + tips
+        if getattr(m, "confidence", "") == "fallback":
+            tips = ["低置信推测，请核对后再执行"] + tips
 
         return HitView(
             intent_id=rule.intent_id,
@@ -183,4 +187,6 @@ class Engine:
             resource_exists=exists,
             missing=missing,
             negated=bool(getattr(m, "negated", False)),
+            match_engine=getattr(m, "match_engine", "v1") or "v1",
+            flags=match_flags_snapshot(),
         )

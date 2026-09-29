@@ -86,6 +86,7 @@ def _try_execute(
     intent_id: str,
     source: str,
     input_fn: Callable[[str], str] | None = None,
+    hit: HitView | None = None,
 ) -> None:
     cmd = cmd.strip()
     if not cmd:
@@ -105,6 +106,7 @@ def _try_execute(
                 "exit_code": None,
                 "confirmed": False,
             },
+            hit=hit,
         )
         return
 
@@ -125,11 +127,12 @@ def _try_execute(
             "interactive": result.interactive,
             "confirmed": True,
         },
+        hit=hit,
     )
 
 
-def _apply_hit(hit: HitView) -> tuple[list[Runnable], str, str]:
-    return hit.runnables, hit.risk_level, hit.intent_id
+def _apply_hit(hit: HitView) -> tuple[list[Runnable], str, str, str]:
+    return hit.runnables, hit.risk_level, hit.intent_id, hit.confidence
 
 
 def agent_command_loop(
@@ -139,7 +142,7 @@ def agent_command_loop(
     input_fn: Callable[[str], str] | None = None,
 ) -> str:
     read = input_fn or input
-    runnables, risk, intent_id = _apply_hit(hit)
+    runnables, risk, intent_id, _confidence = _apply_hit(hit)
     qresult = result
 
     while True:
@@ -178,8 +181,18 @@ def agent_command_loop(
             if not new_hit:
                 print("已取消选择；可继续执行当前意图命令，或空行返回 lch>。")
                 continue
+            if new_hit.confidence == "fallback":
+                print("未找到确切匹配，系统在猜测。是否就是这条？")
+                try:
+                    ans = read("确认这条意图？[y/N] ").strip().lower()
+                except (EOFError, KeyboardInterrupt):
+                    print("\n已取消。")
+                    continue
+                if ans != "y":
+                    print("已取消。")
+                    continue
             hit = new_hit
-            runnables, risk, intent_id = _apply_hit(hit)
+            runnables, risk, intent_id, _confidence = _apply_hit(hit)
             print("已切换意图：输入编号执行命令。")
             continue
 
@@ -200,8 +213,18 @@ def agent_command_loop(
             if not new_hit:
                 print("未选择意图；可继续输入中文，或空行返回 lch>。")
                 continue
+            if new_hit.confidence == "fallback":
+                print("未找到确切匹配，系统在猜测。是否就是这条？")
+                try:
+                    ans = read("确认这条意图？[y/N] ").strip().lower()
+                except (EOFError, KeyboardInterrupt):
+                    print("\n已取消。")
+                    continue
+                if ans != "y":
+                    print("已取消。")
+                    continue
             hit = new_hit
-            runnables, risk, intent_id = _apply_hit(hit)
+            runnables, risk, intent_id, _confidence = _apply_hit(hit)
             print("已切换意图：输入编号执行；i 返回意图列表；空行返回 lch>。")
             continue
 
@@ -230,17 +253,21 @@ def agent_command_loop(
                 if "{" in edited and "}" in edited:
                     print(f"仍含占位符，请改全后再回车: {edited}")
                     continue
-                _try_execute(engine, edited, risk, intent_id, "index", input_fn=read)
+                _try_execute(engine, edited, risk, intent_id, "index", input_fn=read, hit=hit)
                 continue
 
             if runnable.kind == "sequence":
-                action = run_step_mode(engine, runnable, risk, intent_id, input_fn=read)
+                action = run_step_mode(
+                    engine, runnable, risk, intent_id, input_fn=read, hit=hit
+                )
                 if action == "quit":
                     return "quit"
                 continue
 
             if runnable.kind == "script":
-                action = run_script_mode(engine, runnable, risk, intent_id, input_fn=read)
+                action = run_script_mode(
+                    engine, runnable, risk, intent_id, input_fn=read, hit=hit
+                )
                 if action == "quit":
                     return "quit"
                 continue
@@ -318,6 +345,19 @@ def agent_repl(engine: Engine) -> int:
         if not hit:
             print()
             continue
+
+        if hit.confidence == "fallback":
+            print("未找到确切匹配，系统在猜测。是否就是这条？")
+            try:
+                ans = input("确认这条意图？[y/N] ").strip().lower()
+            except (EOFError, KeyboardInterrupt):
+                print("\n已取消。")
+                print()
+                continue
+            if ans != "y":
+                print("已取消。")
+                print()
+                continue
 
         print()
         print("进入命令框：编号执行 / i换意图 / 再输中文 / 手输英文命令；空行跳过本轮。")

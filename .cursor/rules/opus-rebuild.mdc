@@ -1,0 +1,11 @@
+---
+description: Matcher rebuild docs live only in opus-rebuild/
+alwaysApply: true
+---
+
+# opus-rebuild 文档位置
+
+- 匹配识别率分析、重建方案、该轨道实验与落地记录：**只写入** 仓库根目录 `opus-rebuild/`（索引 `opus-rebuild/INDEX.md`）。
+- **不要**把本轨道方案写进 `.docs/`、`.review-ll/`、`/home/lilong/workresource/cloud_init`。
+- `.docs` 现行文档仍管产品功能变更；`cloud_init` 只管云主机环境搭建。
+- 目录名即 `opus-rebuild`（无空格）。用户说的「opus -rebuild」指这一目录。

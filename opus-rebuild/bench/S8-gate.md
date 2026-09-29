@@ -1,0 +1,50 @@
+# bench S8-gate
+
+- set: `heldout-test`
+- path_key: `py38-nojieba`  python=3.8.10  jieba=unavailable:No module named 'jieba'
+- n=66  @1=15 (0.227273)  @3=28 (0.424242)  @10=28 (0.424242)  空=7 (0.106061)
+- query p50=1.938 ms  p95=6.211 ms
+- 主指标（剔除 noisy_input）n=60 @1=14 @10=27 空=7
+- recall@30=0.636364  containment=1.0
+
+## @1 未命中（最多 40 条）
+- '查看硬盘' -> sys.disk.usage  got [['sys.hw.overview', 0.2627, 'weak'], ['sys.block.devices', 0.1792, 'weak'], ['sys.disk.usage', 0.1705, 'weak']]  rank=2
+- '硬盘大小' -> sys.disk.usage  got [['sys.disk.du', 0.1922, 'weak'], ['sys.block.devices', 0.1572, 'weak'], ['sys.disk.usage', 0.1496, 'weak']]  rank=2
+- '后台还挂着哪些程序' -> sys.process.list  got [['svc.list', 0.1577, 'weak']]  rank=None
+- '这个后台现在还活着吗' -> svc.status  got [['java.jar.nohup', 0.0937, 'fallback'], ['svc.list', 0.0642, 'fallback'], ['nslookup.reverse', 0.0574, 'fallback']]  rank=None
+- '让那个后台整段再来一次' -> svc.restart  got [['java.jar.nohup', 0.0864, 'fallback']]  rank=None
+- '让那个后台歇着别再跑了' -> svc.stop  got [['java.jar.nohup', 0.0872, 'fallback'], ['svc.status', 0.0791, 'fallback']]  rank=None
+- '哪些单元自己挂掉了' -> svc.list.failed  got [['mvn.test', 0.0541, 'fallback'], ['svc.list.failed', 0.0498, 'fallback'], ['svc.list.units', 0.0439, 'fallback']]  rank=1
+- '把那份归档对应的程序停下来' -> java.app.stop  got []  rank=None
+- '把默认的那套虚拟机换成另一号' -> java.switch.version  got [['swap.status', 0.0791, 'fallback'], ['text.replace', 0.0649, 'fallback'], ['java.default.vm', 0.057, 'fallback']]  rank=None
+- '钻进沙箱里面去敲命令' -> docker.exec  got [['file.symlink.create', 0.0445, 'fallback'], ['sys.disk.du', 0.0438, 'fallback'], ['pkg.which', 0.0436, 'fallback']]  rank=None
+- '本地已经拉下来的模板有哪些' -> docker.images  got [['svc.list', 0.0821, 'fallback'], ['docker.images', 0.0705, 'fallback'], ['docker.ps', 0.0698, 'fallback']]  rank=1
+- '让沙箱重新过一遍生命周期' -> docker.restart  got [['svc.restart', 0.0581, 'fallback'], ['env.path.source', 0.0482, 'fallback']]  rank=None
+- '本地那套大模型还装了哪些' -> ollama.list  got [['pkg.list', 0.3189, 'weak'], ['ollama.run', 0.193, 'weak'], ['ollama.ps', 0.1484, 'weak']]  rank=None
+- '把不要的本地模型清掉' -> ollama.rm  got [['ollama.run', 0.2879, 'weak'], ['ollama.rm', 0.2813, 'weak']]  rank=1
+- 'apt列表' -> pkg.list  got [['pkg.install', 0.2335, 'weak'], ['mirror.apt', 0.2315, 'weak'], ['pkg.remove', 0.2134, 'weak'], ['pkg.apt.purge', 0.1897, 'weak'], ['pkg.apt.update', 0.1785, 'weak']]  rank=None
+- '把一个监测小工具放到机子上' -> pkg.install  got [['file.symlink.where', 0.0687, 'fallback'], ['docker.run', 0.0567, 'fallback'], ['im.sogou.config', 0.0454, 'fallback']]  rank=None
+- '先把软件仓库目录刷新一遍' -> pkg.apt.update  got [['env.path.source', 0.049, 'fallback'], ['pkg.apt.update', 0.0446, 'fallback'], ['svc.daemon.reload', 0.0442, 'fallback']]  rank=1
+- '堆上占用把快照导出来' -> jvm.jmap.heap  got [['net.port.listen', 0.0647, 'fallback'], ['sys.disk.du', 0.0524, 'fallback'], ['sys.mem.free', 0.0512, 'fallback']]  rank=None
+- '虚拟机这边还挂着几份' -> jvm.jps  got [['swap.status', 0.0946, 'fallback']]  rank=None
+- '国内下载依赖太慢了换个近的站' -> mirror.overview  got [['ollama.gguf.download', 0.2571, 'weak']]  rank=None
+- '拉模板总超时，给引擎换个近的源' -> mirror.docker  got []  rank=None
+- '这块联网的板子叫啥名字、链路亮不亮' -> net.nic.info  got []  rank=None
+- '此刻谁已经跟我握手连上了' -> net.ss.established  got []  rank=None
+- '会话里导出的那些键值都有啥' -> echo.env.list  got [['redis.keys.sample', 0.0614, 'fallback'], ['env.export.set', 0.0474, 'fallback'], ['env.path.export', 0.0454, 'fallback']]  rank=None
+- '找名叫 app.toml 的那份东西' -> file.find.name  got [['text.append.line', 0.1121, 'fallback'], ['java.app.scripts', 0.0824, 'fallback'], ['echo.shell.pid', 0.0538, 'fallback']]  rank=None
+- '把这份拷到另一处' -> file.copy  got []  rank=None
+- '把这份挪个地方并改个称呼' -> file.move  got []  rank=None
+- '可执行搜索路径现在是哪几段' -> env.path.view  got [['pkg.which', 0.1616, 'weak']]  rank=None
+- '中文输入这一套现在正不正常' -> im.status  got [['im.switch', 0.2338, 'weak'], ['im.status', 0.2113, 'weak'], ['im.notwork', 0.1836, 'weak']]  rank=1
+- '把输入这一套关掉再打开' -> im.fcitx.restart  got [['im.switch', 0.0871, 'fallback'], ['im.sogou.config', 0.0629, 'fallback'], ['docker.stop', 0.0573, 'fallback']]  rank=None
+- '恰好五位阿拉伯号的模式' -> regex.len.digit  got [['ollama.ps', 0.0678, 'fallback'], ['nslookup.interactive', 0.0538, 'fallback'], ['regex.len.any', 0.0508, 'fallback']]  rank=None
+- '这套构建工具把工程编一遍' -> mvn.compile  got [['docker.build', 0.0876, 'fallback'], ['im.sogou.config', 0.0471, 'fallback']]  rank=None
+- '这套构建工具出可发布的归档' -> mvn.package  got [['docker.build', 0.0836, 'fallback'], ['im.sogou.config', 0.0449, 'fallback']]  rank=None
+- '帮我把这个域名问成数字地址' -> nslookup.lookup  got [['regex.len.digit', 0.1061, 'fallback'], ['mirror.overview', 0.0706, 'fallback'], ['net.ip.addr', 0.069, 'fallback']]  rank=None
+- '拿数字地址反查它登记的名字' -> nslookup.reverse  got [['regex.len.digit', 0.1045, 'fallback'], ['nslookup.reverse', 0.0825, 'fallback'], ['mirror.overview', 0.0696, 'fallback']]  rank=1
+- '网页服务器歇一下再起来' -> nginx.restart  got [['sys.hw.overview', 0.113, 'fallback'], ['scp.upload.file', 0.1033, 'fallback'], ['sys.config.summary', 0.1012, 'fallback']]  rank=None
+- '网页服务器的访问记录翻一下' -> nginx.log  got [['sys.hw.overview', 0.1021, 'fallback'], ['scp.upload.file', 0.0934, 'fallback'], ['sys.config.summary', 0.0915, 'fallback']]  rank=None
+- '把这个账号的口令换掉' -> user.passwd  got [['user.add', 0.2668, 'weak']]  rank=None
+- '把那份小任务的事件和细节展开' -> k8s.desc  got [['cron.list', 0.0747, 'fallback'], ['k8s.desc', 0.0646, 'fallback'], ['svc.journal.unit', 0.0562, 'fallback']]  rank=1
+- '修改文件用户权限' -> perm.chmod  got [['perm.chown', 0.3468, 'weak'], ['perm.chmod', 0.3006, 'weak'], ['text.replace', 0.1695, 'weak'], ['user.passwd', 0.1258, 'weak']]  rank=1

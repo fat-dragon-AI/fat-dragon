@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "tag": "S8-core-py38",
+    "set": "core",
+    "ts": "2026-09-29T14:48:30.262450+00:00",
+    "python": "3.8.10",
+    "path_key": "py38-nojieba",
+    "jieba_status": "unavailable:No module named 'jieba'",
+    "lch_env": {
+      "LCH_TOP_K": "10"
+    },
+    "code_fingerprint": "48dd48db780a549ff8599b3e4a496a712b0ff324e3abc8f3e2ee25325e7375df",
+    "rules_fingerprint": "3996566024e373f79f9e670ab84de2db26bc33c3f596e10194105e4ef9a43d29",
+    "freeze_sha256": null,
+    "n_rules": 213
+  },
+  "metrics": {
+    "n": 20,
+    "at1": 20,
+    "at3": 20,
+    "at10": 20,
+    "empty": 0,
+    "at1_rate": 1.0,
+    "at3_rate": 1.0,
+    "at10_rate": 1.0,
+    "empty_rate": 0.0,
+    "query_ms_p50": 4.15,
+    "query_ms_p95": 10.564,
+    "confidence_top1": {
+      "exact": 20
+    },
+    "confidence_all": {
+      "exact": 20,
+      "weak": 68
+    },
+    "risk_top1": {
+      "low": 14,
+      "medium": 2,
+      "high": 4
+    },
+    "risk_all": {
+      "low": 62,
+      "medium": 18,
+      "high": 8
+    },
+    "scored": {
+      "n": 20,
+      "at1": 20,
+      "at3": 20,
+      "at10": 20,
+      "empty": 0,
+      "at1_rate": 1.0,
+      "at10_rate": 1.0,
+      "empty_rate": 0.0
+    },
+    "noisy_n": 0,
+    "strict_all_kw": {
+      "n": 0,
+      "at1": 0,
+      "at10": 0,
+      "empty": 0,
+      "at1_rate": null,
+      "at10_rate": null,
+      "empty_rate": null
+    },
+    "recall@30": 1.0,
+    "recall@30_n": 20,
+    "recall_containment": 1.0,
+    "core": {
+      "n": 20,
+      "top1": 20
+    }
+  },
+  "misses": []
+}

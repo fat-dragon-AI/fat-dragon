@@ -1,0 +1,106 @@
+{
+  "file": "heldout-v1.jsonl",
+  "sha256": "12449166beec2dbddada00756e423586619a0f21f4120769ac0408d10ca47e1d",
+  "n_total": 132,
+  "n_dev": 66,
+  "n_test": 66,
+  "n_scored": 120,
+  "n_noisy": 12,
+  "frozen_at": "2026-09-29",
+  "overlap_spec": {
+    "normalize": "NFKC+strip_space+lower",
+    "scope": "all_keywords",
+    "min_kw_len": 2,
+    "reject_if": [
+      "kw_in_query",
+      "query_in_kw"
+    ]
+  },
+  "split_seed": 20260929,
+  "thin_domains": [
+    {
+      "domain": "archive",
+      "n_rules": 2,
+      "n_scored": 2,
+      "splits": [
+        "dev",
+        "test"
+      ]
+    },
+    {
+      "domain": "cron",
+      "n_rules": 1,
+      "n_scored": 1,
+      "splits": [
+        "dev"
+      ]
+    },
+    {
+      "domain": "firewall",
+      "n_rules": 2,
+      "n_scored": 2,
+      "splits": [
+        "test"
+      ]
+    },
+    {
+      "domain": "jdk",
+      "n_rules": 1,
+      "n_scored": 1,
+      "splits": [
+        "dev"
+      ]
+    },
+    {
+      "domain": "log",
+      "n_rules": 1,
+      "n_scored": 1,
+      "splits": [
+        "test"
+      ]
+    },
+    {
+      "domain": "mysql",
+      "n_rules": 2,
+      "n_scored": 2,
+      "splits": [
+        "dev",
+        "test"
+      ]
+    },
+    {
+      "domain": "redis",
+      "n_rules": 2,
+      "n_scored": 2,
+      "splits": [
+        "dev",
+        "test"
+      ]
+    },
+    {
+      "domain": "selinux",
+      "n_rules": 1,
+      "n_scored": 1,
+      "splits": [
+        "dev"
+      ]
+    },
+    {
+      "domain": "sudo",
+      "n_rules": 1,
+      "n_scored": 1,
+      "splits": [
+        "dev"
+      ]
+    },
+    {
+      "domain": "swap",
+      "n_rules": 1,
+      "n_scored": 1,
+      "splits": [
+        "test"
+      ]
+    }
+  ],
+  "revisions": []
+}

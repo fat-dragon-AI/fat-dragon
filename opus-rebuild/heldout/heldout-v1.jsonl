@@ -1,0 +1,132 @@
+{"id": "ho-001", "q": "查看硬盘", "intent": "sys.disk.usage", "split": "test", "note": "真实查询；旧 intent 空，三连均标磁盘占用", "source": "history", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-002", "q": "硬盘占用", "intent": "sys.disk.usage", "split": "test", "note": "真实查询；与查看硬盘/硬盘大小同一 intent，须同侧", "source": "history", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-003", "q": "硬盘大小", "intent": "sys.disk.usage", "split": "test", "note": "真实查询；按占用/容量理解，不标块设备型号", "source": "history", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-004", "q": "这台机子为啥转得这么吃力", "intent": "sys.cpu.usage", "split": "dev", "note": "换说法问处理器忙不忙，避开 cpu/占用 等 keyword", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-005", "q": "这台机子开了多久没关过", "intent": "sys.uptime", "split": "dev", "note": "问连续运行时长；与文档「没关过了」原句不同", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-006", "q": "插了几块盘啊这台机子", "intent": "sys.block.devices", "split": "dev", "note": "问块设备拓扑/几块盘，不谈占用百分比", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-007", "q": "后台还挂着哪些程序", "intent": "sys.process.list", "split": "test", "note": "列进程，不用「进程」字面", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-008", "q": "把那个占着不放的后台程序干掉", "intent": "sys.process.kill", "split": "dev", "note": "high；「后台程序」易跟服务混淆，但不含全库 keyword", "source": "drafted", "category": "distractor", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-009", "q": "盘读写是不是堵住了", "intent": "sys.io.stat", "split": "dev", "note": "问磁盘 IO，避开 io/磁盘 等 keyword", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-010", "q": "这个后台现在还活着吗", "intent": "svc.status", "split": "test", "note": "问单个服务是否在跑", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-011", "q": "让那个后台整段再来一次", "intent": "svc.restart", "split": "test", "note": "整段重启，避开「重启服务/重启一下」", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-012", "q": "把那个后台拉起来让它跑", "intent": "svc.start", "split": "dev", "note": "冷启动服务，避开「启动」keyword", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-013", "q": "让那个后台歇着别再跑了", "intent": "svc.stop", "split": "test", "note": "停服务，避开停掉/关闭服务", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-014", "q": "哪些单元自己挂掉了", "intent": "svc.list.failed", "split": "test", "note": "失败单元；不复用「哪些后台程序挂掉了」", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-015", "q": "开机后让那个后台自己起来", "intent": "svc.enable", "split": "dev", "note": "自启；「后台」也可能被理解成容器/jar", "source": "drafted", "category": "distractor", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-016", "q": "取消开机后自己起来", "intent": "svc.disable", "split": "dev", "note": "关掉自启", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-017", "q": "写一个开机就能拉起的后台单元", "intent": "svc.unit.create", "split": "dev", "note": "high；新建 unit", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-018", "q": "刷新守护者让它重新读单元", "intent": "svc.daemon.reload", "split": "dev", "note": "daemon-reload，避开「进程」", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-019", "q": "进入jar包", "intent": "java.jar.inspect", "split": "test", "note": "真实查询；保持看包内容/清单，不是前台跑 jar", "source": "history", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-020", "q": "这台机子上那套虚拟机是哪个发行号", "intent": "java.version", "split": "test", "note": "问 java/javac 版本，避开 java/jdk 字面", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-021", "q": "编译器家目录指到哪", "intent": "java.home.env", "split": "dev", "note": "问 JAVA_HOME/安装路径", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-022", "q": "把那份归档对应的程序停下来", "intent": "java.app.stop", "split": "test", "note": "high；停 jar，易与杀进程/停服务混淆", "source": "drafted", "category": "distractor", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-023", "q": "源码编成字节码", "intent": "java.compile", "split": "dev", "note": "javac，避开 java/编译java", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-024", "q": "把默认的那套虚拟机换成另一号", "intent": "java.switch.version", "split": "test", "note": "切换系统默认 java", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-025", "q": "挂到后台慢慢跑那份归档", "intent": "java.jar.nohup", "split": "dev", "note": "nohup 跑 jar", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-026", "q": "把那个沙箱里跑着的东西列出来", "intent": "docker.ps", "split": "dev", "note": "列容器，避开 docker/容器", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-027", "q": "把沙箱里那个东西歇掉别再跑了", "intent": "docker.stop", "split": "dev", "note": "停容器；「歇掉」也可能被理解成停服务", "source": "drafted", "category": "distractor", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-028", "q": "沙箱里打印出来的话翻一翻", "intent": "docker.logs", "split": "dev", "note": "容器日志", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-029", "q": "钻进沙箱里面去敲命令", "intent": "docker.exec", "split": "test", "note": "进容器执行", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-030", "q": "把这个沙箱从机子上抹掉", "intent": "docker.rm", "split": "dev", "note": "high；删容器", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-031", "q": "本地已经拉下来的模板有哪些", "intent": "docker.images", "split": "test", "note": "本地镜像列表", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-032", "q": "让沙箱重新过一遍生命周期", "intent": "docker.restart", "split": "test", "note": "重启容器", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-033", "q": "本地那套大模型还装了哪些", "intent": "ollama.list", "split": "test", "note": "列出本地 ollama 模型", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-034", "q": "跟这套本地大模型对对话", "intent": "ollama.run", "split": "dev", "note": "交互跑模型", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-035", "q": "看这颗本地模型量化到什么程度", "intent": "ollama.show", "split": "test", "note": "模型详情/量化", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-036", "q": "把本地大模型服务拉起来", "intent": "ollama.serve", "split": "dev", "note": "启动 ollama 服务", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-037", "q": "把不要的本地模型清掉", "intent": "ollama.rm", "split": "test", "note": "删除本地模型", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-038", "q": "查找firefox的安装位置", "intent": "pkg.files", "split": "dev", "note": "真实查询；旧 intent 空，按包内文件/安装路径标", "source": "history", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-039", "q": "apt列表", "intent": "pkg.list", "split": "test", "note": "真实查询；旧 intent 空，标已装包列表而非换源", "source": "history", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-040", "q": "这个程序不想留在机子上了拿掉", "intent": "pkg.remove", "split": "dev", "note": "high；卸包，易与删容器/停进程混淆", "source": "drafted", "category": "distractor", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-041", "q": "把一个监测小工具放到机子上", "intent": "pkg.install", "split": "test", "note": "装包；不用 htop（含 keyword top）", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-042", "q": "这个命令本体躺在哪条路径", "intent": "pkg.which", "split": "test", "note": "which/命令位置", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-043", "q": "这个包的介绍和版本号翻一翻", "intent": "pkg.info", "split": "dev", "note": "包详情", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-044", "q": "先把软件仓库目录刷新一遍", "intent": "pkg.apt.update", "split": "test", "note": "apt update", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-045", "q": "线程卡住了把调用栈倒出来", "intent": "jvm.jstack", "split": "dev", "note": "线程栈，避开 java/jstack 字面", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-046", "q": "回收器跑得勤不勤", "intent": "jvm.jstat.gc", "split": "dev", "note": "GC 情况，避开「垃圾回收」", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-047", "q": "堆上占用把快照导出来", "intent": "jvm.jmap.heap", "split": "test", "note": "high；heap dump", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-048", "q": "虚拟机这边还挂着几份", "intent": "jvm.jps", "split": "test", "note": "jps 列 java 进程", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-049", "q": "虚拟机参数和属性翻一翻", "intent": "jvm.jinfo", "split": "dev", "note": "jinfo，避开「启动参数」", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-050", "q": "国内下载依赖太慢了换个近的站", "intent": "mirror.overview", "split": "test", "note": "国内源总览；未点名具体生态，可能落到 npm/pip", "source": "drafted", "category": "distractor", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-051", "q": "前端装依赖老是去国外，换成国内站", "intent": "mirror.npm", "split": "dev", "note": "前端包管理器换源", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-052", "q": "拉模板总超时，给引擎换个近的源", "intent": "mirror.docker", "split": "test", "note": "Docker Hub 加速；易与 docker.pull 混淆", "source": "drafted", "category": "distractor", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-053", "q": "系统软件仓库改成国内站", "intent": "mirror.apt", "split": "dev", "note": "apt/ubuntu 换源，避开「装包」", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-054", "q": "查询ip", "intent": "net.ip.addr", "split": "test", "note": "真实查询；旧 intent 空，标本机地址", "source": "history", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-055", "q": "探一下隔壁那台还在不在线上", "intent": "net.ping", "split": "dev", "note": "连通性，避开 ping/通不通", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-056", "q": "这块联网的板子叫啥名字、链路亮不亮", "intent": "net.nic.info", "split": "test", "note": "网卡信息，避开网卡/网口", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-057", "q": "域名怎么指到数字地址的", "intent": "net.dns", "split": "dev", "note": "DNS 配置/解析", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-058", "q": "用抓网页的方式探一下这个站点", "intent": "net.curl", "split": "dev", "note": "curl 探 HTTP", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-059", "q": "数据包走了哪些跳", "intent": "net.traceroute", "split": "dev", "note": "路由追踪，避开「路由」单用成 keyword 短语", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-060", "q": "此刻谁已经跟我握手连上了", "intent": "net.ss.established", "split": "test", "note": "已建立连接", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-061", "q": "屏幕上打出一行你好", "intent": "echo.print", "split": "dev", "note": "echo 打印文字", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-062", "q": "上一条命令成功了没有，返回几", "intent": "echo.exit.status", "split": "dev", "note": "退出码，避开「退出码」keyword", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-063", "q": "会话里导出的那些键值都有啥", "intent": "echo.env.list", "split": "test", "note": "列出环境变量，避开「环境变量」", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-064", "q": "添加软连", "intent": "file.symlink.create", "split": "test", "note": "真实查询；「软连」≠ keyword「软链」故过主口径", "source": "history", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-065", "q": "找名叫 app.toml 的那份东西", "intent": "file.find.name", "split": "test", "note": "按名查找；不复用 application.yml 原句", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-066", "q": "当前文件夹里头有些啥", "intent": "file.list", "split": "dev", "note": "列目录，避开 ls/当前目录", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-067", "q": "把这份拷到另一处", "intent": "file.copy", "split": "test", "note": "复制文件", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-068", "q": "把这份挪个地方并改个称呼", "intent": "file.move", "split": "test", "note": "移动/重命名，避开改名/挪到", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-069", "q": "盯着这份记录的末尾往下刷", "intent": "file.tail.log", "split": "dev", "note": "tail 跟踪日志", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-070", "q": "当前会话里临时声明一个键值", "intent": "env.export.set", "split": "dev", "note": "export 临时变量", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-071", "q": "这终端走代理出去", "intent": "env.proxy.set", "split": "test", "note": "设代理，避开「设置代理」", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-072", "q": "可执行搜索路径现在是哪几段", "intent": "env.path.view", "split": "test", "note": "查看 PATH，避开 path 英文字面", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-073", "q": "把可执行搜索路径写进开机脚本里长期有效", "intent": "env.path.write", "split": "dev", "note": "high；持久化 PATH", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-074", "q": "让刚才改的搜索路径马上生效", "intent": "env.path.source", "split": "dev", "note": "source 使 PATH 生效", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-075", "q": "中文输入这一套现在正不正常", "intent": "im.status", "split": "test", "note": "输入法状态", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-076", "q": "打不了汉字了帮我看看", "intent": "im.notwork", "split": "dev", "note": "输入法失效排查", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-077", "q": "切到拼音输入那一栏", "intent": "im.switch", "split": "test", "note": "切换/激活搜狗拼音", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-078", "q": "把输入这一套关掉再打开", "intent": "im.fcitx.restart", "split": "test", "note": "重启 fcitx", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-079", "q": "通配符写法我忘了提醒我", "intent": "regex.cheat", "split": "dev", "note": "正则速查，避开「正则」", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-080", "q": "恰好五位阿拉伯号的模式", "intent": "regex.len.digit", "split": "test", "note": "n 位数字，避开个数字/位数字", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-081", "q": "必须出现某段字才算数的模式", "intent": "regex.must.contain", "split": "dev", "note": "必须包含，避开「必须包含」字面", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-082", "q": "这套构建工具把工程编一遍", "intent": "mvn.compile", "split": "test", "note": "mvn compile，避开 maven 字面", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-083", "q": "这套构建工具出可发布的归档", "intent": "mvn.package", "split": "test", "note": "mvn package", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-084", "q": "这套构建工具的依赖长啥样", "intent": "mvn.deps", "split": "dev", "note": "dependency:tree", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-085", "q": "帮我把这个域名问成数字地址", "intent": "nslookup.lookup", "split": "test", "note": "正向 nslookup，避开 nslookup 字面", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-086", "q": "拿数字地址反查它登记的名字", "intent": "nslookup.reverse", "split": "test", "note": "反向解析，避开「反向解析」", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-087", "q": "查这个名字负责收信的那条记录", "intent": "nslookup.type", "split": "dev", "note": "MX 类记录，避开 MX记录 字面", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-088", "q": "把文件里这句换成那句", "intent": "text.replace", "split": "dev", "note": "sed 替换", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-089", "q": "把文件里的空白行清掉", "intent": "text.delete.blank", "split": "dev", "note": "删空行，避开删除空行", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-090", "q": "在文件末尾再添一句", "intent": "text.append.line", "split": "test", "note": "追加一行，避开追加文本", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-091", "q": "网页服务器的配置先核对一遍有没有写错", "intent": "nginx.config.test", "split": "dev", "note": "nginx -t，避开 nginx 字面", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-092", "q": "网页服务器歇一下再起来", "intent": "nginx.restart", "split": "test", "note": "重启 nginx；易落到 svc.restart", "source": "drafted", "category": "distractor", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-093", "q": "网页服务器的访问记录翻一下", "intent": "nginx.log", "split": "test", "note": "nginx 日志", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-094", "q": "网页服务器不中断连接地读新配置", "intent": "nginx.reload", "split": "dev", "note": "reload；不复用「不重启让网页服务器读新配置」", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-095", "q": "代码仓库工作区改了哪些还没提交", "intent": "git.status", "split": "test", "note": "git status", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-096", "q": "把远端的提交同步下来", "intent": "git.pull", "split": "dev", "note": "git pull，避开拉代码", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-097", "q": "把这份东西推到另一台机子上", "intent": "scp.upload.file", "split": "dev", "note": "scp 上传文件", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-098", "q": "从另一台机子把那份东西取回来", "intent": "scp.download.file", "split": "test", "note": "scp 拉文件", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-099", "q": "当前登录的账号叫啥", "intent": "user.whoami", "split": "dev", "note": "whoami；不复用「当前登录的是哪个账号」", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-100", "q": "给这台机子开一个新账号", "intent": "user.add", "split": "dev", "note": "high；不复用「给这台机器加个新账号」", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-101", "q": "把这个账号的口令换掉", "intent": "user.passwd", "split": "test", "note": "high；改密码，避开改密码 keyword", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-102", "q": "编排集群里那些小份任务还在不在", "intent": "k8s.pods", "split": "dev", "note": "kubectl get pods，避开 k8s/pod", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-103", "q": "把那份小任务的事件和细节展开", "intent": "k8s.desc", "split": "test", "note": "describe pod", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-104", "q": "修改文件用户权限", "intent": "perm.chmod", "split": "test", "note": "真实查询；旧标 perm.chown，按改权限而非改属主改标", "source": "history", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-105", "q": "把这份东西的主人换成另一个人", "intent": "perm.chown", "split": "dev", "note": "high；改属主，易与加用户混淆", "source": "drafted", "category": "distractor", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-106", "q": "这份东西现在归谁名下", "intent": "perm.owner.view", "split": "test", "note": "看属主，避开文件是谁的等 keyword", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-107", "q": "把一堆零散东西收成一份压缩件", "intent": "archive.tar.pack", "split": "test", "note": "打包 tar；不复用「把一堆文件打成一个包」", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-108", "q": "压缩件还原开", "intent": "archive.tar.unpack", "split": "dev", "note": "解压，避开解压/解包", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-109", "q": "访问控制墙开了没有", "intent": "firewall.status", "split": "test", "note": "防火墙状态，避开防火墙字面", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-110", "q": "墙那边把这个号放过去", "intent": "firewall.open.port", "split": "test", "note": "high；放行端口，易与看谁在听混淆", "source": "drafted", "category": "distractor", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-111", "q": "那套关系库还活着吗", "intent": "mysql.status", "split": "test", "note": "MySQL 是否在跑，避开 mysql 字面", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-112", "q": "关系库此刻谁占着连接", "intent": "mysql.processlist", "split": "dev", "note": "processlist", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-113", "q": "那套缓存库还活着吗", "intent": "redis.info", "split": "dev", "note": "Redis 是否在跑，避开 redis 字面", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-114", "q": "抽样看缓存库的钥匙，别全扫", "intent": "redis.keys.sample", "split": "test", "note": "SCAN 抽样，避开 redis key", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-115", "q": "定时会自动跑的那些活有哪些", "intent": "cron.list", "split": "dev", "note": "crontab，避开定时任务", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-116", "q": "离线把十七号那套编译器放到机子上", "intent": "jdk.install.17", "split": "dev", "note": "high；离线装 JDK17", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-117", "q": "开机以来系统记下来的那些话", "intent": "log.journal", "split": "test", "note": "journalctl，避开系统日志", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-118", "q": "强制访问那套策略开了没有", "intent": "selinux.status", "split": "dev", "note": "SELinux，避开 selinux 字面", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-119", "q": "我能不能用提升后的身份去执行", "intent": "sudo.list", "split": "dev", "note": "sudo -l，避开 sudo权限", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-120", "q": "这台机子还剩多少能用来周转的备用容量", "intent": "swap.status", "split": "test", "note": "swap，避开交换分区/虚拟内存", "source": "drafted", "category": "paraphrase", "class": "heldout", "strict_all_kw": true}
+{"id": "ho-121", "q": "列出本级所有ja版本", "intent": "java.default.vm", "split": "test", "note": "真实查询；截断+错字，主指标剔除", "source": "history", "category": "truncation", "class": "noisy_input", "strict_all_kw": true}
+{"id": "ho-122", "q": "spc 传输文件", "intent": "scp.upload.file", "split": "dev", "note": "真实查询；scp 键位错成 spc，主指标剔除", "source": "history", "category": "typo", "class": "noisy_input", "strict_all_kw": true}
+{"id": "ho-123", "q": "网页服务配置核", "intent": "nginx.config.test", "split": "dev", "note": "截断「网页服务器的配置核对」", "source": "drafted", "category": "truncation", "class": "noisy_input", "strict_all_kw": true}
+{"id": "ho-124", "q": "沙箱里跑着的列一", "intent": "docker.ps", "split": "dev", "note": "截断列沙箱", "source": "drafted", "category": "truncation", "class": "noisy_input", "strict_all_kw": true}
+{"id": "ho-125", "q": "国内下依赖换站", "intent": "mirror.overview", "split": "test", "note": "截断换国内源", "source": "drafted", "category": "truncation", "class": "noisy_input", "strict_all_kw": true}
+{"id": "ho-126", "q": "gti工作区动了哪些还没提交", "intent": "git.status", "split": "test", "note": "git 键位错成 gti", "source": "drafted", "category": "typo", "class": "noisy_input", "strict_all_kw": true}
+{"id": "ho-127", "q": "网页服务器歇一下在起来", "intent": "nginx.restart", "split": "test", "note": "再→在 键位/同音错", "source": "drafted", "category": "typo", "class": "noisy_input", "strict_all_kw": true}
+{"id": "ho-128", "q": "crul探一下这个站点", "intent": "net.curl", "split": "dev", "note": "curl 键位错成 crul", "source": "drafted", "category": "typo", "class": "noisy_input", "strict_all_kw": true}
+{"id": "ho-129", "q": "chakanbanben", "intent": "java.version", "split": "test", "note": "全拼「查看版本」；不含 java 字面", "source": "drafted", "category": "pinyin", "class": "noisy_input", "strict_all_kw": true}
+{"id": "ho-130", "q": "rongqiliebiao", "intent": "docker.ps", "split": "dev", "note": "全拼「容器列表」", "source": "drafted", "category": "pinyin", "class": "noisy_input", "strict_all_kw": true}
+{"id": "ho-131", "q": "wangyefuwuqi", "intent": "nginx.config.view", "split": "dev", "note": "全拼「网页服务器」", "source": "drafted", "category": "pinyin", "class": "noisy_input", "strict_all_kw": true}
+{"id": "ho-132", "q": "jiaohuanqu", "intent": "swap.status", "split": "test", "note": "全拼「交换区」", "source": "drafted", "category": "pinyin", "class": "noisy_input", "strict_all_kw": true}

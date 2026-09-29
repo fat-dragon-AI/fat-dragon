@@ -1,0 +1,50 @@
+# bench S8-heldout-dev-py38
+
+- set: `heldout-dev`
+- path_key: `py38-nojieba`  python=3.8.10  jieba=unavailable:No module named 'jieba'
+- n=66  @1=24 (0.363636)  @3=29 (0.439394)  @10=29 (0.439394)  空=3 (0.045455)
+- query p50=2.317 ms  p95=5.835 ms
+- 主指标（剔除 noisy_input）n=60 @1=24 @10=28 空=3
+- recall@30=0.742424  containment=1.0
+
+## @1 未命中（最多 40 条）
+- '这台机子为啥转得这么吃力' -> sys.cpu.usage  got []  rank=None
+- '把那个占着不放的后台程序干掉' -> sys.process.kill  got [['java.jar.nohup', 0.0757, 'fallback']]  rank=None
+- '开机后让那个后台自己起来' -> svc.enable  got [['java.jar.nohup', 0.0845, 'fallback'], ['mvn.run', 0.0579, 'fallback'], ['svc.start', 0.0528, 'fallback']]  rank=None
+- '刷新守护者让它重新读单元' -> svc.daemon.reload  got [['svc.restart', 0.0599, 'fallback'], ['env.path.source', 0.0497, 'fallback'], ['mvn.test', 0.0453, 'fallback']]  rank=None
+- '编译器家目录指到哪' -> java.home.env  got [['pkg.files', 0.0937, 'fallback'], ['file.symlink.where', 0.0728, 'fallback'], ['docker.build', 0.0693, 'fallback']]  rank=None
+- '把那个沙箱里跑着的东西列出来' -> docker.ps  got [['svc.list', 0.0523, 'fallback'], ['file.list', 0.035, 'fallback'], ['jvm.jps', 0.0315, 'fallback']]  rank=None
+- '把沙箱里那个东西歇掉别再跑了' -> docker.stop  got [['svc.status', 0.0682, 'fallback']]  rank=None
+- '沙箱里打印出来的话翻一翻' -> docker.logs  got [['echo.print', 0.044, 'fallback'], ['echo.escape', 0.0434, 'fallback'], ['echo.pipe', 0.0425, 'fallback']]  rank=None
+- '把这个沙箱从机子上抹掉' -> docker.rm  got [['text.delete.substr', 0.0905, 'fallback'], ['nslookup.reverse', 0.0536, 'fallback'], ['perm.owner.view', 0.0494, 'fallback']]  rank=None
+- '把本地大模型服务拉起来' -> ollama.serve  got [['svc.start', 0.4809, 'weak'], ['ollama.run', 0.444, 'weak']]  rank=None
+- '查找firefox的安装位置' -> pkg.files  got [['firewall.status', 0.1841, 'weak'], ['pkg.files', 0.1678, 'weak'], ['firewall.open.port', 0.1378, 'weak']]  rank=1
+- '这个程序不想留在机子上了拿掉' -> pkg.remove  got [['nslookup.reverse', 0.0465, 'fallback'], ['perm.owner.view', 0.0428, 'fallback']]  rank=None
+- '系统软件仓库改成国内站' -> mirror.apt  got [['mirror.overview', 0.0538, 'fallback'], ['pkg.list', 0.0466, 'fallback'], ['pkg.install', 0.0449, 'fallback']]  rank=None
+- '探一下隔壁那台还在不在线上' -> net.ping  got [['sys.process.find', 0.211, 'weak']]  rank=None
+- '域名怎么指到数字地址的' -> net.dns  got [['regex.len.digit', 0.1184, 'fallback'], ['mirror.overview', 0.0788, 'fallback'], ['net.ip.addr', 0.077, 'fallback']]  rank=None
+- '用抓网页的方式探一下这个站点' -> net.curl  got [['nslookup.reverse', 0.0473, 'fallback'], ['perm.owner.view', 0.0436, 'fallback'], ['jvm.thread.dump.signal', 0.0341, 'fallback']]  rank=None
+- '当前文件夹里头有些啥' -> file.list  got [['sys.disk.du', 0.1421, 'weak'], ['scp.upload.dir', 0.127, 'weak'], ['scp.download.dir', 0.1268, 'weak']]  rank=None
+- '盯着这份记录的末尾往下刷' -> file.tail.log  got [['nslookup.type', 0.0726, 'fallback'], ['nslookup.reverse', 0.0627, 'fallback'], ['text.append.line', 0.0602, 'fallback']]  rank=None
+- '当前会话里临时声明一个键值' -> env.export.set  got [['env.path.export', 0.1821, 'weak'], ['java.switch.home', 0.1562, 'weak'], ['im.env.set', 0.1227, 'weak']]  rank=None
+- '把可执行搜索路径写进开机脚本里长期有效' -> env.path.write  got [['pkg.which', 0.1283, 'weak']]  rank=None
+- '通配符写法我忘了提醒我' -> regex.cheat  got []  rank=None
+- '这套构建工具的依赖长啥样' -> mvn.deps  got [['docker.build', 0.0888, 'fallback'], ['mvn.deps', 0.0772, 'fallback'], ['pkg.apt.autoremove', 0.0496, 'fallback']]  rank=1
+- '查这个名字负责收信的那条记录' -> nslookup.type  got [['nslookup.reverse', 0.1647, 'weak']]  rank=None
+- '把文件里的空白行清掉' -> text.delete.blank  got [['text.replace', 0.2957, 'weak'], ['file.find.content', 0.1705, 'weak'], ['text.delete.substr', 0.1352, 'weak']]  rank=None
+- '网页服务器的配置先核对一遍有没有写错' -> nginx.config.test  got [['sys.process.find', 0.1325, 'weak'], ['svc.is-enabled', 0.1307, 'weak']]  rank=None
+- '网页服务器不中断连接地读新配置' -> nginx.reload  got [['sys.hw.overview', 0.1128, 'fallback'], ['scp.upload.file', 0.0847, 'fallback'], ['sys.config.summary', 0.083, 'fallback']]  rank=None
+- '把这份东西推到另一台机子上' -> scp.upload.file  got []  rank=None
+- '当前登录的账号叫啥' -> user.whoami  got [['user.list', 0.1105, 'fallback'], ['user.whoami', 0.0332, 'fallback'], ['net.ss.established', 0.0329, 'fallback']]  rank=1
+- '给这台机子开一个新账号' -> user.add  got [['user.list', 0.0758, 'fallback'], ['docker.run', 0.0624, 'fallback']]  rank=None
+- '编排集群里那些小份任务还在不在' -> k8s.pods  got [['sys.process.find', 0.1929, 'weak']]  rank=None
+- '把这份东西的主人换成另一个人' -> perm.chown  got [['text.replace', 0.0643, 'fallback'], ['docker.run', 0.0539, 'fallback']]  rank=None
+- '压缩件还原开' -> archive.tar.unpack  got [['archive.tar.pack', 0.0968, 'fallback'], ['text.delete.blank', 0.0894, 'fallback'], ['archive.tar.unpack', 0.0771, 'fallback']]  rank=2
+- '关系库此刻谁占着连接' -> mysql.processlist  got [['net.port.listen', 0.1292, 'weak']]  rank=None
+- '那套缓存库还活着吗' -> redis.info  got [['ollama.blobs.clean', 0.067, 'fallback']]  rank=None
+- '离线把十七号那套编译器放到机子上' -> jdk.install.17  got [['file.symlink.where', 0.061, 'fallback'], ['docker.build', 0.0477, 'fallback'], ['java.compile.run', 0.0472, 'fallback']]  rank=None
+- '我能不能用提升后的身份去执行' -> sudo.list  got [['net.ping', 0.2176, 'weak'], ['im.notwork', 0.1894, 'weak']]  rank=None
+- 'spc 传输文件' -> scp.upload.file  got [['k8s.pods', 0.0731, 'fallback'], ['mvn.run', 0.0443, 'fallback'], ['file.find.content', 0.0328, 'fallback']]  rank=None
+- '网页服务配置核' -> nginx.config.test  got [['svc.unit.cat', 0.3467, 'weak'], ['svc.unit.show', 0.299, 'weak'], ['svc.reload', 0.1617, 'weak']]  rank=None
+- '沙箱里跑着的列一' -> docker.ps  got [['svc.list', 0.0719, 'fallback']]  rank=None
+- 'crul探一下这个站点' -> net.curl  got [['cron.list', 0.0587, 'fallback'], ['nslookup.reverse', 0.0582, 'fallback'], ['net.curl', 0.0542, 'fallback']]  rank=2
